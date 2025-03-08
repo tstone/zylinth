@@ -3,9 +3,7 @@ use bevy_ecs_tilemap::prelude::*;
 use bevy_pancam::{PanCam, PanCamPlugin};
 
 mod costmic_legacy_tiles;
-mod maze;
-mod room;
-mod room_layout;
+mod layout;
 
 const BASE_MAROON: Color = Color::hsl(281., 0.51, 0.17);
 
@@ -27,7 +25,7 @@ fn main() {
         .add_plugins((TilemapPlugin, PanCamPlugin::default()))
         .insert_resource(ClearColor(BASE_MAROON))
         .add_systems(Startup, startup)
-        .add_systems(Startup, room_layout::render_room)
+        .add_systems(Startup, layout::generate_layout)
         .run();
 }
 

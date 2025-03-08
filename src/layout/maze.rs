@@ -2,6 +2,8 @@ use std::collections::HashSet;
 
 use rand::seq::IteratorRandom;
 
+/// A maze describes a graph of nodes and their interconnections.
+/// This is used to connect rooms.
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct Maze {
