@@ -13,7 +13,7 @@ pub fn render_room(
         ArrayTextureLoader,
     >,
 ) {
-    let room_grid = RoomGrid::generate(4, 4);
+    let room_grid = RoomGrid::generate(3, 3);
     let map_size = TilemapSize {
         x: room_grid.max_room_width.iter().sum(),
         y: room_grid.max_room_height.iter().sum(),
@@ -29,18 +29,24 @@ pub fn render_room(
 
         for y in 0..room_grid.room_count_y {
             let offset_y = room_grid.max_room_height.iter().take(y).sum::<u32>();
-
-            // TODO: try; to center the square in the region available
-
             let room = &room_grid.rooms[x][y];
-            println!(
-                "room size at ({}, {}) : ({}, {})",
-                x, y, room.width, room.height
-            );
+
+            // randomly displace the room in it's possible area to make it less uniform
+            let rem_x = room_grid.max_room_width[x] - room.width as u32;
+            let rem_y = room_grid.max_room_height[y] - room.height as u32;
+            let wiggle_x = match rem_x {
+                0 => 0,
+                x => rand::random_range(0..x),
+            };
+            let wiggle_y = match rem_y {
+                0 => 0,
+                y => rand::random_range(0..y),
+            };
+
             add_room(
                 room,
-                offset_x,
-                offset_y,
+                offset_x + wiggle_x,
+                offset_y + wiggle_y,
                 tilemap_entity,
                 &mut tile_storage,
                 &mut commands,
@@ -96,7 +102,12 @@ impl RoomGrid {
         // generate a layout of rooms
         for x in 0..count_x {
             for y in 0..count_y {
-                let room = Room::generate_walled();
+                let mut room = Room::generate_walled(8, 20);
+
+                if rand::random_bool(0.25) {
+                    Room::remove_bottom_left_chunk_walled(&mut room);
+                }
+
                 max_room_width[x] = cmp::max(room.width.into(), max_room_width[x]);
                 max_room_height[y] = cmp::max(room.height.into(), max_room_height[y]);
                 rooms[x][y] = room;
@@ -121,10 +132,10 @@ fn add_room(
     tile_storage: &mut TileStorage,
     commands: &mut Commands,
 ) {
-    for x in 0..room.bottom_layer.len() {
-        let y_len = room.bottom_layer[x].len() as u32;
+    for x in 0..room.tiles.len() {
+        let y_len = room.tiles[x].len() as u32;
         for y in 0..y_len {
-            match room.bottom_layer[x][y as usize] {
+            match room.tiles[x][y as usize] {
                 Some(sprite) => add_tile(
                     x as u32 + offset_x,
                     (y_len - y - 1) + offset_y,

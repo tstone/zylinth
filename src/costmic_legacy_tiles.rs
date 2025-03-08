@@ -115,10 +115,9 @@ impl CosmicLegacyTiles {
     pub fn floor_tiles() -> Vec<CosmicLegacyTiles> {
         vec![
             Self::Floor,
-            Self::FloorCutOut,
-            Self::FloorDrain,
             Self::FloorMinorCracks,
             Self::FloorMajorCracks,
+            Self::FloorScuffed,
         ]
     }
 }

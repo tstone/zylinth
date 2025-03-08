@@ -4,7 +4,6 @@ use bevy_pancam::{PanCam, PanCamPlugin};
 
 mod costmic_legacy_tiles;
 mod maze;
-mod maze_render;
 mod room;
 mod room_layout;
 
