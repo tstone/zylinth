@@ -1,6 +1,5 @@
-#[derive(Copy, Clone, Default, Debug)]
+#[derive(Copy, Clone, Default, Debug, PartialEq, Eq)]
 #[allow(dead_code)]
-
 pub enum CosmicLegacyTiles {
     // Row 1
     TopLeftOuterCorner = 0,
@@ -61,7 +60,7 @@ pub enum CosmicLegacyTiles {
     TopCapBottomVar2 = 52,
     TopCapBottomVar3 = 53,
     BottomRightOuterCorner = 54,
-    TopLeftInerCorner = 55,
+    TopLeftInnerCorner = 55,
     TopRightInnerCorner = 56,
     FloorMinorCracks = 57,
     FloorMajorCracks = 58,
@@ -92,12 +91,24 @@ pub enum CosmicLegacyTiles {
     GardenBoxSmallVar2 = 82,
     PlantLampBottom = 83,
     BookcaseBottom = 84,
-    // Row 6 - 85
-    // Row 7 - 101
-    // Row 8 - 117
+    // Row 6
+    // Row 7
+    // Row 8
     #[default]
-    Background = 127,
-    DarkestBlue = 128,
+    DarkPink = 119,
+    Pink = 120,
+    LightPink = 121,
+    MedSkin = 122,
+    LightSkin = 123,
+    LightYellow = 124,
+    Peach = 125,
+    Tangerine = 126,
+    DarkFlesh = 127,
+    Maroon = 128,
+    Background = 129,
+    DarkestBlue = 130,
+    DarkTeal = 131,
+    Teal = 132,
 }
 
 impl CosmicLegacyTiles {

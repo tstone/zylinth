@@ -8,6 +8,10 @@ pub struct Room {
     pub width: u8,
     pub height: u8,
     pub tiles: Vec<Vec<Option<CosmicLegacyTiles>>>,
+    pub top_margin: u8,
+    pub bot_margin: u8,
+    pub left_margin: u8,
+    pub right_margin: u8,
 }
 
 impl Room {
@@ -55,6 +59,10 @@ impl Room {
             width: total_width,
             height: total_height,
             tiles,
+            top_margin,
+            bot_margin,
+            left_margin,
+            right_margin,
         };
     }
 

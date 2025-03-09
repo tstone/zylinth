@@ -30,7 +30,7 @@ impl Maze {
         // randomly pick a starting node in the first row
         let start_node = rand::random_range(0..width) as u32;
         let mut current_node = start_node.clone();
-        println!("start node: {current_node}");
+
         while unconnected_nodes.len() > 0 {
             unconnected_nodes.remove(&current_node);
             let candidate_edges =
@@ -74,11 +74,13 @@ impl Maze {
         height: u16,
     ) -> HashSet<(u32, u32)> {
         let mut possible_edges: HashSet<(u32, u32)> = HashSet::new();
-        let row = node / width as u32;
-        let offset = width as u32 * row;
+        let y = node / width as u32;
+        let x = node - (y * width as u32);
+        let max_width = (width - 1) as u32;
+        let max_height = (height - 1) as u32;
 
         // left
-        if node != offset {
+        if x > 0 {
             let left = (node, node - 1);
             if !edges.contains(&left) && !connected_nodes.contains(&left.1) {
                 possible_edges.insert(left);
@@ -86,7 +88,7 @@ impl Maze {
         }
 
         // right
-        if node == 0 || (offset > 0 && node != offset - 1) {
+        if x < max_width {
             let right = (node, node + 1);
             if !edges.contains(&right)
                 && !connected_nodes.contains(&right.1)
@@ -97,7 +99,7 @@ impl Maze {
         }
 
         // up
-        if node > width as u32 {
+        if y > 0 {
             let up = (node, node - width as u32);
             if !edges.contains(&up) && !connected_nodes.contains(&up.1) {
                 possible_edges.insert(up);
@@ -105,7 +107,7 @@ impl Maze {
         }
 
         // down
-        if node < (width * (height - 1)) as u32 {
+        if y < max_height {
             let down = (node, node + width as u32);
             if !edges.contains(&down) && !connected_nodes.contains(&down.1) {
                 possible_edges.insert(down);
@@ -119,14 +121,6 @@ impl Maze {
         let y = node / width;
         let x = node - (y * width);
         (x, y)
-    }
-
-    pub fn node_to_scaled_coords(node: u32, scale: u8, width: u32) -> (u32, u32) {
-        let (x, y) = Self::node_to_grid_coords(node, width);
-        (
-            x.saturating_mul(scale as u32),
-            y.saturating_mul(scale as u32),
-        )
     }
 }
 
@@ -148,6 +142,15 @@ mod tests {
         assert!(edges.contains(&(2, 1)));
         assert!(edges.contains(&(2, 5)));
         assert_eq!(edges.len(), 2);
+    }
+
+    #[test]
+    fn get_possible_edges_mid_right() {
+        let edges = Maze::get_possible_edges(5, &HashSet::new(), &HashSet::new(), 3, 3);
+        assert!(edges.contains(&(5, 2)));
+        assert!(edges.contains(&(5, 4)));
+        assert!(edges.contains(&(5, 8)));
+        assert_eq!(edges.len(), 3);
     }
 
     #[test]
@@ -177,21 +180,21 @@ mod tests {
     }
 
     // TODO: fix
-    // #[test]
-    // fn node_id_to_grid_coords() {
-    //     let maze = Maze::generate(3, 3);
-    //     let coords1 = maze.node_to_grid_coords(2);
-    //     assert_eq!(coords1, (2, 0));
+    #[test]
+    fn node_id_to_grid_coords() {
+        let maze = Maze::generate(3, 3);
+        let coords1 = Maze::node_to_grid_coords(2, 3);
+        assert_eq!(coords1, (2, 0));
 
-    //     let coords2 = maze.node_to_grid_coords(4);
-    //     assert_eq!(coords2, (1, 1));
+        let coords2 = Maze::node_to_grid_coords(4, 3);
+        assert_eq!(coords2, (1, 1));
 
-    //     let coords3 = maze.node_to_grid_coords(6);
-    //     assert_eq!(coords3, (0, 2));
+        let coords3 = Maze::node_to_grid_coords(6, 3);
+        assert_eq!(coords3, (0, 2));
 
-    //     let coords4 = maze.node_to_grid_coords(7);
-    //     assert_eq!(coords4, (1, 2));
-    // }
+        let coords4 = Maze::node_to_grid_coords(7, 3);
+        assert_eq!(coords4, (1, 2));
+    }
 
     #[test]
     fn maze_gen_preview() {

@@ -13,7 +13,7 @@ pub struct RoomGrid {
 
 impl RoomGrid {
     pub fn generate(count_x: usize, count_y: usize) -> RoomGrid {
-        let mut rooms: Vec<Vec<Room>> = vec![vec![Room::default(); count_y]; count_y];
+        let mut rooms: Vec<Vec<Room>> = vec![vec![Room::default(); count_y]; count_x];
 
         // max room width/height keeps track of the widest/tallest size for a given x/y
         // e.g. if the room sizes are:
@@ -26,14 +26,15 @@ impl RoomGrid {
         // generate a layout of rooms
         for x in 0..count_x {
             for y in 0..count_y {
-                let mut room = Room::generate_walled(8, 20);
+                let mut room = Room::generate_walled(10, 20);
 
-                if rand::random_bool(0.25) {
-                    Room::remove_bottom_left_chunk_walled(&mut room);
-                }
+                // if rand::random_bool(0.225) {
+                //     Room::remove_bottom_left_chunk_walled(&mut room);
+                // }
 
                 max_room_width[x] = cmp::max(room.width.into(), max_room_width[x]);
                 max_room_height[y] = cmp::max(room.height.into(), max_room_height[y]);
+
                 rooms[x][y] = room;
             }
         }
