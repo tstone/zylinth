@@ -47,7 +47,7 @@ impl Room {
                     (_, 0) => Some(CosmicLegacyTiles::TopCapTopSimple),
                     (_, 1) => Self::rnd_wall(&mut rng),
                     (_, 2) => Some(CosmicLegacyTiles::Wall),
-                    (1, 3) => Some(CosmicLegacyTiles::FloorShadowTopCorner),
+                    (1, 3) => Some(CosmicLegacyTiles::FloorShadowInnerCorner),
                     (_, 3) => Some(CosmicLegacyTiles::FloorShadowTop),
                     (1, _) => Some(CosmicLegacyTiles::FloorShadowLeft),
                     _ => Self::rnd_floor(&mut rng),

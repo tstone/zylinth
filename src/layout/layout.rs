@@ -18,7 +18,7 @@ impl Layout {
         let maze = Maze::generate(count_x as u16, count_y as u16);
 
         // space out the rooms for a bit more natural feel
-        let extra_room_spacing = 6;
+        let extra_room_spacing = 4;
         let enlarged_max_room_width = room_grid
             .max_room_width
             .iter()
@@ -181,33 +181,93 @@ fn connect_horz(
     let from_right = from_pos.0 + from_room.width as u32 - from_room.right_margin as u32;
     let to_right = to_pos.0 + to_room.width as u32 - to_room.right_margin as u32;
 
-    for tile_y in (overlap.0)..=(overlap.1) {
-        let mut done = false;
-        let x_range = if from_right < to_right {
-            from_right..to_right
-        } else {
-            to_right..from_right
-        };
+    let x_range = if from_right < to_right {
+        from_right..to_right
+    } else {
+        to_right..from_right
+    };
 
-        // floor
-        for tile_x in x_range {
+    // floor
+    for (y_index, tile_y) in ((overlap.0)..=(overlap.1)).enumerate() {
+        let mut done = false;
+        for (x_index, tile_x) in x_range.clone().enumerate() {
             let current_tile = tiles[tile_x as usize][tile_y as usize];
             tiles[tile_x as usize][tile_y as usize] = match current_tile {
                 Some(CosmicLegacyTiles::FloorShadowLeft) | Some(CosmicLegacyTiles::Floor) => {
                     done = true;
-                    Some(CosmicLegacyTiles::Floor)
+                    if y_index == 0 {
+                        Some(CosmicLegacyTiles::FloorShadowOuterCorner)
+                    } else {
+                        Some(CosmicLegacyTiles::Floor)
+                    }
                 }
                 Some(CosmicLegacyTiles::TopCapLeft)
                 | Some(CosmicLegacyTiles::TopCapRight)
                 | Some(CosmicLegacyTiles::BottomLeftOuterCorner)
                 | Some(CosmicLegacyTiles::BottomRightOuterCorner)
                 | Some(CosmicLegacyTiles::TopCapBottomSimple)
-                | None => Some(CosmicLegacyTiles::Floor),
+                | None => {
+                    if y_index == 0 && x_index == 0 {
+                        Some(CosmicLegacyTiles::FloorShadowTopFadeLeft)
+                    } else if y_index == 0 {
+                        Some(CosmicLegacyTiles::FloorShadowTop)
+                    } else {
+                        Some(CosmicLegacyTiles::Floor)
+                    }
+                }
                 t => t,
             };
             if done {
                 break;
             }
+        }
+    }
+
+    // top wall
+    let top_y = overlap.0 as usize;
+    for y in (top_y - 2..top_y) {
+        let mut done = false;
+        for tile_x in x_range.clone() {
+            let current_tile = tiles[tile_x as usize][y as usize];
+            tiles[tile_x as usize][y] = match current_tile {
+                Some(CosmicLegacyTiles::TopCapLeft)
+                | Some(CosmicLegacyTiles::FloorShadowLeft)
+                | Some(CosmicLegacyTiles::Floor)
+                | Some(CosmicLegacyTiles::TopCapBottomSimple) => {
+                    done = true;
+                    Some(CosmicLegacyTiles::Wall)
+                }
+                _ => Some(CosmicLegacyTiles::Wall),
+            };
+            if done {
+                break;
+            }
+        }
+    }
+
+    // bottom wall
+    let mut done = false;
+    let bottom_y = overlap.1 as usize + 1;
+    for tile_x in x_range {
+        let current_tile = tiles[tile_x as usize][bottom_y as usize];
+        tiles[tile_x as usize][bottom_y] = match current_tile {
+            Some(CosmicLegacyTiles::TopCapRight) => Some(CosmicLegacyTiles::TopLeftInnerCorner),
+            Some(CosmicLegacyTiles::TopCapLeft) => {
+                done = true;
+                tiles[(tile_x + 1) as usize][bottom_y as usize] =
+                    Some(CosmicLegacyTiles::FloorShadowLeftFadeUp);
+                Some(CosmicLegacyTiles::TopRightInnerCorner)
+            }
+            Some(CosmicLegacyTiles::FloorShadowLeft)
+            | Some(CosmicLegacyTiles::Floor)
+            | Some(CosmicLegacyTiles::TopCapBottomSimple) => {
+                done = true;
+                Some(CosmicLegacyTiles::TopCapBottomSimple)
+            }
+            _ => Some(CosmicLegacyTiles::TopCapBottomSimple),
+        };
+        if done {
+            break;
         }
     }
 }

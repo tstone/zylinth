@@ -10,7 +10,7 @@ pub fn generate_layout(
         ArrayTextureLoader,
     >,
 ) {
-    let layout = Layout::new(3, 3);
+    let layout = Layout::new(4, 6);
     let map_size = TilemapSize {
         x: layout.width,
         y: layout.height,
