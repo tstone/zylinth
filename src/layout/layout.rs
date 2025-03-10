@@ -223,6 +223,8 @@ fn connect_horz(
         }
     }
 
+    // TODO: top cap
+
     // top wall
     let top_y = overlap.0 as usize;
     for y in (top_y - 2..top_y) {
