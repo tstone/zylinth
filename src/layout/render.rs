@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-use super::layout::Layout;
+use super::wfc::wfc_generate;
 
 pub fn generate_layout(
     mut commands: Commands,
@@ -10,22 +10,25 @@ pub fn generate_layout(
         ArrayTextureLoader,
     >,
 ) {
-    let layout = Layout::new(12, 16);
+    // let layout = Layout::new(12, 16);
+    let width: u32 = 8;
+    let height: u32 = 8;
+    let tile_grid = wfc_generate(width as usize, height as usize);
     let map_size = TilemapSize {
-        x: layout.width,
-        y: layout.height,
+        x: width,
+        y: height,
     };
 
     let texture_handle: Handle<Image> = asset_server.load("CosmicLegacy_PetricakeGames.png");
     let tilemap_entity = commands.spawn_empty().id();
     let mut tile_storage = TileStorage::empty(map_size);
 
-    for x in 0..layout.width {
-        for y in 0..layout.height {
-            match layout.tiles[x as usize][y as usize] {
+    for x in 0..width {
+        for y in 0..height {
+            match tile_grid[x as usize][y as usize] {
                 Some(sprite) => {
                     // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
-                    let flipped_y = layout.height - y - 1;
+                    let flipped_y = height - y - 1;
                     let tile_pos = TilePos { x, y: flipped_y };
                     let tile_entity = commands
                         .spawn(TileBundle {
