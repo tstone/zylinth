@@ -1,4 +1,7 @@
-#[derive(Copy, Clone, Default, Debug, PartialEq, Eq)]
+use lazy_static::lazy_static;
+use std::collections::HashMap;
+
+#[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
 pub enum CosmicLegacyTiles {
     // Row 1
@@ -6,7 +9,7 @@ pub enum CosmicLegacyTiles {
     TopCapTopVar1 = 1,
     TopCapTopVar2 = 2,
     TopRightOuterCorner = 3,
-    PlateMesh = 4,
+    TransPlateMesh = 4,
     PlateSteel = 5,
     WallLighted = 6,
     WallFan = 7,
@@ -137,4 +140,164 @@ impl Into<u32> for CosmicLegacyTiles {
     fn into(self) -> u32 {
         self as u32
     }
+}
+
+pub struct Constraint {
+    // TODO: weights
+    pub up: Vec<CosmicLegacyTiles>,
+    pub down: Vec<CosmicLegacyTiles>,
+    pub left: Vec<CosmicLegacyTiles>,
+    pub right: Vec<CosmicLegacyTiles>,
+}
+
+// TODO: contstraints about "edge" -- ie shadow top can't be on the top row
+// This could be some kind of tile like "UpperBorder"
+
+// TODO: constraints 2 hops away
+
+
+
+
+// New architecture:
+// room generator -- just floors/walls
+// shadowizer -- adds shadows
+// variety -- swaps in alternates of floor/wall tiles
+
+
+lazy_static! {
+    pub static ref CONSTRAINTS: HashMap<CosmicLegacyTiles, Constraint> = {
+        let mut lookup = HashMap::new();
+
+        lookup.insert(
+            CosmicLegacyTiles::Floor,
+            Constraint {
+                up: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                    CosmicLegacyTiles::FloorShadowTop,
+                ],
+                down: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                    CosmicLegacyTiles::Wall,
+                ],
+                left: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                    CosmicLegacyTiles::FloorShadowLeft,
+                    CosmicLegacyTiles::Wall,
+                ],
+                right: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                    CosmicLegacyTiles::Wall,
+                ],
+            },
+        );
+
+        lookup.insert(
+            CosmicLegacyTiles::FloorMinorCracks,
+            Constraint {
+                up: vec![CosmicLegacyTiles::Floor, CosmicLegacyTiles::FloorShadowTop],
+                down: vec![CosmicLegacyTiles::Floor, CosmicLegacyTiles::Wall],
+                left: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorShadowLeft,
+                    CosmicLegacyTiles::Wall,
+                ],
+                right: vec![CosmicLegacyTiles::Floor, CosmicLegacyTiles::Wall],
+            },
+        );
+
+        lookup.insert(
+            CosmicLegacyTiles::FloorShadowLeft,
+            Constraint {
+                up: vec![
+                    CosmicLegacyTiles::FloorShadowLeft,
+                    CosmicLegacyTiles::FloorShadowLeftFadeUp,
+                ],
+                down: vec![CosmicLegacyTiles::FloorShadowOuterCorner],
+                left: vec![CosmicLegacyTiles::Wall],
+                right: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                ],
+            },
+        );
+
+        lookup.insert(
+            CosmicLegacyTiles::FloorShadowOuterCorner,
+            Constraint {
+                up: vec![
+                    CosmicLegacyTiles::FloorShadowLeftFadeUp,
+                    CosmicLegacyTiles::FloorShadowLeft,
+                ],
+                down: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                ],
+                left: vec![CosmicLegacyTiles::FloorShadowTop],
+                right: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                ],
+            },
+        );
+
+        lookup.insert(
+            CosmicLegacyTiles::FloorShadowLeftFadeUp,
+            Constraint {
+                up: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                ],
+                down: vec![CosmicLegacyTiles::FloorShadowOuterCorner],
+                left: vec![CosmicLegacyTiles::Wall],
+                right: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                ],
+            },
+        );
+
+        lookup.insert(
+            CosmicLegacyTiles::FloorShadowTop,
+            Constraint {
+                up: vec![CosmicLegacyTiles::Wall],
+                down: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                ],
+                left: vec![CosmicLegacyTiles::FloorShadowTop],
+                right: vec![
+                    CosmicLegacyTiles::FloorShadowTop,
+                    CosmicLegacyTiles::FloorShadowOuterCorner,
+                ],
+            },
+        );
+
+        lookup.insert(
+            CosmicLegacyTiles::Wall,
+            Constraint {
+                up: vec![
+                    CosmicLegacyTiles::Wall,
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                ],
+                down: vec![CosmicLegacyTiles::FloorShadowTop, CosmicLegacyTiles::Wall],
+                left: vec![
+                    CosmicLegacyTiles::Floor,
+                    CosmicLegacyTiles::FloorMinorCracks,
+                    CosmicLegacyTiles::Wall,
+                ],
+                right: vec![
+                    CosmicLegacyTiles::FloorShadowLeft,
+                    CosmicLegacyTiles::FloorShadowLeftFadeUp,
+                    CosmicLegacyTiles::Wall,
+                ],
+            },
+        );
+
+        lookup
+    };
 }
