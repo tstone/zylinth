@@ -5,11 +5,14 @@ use std::collections::HashSet;
 pub fn wrap_walls(input: Vec<Vec<Option<UtilityTile>>>) -> Vec<Vec<Option<UtilityTile>>> {
     let padded = padding(input, 3, 1, 1, 1);
 
+    // return replace_tiles(padded, FIRST_PASS.to_vec());
+
     // 2 height walls
     let walled = replace_tiles(
         replace_tiles(padded, FIRST_PASS.to_vec()),
         SECOND_PASS.to_vec(),
     );
+    // return walled;
     // top cap
     replace_tiles(walled, THIRD_PASS.to_vec())
 }
@@ -46,10 +49,49 @@ lazy_static! {
         // inner top-right
         Replacement {
             target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallOutlineTopLeft, UtilityTile::Empty]),
             below: HashSet::from([UtilityTile::Floor]),
             on_left: HashSet::from([UtilityTile::Floor]),
             on_bottom_right: HashSet::from([UtilityTile::Floor]),
             replacement: UtilityTile::WallTop,
+            ..Default::default()
+        },
+        // inner bottom left
+        Replacement {
+            target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::WallRight, UtilityTile::WallOutlineTopRight, UtilityTile::Empty]),
+            on_left: HashSet::from([UtilityTile::Floor]),
+            on_bottom_left: HashSet::from([UtilityTile::Floor]),
+            below: HashSet::from([UtilityTile::Floor]),
+            replacement: UtilityTile::WallTop,
+            ..Default::default()
+        },
+        // inner bottom right
+        Replacement {
+            target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::WallRight]),
+            on_right: HashSet::from([UtilityTile::Floor]),
+            on_bottom_right: HashSet::from([UtilityTile::Floor]),
+            below: HashSet::from([UtilityTile::Floor]),
+            replacement: UtilityTile::WallTop,
+            ..Default::default()
+        },
+        // inner top left
+        Replacement {
+            target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::Floor]),
+            on_left: HashSet::from([UtilityTile::Floor]),
+            on_top_left: HashSet::from([UtilityTile::Floor]),
+            replacement: UtilityTile::WallOutlineInnerCornerTopLeft,
+            ..Default::default()
+        },
+        // inner top right
+        Replacement {
+            target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::Floor]),
+            on_right: HashSet::from([UtilityTile::Floor]),
+            on_top_right: HashSet::from([UtilityTile::Floor]),
+            replacement: UtilityTile::WallOutlineInnerCornerTopRight,
             ..Default::default()
         },
         // top
@@ -66,24 +108,6 @@ lazy_static! {
             on_right: HashSet::from([UtilityTile::Floor]),
             on_left: HashSet::from([UtilityTile::Empty]),
             replacement: UtilityTile::WallLeft,
-            ..Default::default()
-        },
-        // bottom inner left
-        Replacement {
-            target: UtilityTile::Empty,
-            above: HashSet::from([UtilityTile::Floor]),
-            on_right: HashSet::from([UtilityTile::Floor]),
-            on_top_right: HashSet::from([UtilityTile::Floor]),
-            replacement: UtilityTile::WallOutlineInnerCornerTopRight,
-            ..Default::default()
-        },
-        // bottom inner right
-        Replacement {
-            target: UtilityTile::Empty,
-            above: HashSet::from([UtilityTile::Floor]),
-            on_left: HashSet::from([UtilityTile::Floor]),
-            on_top_left: HashSet::from([UtilityTile::Floor]),
-            replacement: UtilityTile::WallOutlineInnerCornerTopLeft,
             ..Default::default()
         },
         // right
@@ -173,7 +197,25 @@ lazy_static! {
     ];
 
     static ref THIRD_PASS: Vec<Replacement> = vec![
-        //
+        // inner bottom left
+        Replacement {
+            target: UtilityTile::WallOutlineTopRight,
+            on_left: HashSet::from([UtilityTile::WallTop]),
+            on_bottom_left: HashSet::from([UtilityTile::WallTop]),
+            below: HashSet::from([UtilityTile::WallTop]),
+            replacement: UtilityTile::WallOutlineInnerCornerBottomLeft,
+            ..Default::default()
+        },
+        // inner bottom right
+        Replacement {
+            target: UtilityTile::WallOutlineTopLeft,
+            on_right: HashSet::from([UtilityTile::WallTop]),
+            on_bottom_right: HashSet::from([UtilityTile::WallTop]),
+            below: HashSet::from([UtilityTile::WallTop]),
+            replacement: UtilityTile::WallOutlineInnerCornerBottomRight,
+            ..Default::default()
+        },
+        // move caps up a third time to be on top of 2nd wall
         Replacement {
             target: UtilityTile::Empty,
             below: HashSet::from([UtilityTile::WallOutlineTopLeft]),
@@ -198,6 +240,12 @@ lazy_static! {
             target: UtilityTile::WallOutlineTopRight,
             above: HashSet::from([UtilityTile::WallOutlineTopRight]),
             replacement: UtilityTile::WallRight,
+            ..Default::default()
+        },
+        Replacement {
+            target: UtilityTile::WallOutlineInnerCornerTopRight,
+            below: HashSet::from([UtilityTile::WallTop]),
+            replacement: UtilityTile::WallTop,
             ..Default::default()
         },
         // Top cap
