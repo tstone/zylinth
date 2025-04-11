@@ -1,7 +1,5 @@
-use lazy_static::lazy_static;
-use std::collections::HashMap;
-
 use crate::layout::functional_tiles::UtilityTile;
+use rand::prelude::*;
 
 #[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
@@ -148,13 +146,26 @@ impl Into<u32> for CosmicLegacyTile {
 
 pub fn utility_to_cosmic(
     input: Vec<Vec<Option<UtilityTile>>>,
+    rng: &mut ThreadRng,
 ) -> Vec<Vec<Option<CosmicLegacyTile>>> {
     let mut output: Vec<Vec<Option<CosmicLegacyTile>>> = vec![vec![]; input.len()];
     for x in 0..input.len() {
         for y in 0..input[x].len() {
             let tile = match input[x][y] {
-                Some(UtilityTile::Wall) => Some(CosmicLegacyTile::Wall),
-                Some(UtilityTile::Floor) => Some(CosmicLegacyTile::Floor),
+                Some(UtilityTile::Wall) => {
+                    if rand::random_bool(0.9) {
+                        Some(CosmicLegacyTile::Wall)
+                    } else {
+                        CosmicLegacyTile::wall_tiles().choose(rng).copied()
+                    }
+                }
+                Some(UtilityTile::Floor) => {
+                    if rand::random_bool(0.975) {
+                        Some(CosmicLegacyTile::Floor)
+                    } else {
+                        CosmicLegacyTile::floor_tiles().choose(rng).copied()
+                    }
+                }
                 Some(UtilityTile::FloorShadowLeft) => Some(CosmicLegacyTile::FloorShadowLeft),
                 Some(UtilityTile::FloorShadowTop) => Some(CosmicLegacyTile::FloorShadowTop),
                 Some(UtilityTile::FloorShadowLeftTransition) => {
@@ -170,6 +181,9 @@ pub fn utility_to_cosmic(
                     Some(CosmicLegacyTile::FloorShadowInnerCorner)
                 }
                 Some(UtilityTile::Empty) => None,
+                Some(UtilityTile::Test1) => Some(CosmicLegacyTile::Pink),
+                Some(UtilityTile::Test2) => Some(CosmicLegacyTile::LightYellow),
+                Some(UtilityTile::Test3) => Some(CosmicLegacyTile::DarkestBlue),
                 None => None,
             };
             output[x].push(tile);
