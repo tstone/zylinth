@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use rand::prelude::*;
+use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
 use super::{
@@ -18,7 +18,15 @@ pub fn generate_layout(
         ArrayTextureLoader,
     >,
 ) {
-    let mut rng = ChaCha8Rng::seed_from_u64(1);
+    // needs fixes:
+    // 4
+    // 8 - shadow bottom right
+    // 16931032955856955107 - weird top left corners
+    let seed = random_range(0..u64::MAX);
+    println!("Using seed: {seed}");
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+
+    // TODO: randomize size a little
     let width: u32 = 12;
     let height: u32 = 12;
 

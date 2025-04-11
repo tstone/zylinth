@@ -59,4 +59,7 @@ pub fn organic_room(
         return organic_room(width, height, rng);
     }
     grid
+
+    // TODO: add constraint for single block missing
+    // TODO: implement culling of islands
 }
