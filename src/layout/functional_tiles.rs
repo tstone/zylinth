@@ -2,6 +2,9 @@
 #[allow(dead_code)]
 pub enum UtilityTile {
     #[default]
+    Test1,
+    Test2,
+    Test3,
     Empty,
     Wall,
     Floor,

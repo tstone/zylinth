@@ -10,10 +10,10 @@ pub struct Replacement {
     pub below: HashSet<UtilityTile>,
     pub on_left: HashSet<UtilityTile>,
     pub on_right: HashSet<UtilityTile>,
-    // pub on_top_left: HashSet<UtilityTile>,
-    // pub on_top_right: HashSet<UtilityTile>,
-    // pub on_bottom_left: HashSet<UtilityTile>,
-    // pub on_bottom_right: HashSet<UtilityTile>,
+    pub on_top_left: HashSet<UtilityTile>,
+    pub on_top_right: HashSet<UtilityTile>,
+    pub on_bottom_left: HashSet<UtilityTile>,
+    pub on_bottom_right: HashSet<UtilityTile>,
 }
 
 pub fn replace_tiles(
@@ -25,62 +25,82 @@ pub fn replace_tiles(
         let height = grid[x].len();
         for y in 0..height {
             for replacement in replacements.iter() {
-                if grid[x][y] == Some(replacement.target) {
+                if grid[x][y] == Some(replacement.target)
+                    || (grid[x][y] == None && replacement.target == UtilityTile::Empty)
+                {
                     let above = match get_tile_above(x, y, &grid) {
                         _ if replacement.above.len() == 0 => true,
                         None if replacement.above.contains(&UtilityTile::Empty) => true,
+                        None if replacement.above.len() > 0 => false,
                         Some(t) => replacement.above.contains(&t),
                         _ => true,
                     };
                     let below = match get_tile_below(x, y, &grid) {
                         _ if replacement.below.len() == 0 => true,
                         None if replacement.below.contains(&UtilityTile::Empty) => true,
-                        Some(t) => replacement.below.contains(&t),
+                        None if replacement.below.len() > 0 => false,
+                        Some(t) => {
+                            println!("contains {:?}", t);
+                            replacement.below.contains(&t)
+                        }
                         _ => true,
                     };
                     let left_of = match get_tile_left_of(x, y, &grid) {
                         _ if replacement.on_left.len() == 0 => true,
                         None if replacement.on_left.contains(&UtilityTile::Empty) => true,
+                        None if replacement.on_left.len() > 0 => false,
                         Some(t) => replacement.on_left.contains(&t),
                         _ => true,
                     };
                     let right_of = match get_tile_right_of(x, y, &grid) {
                         _ if replacement.on_right.len() == 0 => true,
                         None if replacement.on_right.contains(&UtilityTile::Empty) => true,
+                        None if replacement.on_right.len() > 0 => false,
                         Some(t) => replacement.on_right.contains(&t),
                         _ => true,
                     };
 
-                    // let top_left_of = match get_top_left_tile(x, y, &grid) {
-                    //     _ if replacement.on_top_left.len() == 0 => true,
-                    //     None if replacement.on_top_left.contains(&UtilityTile::Empty) => true,
-                    //     Some(t) => replacement.on_top_left.contains(&t),
-                    //     _ => true,
-                    // };
-                    // let top_right_of = match get_top_right_tile(x, y, &grid) {
-                    //     _ if replacement.on_top_right.len() == 0 => true,
-                    //     None if replacement.on_top_right.contains(&UtilityTile::Empty) => true,
-                    //     Some(t) => replacement.on_top_right.contains(&t),
-                    //     _ => true,
-                    // };
-                    // let bottom_left_of = match get_bottom_left_tile(x, y, &grid) {
-                    //     _ if replacement.on_bottom_left.len() == 0 => true,
-                    //     Some(t) if replacement.on_bottom_left.len() > 0 => {
-                    //         replacement.on_right.contains(&t)
-                    //     }
-                    //     _ => true,
-                    // };
-                    // let bottom_right_of = match get_bottom_right_tile(x, y, &grid) {
-                    //     _ if replacement.on_bottom_left.len() == 0 => true,
-                    //     Some(t) if replacement.on_bottom_right.len() > 0 => {
-                    //         replacement.on_right.contains(&t)
-                    //     }
-                    //     _ => true,
-                    // };
+                    let top_left_of = match get_top_left_tile(x, y, &grid) {
+                        _ if replacement.on_top_left.len() == 0 => true,
+                        None if replacement.on_top_left.contains(&UtilityTile::Empty) => true,
+                        None if replacement.on_top_left.len() > 0 => false,
+                        Some(t) => replacement.on_top_left.contains(&t),
+                        _ => true,
+                    };
+                    let top_right_of = match get_top_right_tile(x, y, &grid) {
+                        _ if replacement.on_top_right.len() == 0 => true,
+                        None if replacement.on_top_right.contains(&UtilityTile::Empty) => true,
+                        None if replacement.on_top_right.len() > 0 => false,
+                        Some(t) => replacement.on_top_right.contains(&t),
+                        _ => true,
+                    };
+                    let bottom_left_of = match get_bottom_left_tile(x, y, &grid) {
+                        _ if replacement.on_bottom_left.len() == 0 => true,
+                        None if replacement.on_bottom_left.contains(&UtilityTile::Empty) => true,
+                        None if replacement.on_bottom_left.len() > 0 => false,
+                        Some(t) => replacement.on_bottom_left.contains(&t),
+                        _ => true,
+                    };
+                    let bottom_right_of = match get_bottom_right_tile(x, y, &grid) {
+                        _ if replacement.on_bottom_right.len() == 0 => true,
+                        None if replacement.on_bottom_right.contains(&UtilityTile::Empty) => true,
+                        None if replacement.on_bottom_right.len() > 0 => false,
+                        Some(t) => replacement.on_bottom_right.contains(&t),
+                        _ => true,
+                    };
 
-                    if above && below && left_of && right_of
-                    // && top_left_of && top_right_of
-                    // && bottom_left_of && bottom_right_of
+                    println!(
+                        "({x},{y}) above: {above}, below: {below}, left: {left_of}, right: {right_of}"
+                    );
+
+                    if above
+                        && below
+                        && left_of
+                        && right_of
+                        && top_left_of
+                        && top_right_of
+                        && bottom_left_of
+                        && bottom_right_of
                     {
                         grid[x][y] = Some(replacement.replacement);
                         continue;
