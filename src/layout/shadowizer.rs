@@ -3,28 +3,6 @@ use std::collections::HashSet;
 
 use super::{functional_tiles::UtilityTile, replacement::*};
 
-// TODO: make a real room generator
-// - generates floors first
-// - wraps floor tiles in walls
-
-pub fn basic_room(width: usize, height: usize) -> Vec<Vec<Option<UtilityTile>>> {
-    let mut grid: Vec<Vec<Option<UtilityTile>>> = vec![vec![None; height]; width];
-    for x in 0..grid.len() {
-        for y in 0..grid[x].len() {
-            if x == 0 || y == 0 || x == (width - 1) || y == (height - 1) {
-                grid[x][y] = Some(UtilityTile::Wall);
-            } else if x == 3 && y > 3 {
-                grid[x][y] = Some(UtilityTile::Wall);
-            } else if x == width - 2 && y == 2 {
-                grid[x][y] = Some(UtilityTile::Wall);
-            } else {
-                grid[x][y] = Some(UtilityTile::Floor);
-            }
-        }
-    }
-    grid
-}
-
 pub fn shadowize(grid: Vec<Vec<Option<UtilityTile>>>) -> Vec<Vec<Option<UtilityTile>>> {
     replace_tiles(
         replace_tiles(grid, FIRST_PASS.to_vec()),
@@ -34,13 +12,15 @@ pub fn shadowize(grid: Vec<Vec<Option<UtilityTile>>>) -> Vec<Vec<Option<UtilityT
 
 lazy_static! {
     static ref FIRST_PASS: Vec<Replacement> = vec![
+        // inner corner
         Replacement {
             target: UtilityTile::Floor,
-            above: HashSet::from([UtilityTile::Wall]),
-            on_left: HashSet::from([UtilityTile::Wall]),
+            above: HashSet::from([UtilityTile::WallTop]),
+            on_left: HashSet::from([UtilityTile::WallLeft]),
             replacement: UtilityTile::FloorShadowInnerCorner,
             ..Default::default()
         },
+        // outer corner
         Replacement {
             target: UtilityTile::Floor,
             above: HashSet::from([UtilityTile::FloorShadowLeft]),
@@ -48,15 +28,17 @@ lazy_static! {
             replacement: UtilityTile::FloorShadowOuterCorner,
             ..Default::default()
         },
+        // top
         Replacement {
             target: UtilityTile::Floor,
-            above: HashSet::from([UtilityTile::Wall]),
+            above: HashSet::from([UtilityTile::WallTop]),
             replacement: UtilityTile::FloorShadowTop,
             ..Default::default()
         },
+        // left
         Replacement {
             target: UtilityTile::Floor,
-            on_left: HashSet::from([UtilityTile::Wall]),
+            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallTop]),
             replacement: UtilityTile::FloorShadowLeft,
             ..Default::default()
         }
@@ -67,7 +49,9 @@ lazy_static! {
             on_right: HashSet::from([
                 UtilityTile::FloorShadowTop,
                 UtilityTile::FloorShadowOuterCorner,
-                UtilityTile::Wall
+                UtilityTile::WallTop,
+                UtilityTile::WallLeft,
+                UtilityTile::WallRight,
             ]),
             on_left: HashSet::from([UtilityTile::Floor]),
             replacement: UtilityTile::FloorShadowTopTransition,
@@ -79,7 +63,9 @@ lazy_static! {
             below: HashSet::from([
                 UtilityTile::FloorShadowLeft,
                 UtilityTile::FloorShadowOuterCorner,
-                UtilityTile::Wall
+                UtilityTile::WallTop,
+                UtilityTile::WallRight,
+                UtilityTile::WallLeft,
             ]),
             replacement: UtilityTile::FloorShadowLeftTransition,
             ..Default::default()

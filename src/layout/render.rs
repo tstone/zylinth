@@ -5,7 +5,7 @@ use super::{
     cosmic_legacy_tiles::utility_to_cosmic,
     floor_plan::{l_room, rect_room},
     modifications::{flip_horz, padding},
-    shadowizer::{basic_room, shadowize},
+    shadowizer::shadowize,
     wall_wrap::wrap_walls,
 };
 
@@ -23,7 +23,7 @@ pub fn generate_layout(
     // let layout = Layout::new(12, 16);
     // let tile_grid = wfc_generate(width as usize, height as usize);
 
-    let floor = flip_horz(l_room(width as usize, height as usize, 3, 2));
+    let floor = l_room(width as usize, height as usize, 3, 2);
     let walled = wrap_walls(floor);
     let shadow_walls = shadowize(walled);
     let tile_grid = utility_to_cosmic(shadow_walls, &mut rng);

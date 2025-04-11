@@ -123,7 +123,6 @@ impl CosmicLegacyTile {
             Self::Wall3Vents,
             Self::WallCircuits,
             Self::WallFan,
-            Self::WallSplit,
             Self::WallWires,
         ]
     }
@@ -152,13 +151,17 @@ pub fn utility_to_cosmic(
     for x in 0..input.len() {
         for y in 0..input[x].len() {
             let tile = match input[x][y] {
-                Some(UtilityTile::Wall) => {
+                Some(UtilityTile::WallTop) => {
                     if rand::random_bool(0.9) {
                         Some(CosmicLegacyTile::Wall)
                     } else {
                         CosmicLegacyTile::wall_tiles().choose(rng).copied()
                     }
                 }
+                Some(UtilityTile::WallTopLeft) => Some(CosmicLegacyTile::TopLeftOuterCorner),
+                Some(UtilityTile::WallTopRight) => Some(CosmicLegacyTile::TopRightOuterCorner),
+                Some(UtilityTile::WallLeft) => Some(CosmicLegacyTile::TopCapLeft),
+                Some(UtilityTile::WallRight) => Some(CosmicLegacyTile::TopCapRight),
                 Some(UtilityTile::Floor) => {
                     if rand::random_bool(0.975) {
                         Some(CosmicLegacyTile::Floor)
