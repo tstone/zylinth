@@ -1,4 +1,7 @@
-use super::functional_tiles::UtilityTile;
+use super::{
+    functional_tiles::UtilityTile,
+    replacement::{get_tile_above, is_edge},
+};
 use noise::{NoiseFn, Perlin};
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
@@ -30,7 +33,7 @@ pub fn l_room(
     grid
 }
 
-pub fn organic_room(
+pub fn perlin_room(
     width: usize,
     height: usize,
     rng: &mut ChaCha8Rng,
@@ -48,7 +51,7 @@ pub fn organic_room(
                 grid[x][y] = Some(UtilityTile::Floor);
                 count += 1;
             } else {
-                grid[x][y] = Some(UtilityTile::Empty);
+                grid[x][y] = None;
             }
         }
     }
@@ -56,7 +59,7 @@ pub fn organic_room(
     // if less than 50% of the room generated, try again
     let total = width * height;
     if (count as f32 / total as f32) < 0.5 {
-        return organic_room(width, height, rng);
+        return perlin_room(width, height, rng);
     }
     grid
 

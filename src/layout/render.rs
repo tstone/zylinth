@@ -3,9 +3,13 @@ use bevy_ecs_tilemap::prelude::*;
 use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
+use crate::layout::{
+    cosmic_legacy::{decorate, utility_to_cosmic},
+    fixer::floor_fixer,
+};
+
 use super::{
-    cosmic_legacy_tiles::utility_to_cosmic,
-    floor_plan::{l_room, organic_room},
+    floor_plan::{l_room, perlin_room},
     modifications::flip_horz,
     shadowizer::shadowize,
     wall_wrap::wrap_walls,
@@ -19,22 +23,22 @@ pub fn generate_layout(
     >,
 ) {
     // needs fixes:
-    // 4
-    // 8 - shadow bottom right
     // 16931032955856955107 - weird top left corners
     let seed = random_range(0..u64::MAX);
     println!("Using seed: {seed}");
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    let mut rng = ChaCha8Rng::seed_from_u64(8);
 
     // TODO: randomize size a little
     let width: u32 = 12;
     let height: u32 = 12;
 
     // let floor = flip_horz(l_room(width as usize, height as usize, 3, 2));
-    let floor = organic_room(width as usize, height as usize, &mut rng);
-    let walled = wrap_walls(floor);
-    let shadow_walls = shadowize(walled);
-    let tile_grid = utility_to_cosmic(shadow_walls, &mut rng);
+    let floor = perlin_room(width as usize, height as usize, &mut rng);
+    let floor_fixed = floor_fixer(floor, &mut rng);
+    let walled = wrap_walls(floor_fixed, &mut rng);
+    // let shadow_walls = shadowize(walled, &mut rng);
+    // let decorations = decorate(&shadow_walls, &mut rng);
+    let tile_grid = utility_to_cosmic(walled, &mut rng);
 
     let width: u32 = tile_grid.len() as u32;
     let height: u32 = tile_grid[0].len() as u32;
@@ -49,11 +53,12 @@ pub fn generate_layout(
 
     for x in 0..width {
         for y in 0..height {
+            // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
+            let flipped_y = height - y - 1;
+            let tile_pos = TilePos { x, y: flipped_y };
+
             match tile_grid[x as usize][y as usize] {
                 Some(sprite) => {
-                    // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
-                    let flipped_y = height - y - 1;
-                    let tile_pos = TilePos { x, y: flipped_y };
                     let tile_entity = commands
                         .spawn(TileBundle {
                             position: tile_pos,
@@ -66,6 +71,21 @@ pub fn generate_layout(
                 }
                 _ => {}
             }
+
+            // match decorations[x as usize][y as usize] {
+            //     Some(sprite) => {
+            //         let tile_entity = commands
+            //             .spawn(TileBundle {
+            //                 position: tile_pos,
+            //                 texture_index: TileTextureIndex(sprite.into()),
+            //                 tilemap_id: TilemapId(tilemap_entity),
+            //                 ..default()
+            //             })
+            //             .id();
+            //         tile_storage.set(&tile_pos, tile_entity);
+            //     }
+            //     _ => {}
+            // }
         }
     }
 

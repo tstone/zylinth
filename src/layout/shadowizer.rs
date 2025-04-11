@@ -1,17 +1,18 @@
+use super::{functional_tiles::UtilityTile, replacement::*};
 use lazy_static::lazy_static;
+use rand_chacha::ChaCha8Rng;
 use std::collections::HashSet;
 
-use super::{functional_tiles::UtilityTile, replacement::*};
-
-pub fn shadowize(grid: Vec<Vec<Option<UtilityTile>>>) -> Vec<Vec<Option<UtilityTile>>> {
-    replace_tiles(
-        replace_tiles(grid, FIRST_PASS.to_vec()),
-        SECOND_PASS.to_vec(),
-    )
+pub fn shadowize(
+    grid: Vec<Vec<Option<UtilityTile>>>,
+    rng: &mut ChaCha8Rng,
+) -> Vec<Vec<Option<UtilityTile>>> {
+    let first_pass = replace_tiles(&grid, FIRST_PASS.to_vec(), grid.clone(), rng);
+    replace_tiles(&first_pass, SECOND_PASS.to_vec(), first_pass.clone(), rng)
 }
 
 lazy_static! {
-    static ref FIRST_PASS: Vec<Replacement> = vec![
+    static ref FIRST_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
         // inner corner
         Replacement {
             target: UtilityTile::Floor,
@@ -43,7 +44,8 @@ lazy_static! {
             ..Default::default()
         }
     ];
-    static ref SECOND_PASS: Vec<Replacement> = vec![
+
+    static ref SECOND_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
         Replacement {
             target: UtilityTile::FloorShadowTop,
             on_right: HashSet::from([
@@ -63,10 +65,14 @@ lazy_static! {
             below: HashSet::from([
                 UtilityTile::FloorShadowLeft,
                 UtilityTile::FloorShadowOuterCorner,
+                UtilityTile::WallOutlineInnerCornerBottomLeft,
+                UtilityTile::WallOutlineInnerCornerBottomRight,
+                UtilityTile::WallOutlineInnerCornerTopLeft,
                 UtilityTile::WallOutlineInnerCornerTopRight,
                 UtilityTile::WallTop,
                 UtilityTile::WallRight,
                 UtilityTile::WallLeft,
+                UtilityTile::WallBottom,
             ]),
             replacement: UtilityTile::FloorShadowLeftTransition,
             ..Default::default()
