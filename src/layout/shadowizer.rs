@@ -16,7 +16,7 @@ lazy_static! {
         Replacement {
             target: UtilityTile::Floor,
             above: HashSet::from([UtilityTile::WallTop]),
-            on_left: HashSet::from([UtilityTile::WallLeft]),
+            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallOutlineOuterLeft]),
             replacement: UtilityTile::FloorShadowInnerCorner,
             ..Default::default()
         },
