@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use std::collections::HashSet;
 
 pub fn wrap_walls(input: Vec<Vec<Option<UtilityTile>>>) -> Vec<Vec<Option<UtilityTile>>> {
-    let padded = padding(input, 3, 1, 0, 1);
+    let padded = padding(input, 3, 1, 1, 1);
     // 2 height walls
     let walled = replace_tiles(
         replace_tiles(padded, FIRST_PASS.to_vec()),
@@ -74,6 +74,28 @@ lazy_static! {
             on_right: HashSet::from([UtilityTile::Empty]),
             below: HashSet::from([UtilityTile::Empty]),
             replacement: UtilityTile::WallRight,
+            ..Default::default()
+        },
+        // bottom
+        Replacement {
+            target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::Floor]),
+            replacement: UtilityTile::WallBottom,
+            ..Default::default()
+        },
+        // bottom left
+        Replacement {
+            target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::WallLeft]),
+            replacement: UtilityTile::WallBottomLeft,
+            ..Default::default()
+        },
+        // bottom right
+        Replacement {
+            target: UtilityTile::Empty,
+            above: HashSet::from([UtilityTile::WallRight]),
+            on_left: HashSet::from([UtilityTile::WallBottom, UtilityTile::WallBottomLeft]),
+            replacement: UtilityTile::WallBottomRight,
             ..Default::default()
         },
     ];
@@ -171,7 +193,7 @@ lazy_static! {
             on_left: HashSet::from([UtilityTile::WallOutlineTop, UtilityTile::WallOutlineTopLeft]),
             above: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallOutlineTopLeft]),
             below: HashSet::from([UtilityTile::WallTop]),
-            replacement: UtilityTile::WallOutlineOuterLeft,
+            replacement: UtilityTile::WallOutlineInnerCornerRight,
             ..Default::default()
         },
         // inner bottom-left corner
@@ -180,7 +202,7 @@ lazy_static! {
             on_left: HashSet::from([UtilityTile::Floor]),
             above: HashSet::from([UtilityTile::WallRight, UtilityTile::WallOutlineTopRight]),
             below: HashSet::from([UtilityTile::WallTop]),
-            replacement: UtilityTile::WallOutlineOuterRight,
+            replacement: UtilityTile::WallOutlineInnerCornerLeft,
             ..Default::default()
         },
     ];
