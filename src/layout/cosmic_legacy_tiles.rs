@@ -1,5 +1,6 @@
 use crate::layout::functional_tiles::UtilityTile;
 use rand::prelude::*;
+use rand_chacha::ChaCha8Rng;
 
 #[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
@@ -145,7 +146,7 @@ impl Into<u32> for CosmicLegacyTile {
 
 pub fn utility_to_cosmic(
     input: Vec<Vec<Option<UtilityTile>>>,
-    rng: &mut ThreadRng,
+    rng: &mut ChaCha8Rng,
 ) -> Vec<Vec<Option<CosmicLegacyTile>>> {
     let mut output: Vec<Vec<Option<CosmicLegacyTile>>> = vec![vec![]; input.len()];
     for x in 0..input.len() {
@@ -170,11 +171,17 @@ pub fn utility_to_cosmic(
                     Some(CosmicLegacyTile::BottomRightOuterCorner)
                 }
                 Some(UtilityTile::WallOutlineTop) => Some(CosmicLegacyTile::TopCapTopSimple),
-                Some(UtilityTile::WallOutlineInnerCornerRight) => {
-                    Some(CosmicLegacyTile::BottomRightCorner)
+                Some(UtilityTile::WallOutlineInnerCornerTopLeft) => {
+                    Some(CosmicLegacyTile::TopLeftInnerCorner)
                 }
-                Some(UtilityTile::WallOutlineInnerCornerLeft) => {
+                Some(UtilityTile::WallOutlineInnerCornerBottomLeft) => {
                     Some(CosmicLegacyTile::BottomLeftCorner)
+                }
+                Some(UtilityTile::WallOutlineInnerCornerTopRight) => {
+                    Some(CosmicLegacyTile::TopRightInnerCorner)
+                }
+                Some(UtilityTile::WallOutlineInnerCornerBottomRight) => {
+                    Some(CosmicLegacyTile::BottomRightCorner)
                 }
                 Some(UtilityTile::Floor) => {
                     if rand::random_bool(0.95) {

@@ -1,9 +1,14 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use rand::prelude::*;
+use rand_chacha::ChaCha8Rng;
 
 use super::{
-    cosmic_legacy_tiles::utility_to_cosmic, floor_plan::l_room, modifications::flip_horz,
-    shadowizer::shadowize, wall_wrap::wrap_walls,
+    cosmic_legacy_tiles::utility_to_cosmic,
+    floor_plan::{l_room, organic_room},
+    modifications::flip_horz,
+    shadowizer::shadowize,
+    wall_wrap::wrap_walls,
 };
 
 pub fn generate_layout(
@@ -13,11 +18,12 @@ pub fn generate_layout(
         ArrayTextureLoader,
     >,
 ) {
-    let mut rng = rand::rng();
+    let mut rng = ChaCha8Rng::seed_from_u64(2);
     let width: u32 = 12;
-    let height: u32 = 8;
+    let height: u32 = 12;
 
-    let floor = flip_horz(l_room(width as usize, height as usize, 3, 2));
+    // let floor = flip_horz(l_room(width as usize, height as usize, 3, 2));
+    let floor = organic_room(width as usize, height as usize, &mut rng);
     let walled = wrap_walls(floor);
     let shadow_walls = shadowize(walled);
     let tile_grid = utility_to_cosmic(shadow_walls, &mut rng);
