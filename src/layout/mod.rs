@@ -1,8 +1,11 @@
-mod layout;
+mod costmic_legacy_tiles;
+mod floor_plan;
+pub mod functional_tiles;
 mod maze;
+mod modifications;
 mod render;
-mod room;
-mod room_grid;
-mod wfc;
+mod replacement;
+mod shadowizer;
+mod wall_wrap;
 
 pub use render::generate_layout;

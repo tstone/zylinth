@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_pancam::{PanCam, PanCamPlugin};
 
-mod costmic_legacy_tiles;
 mod layout;
 
 const BASE_MAROON: Color = Color::hsl(281., 0.51, 0.17);

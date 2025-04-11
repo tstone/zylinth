@@ -1,7 +1,13 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
-use super::wfc::wfc_generate;
+use super::{
+    costmic_legacy_tiles::utility_to_cosmic,
+    floor_plan::{l_room, rect_room},
+    modifications::flip_horz,
+    shadowizer::{basic_room, shadowize},
+    wall_wrap::wrap_walls,
+};
 
 pub fn generate_layout(
     mut commands: Commands,
@@ -10,10 +16,17 @@ pub fn generate_layout(
         ArrayTextureLoader,
     >,
 ) {
-    // let layout = Layout::new(12, 16);
-    let width: u32 = 8;
+    let width: u32 = 9;
     let height: u32 = 8;
-    let tile_grid = wfc_generate(width as usize, height as usize);
+
+    // let layout = Layout::new(12, 16);
+    // let tile_grid = wfc_generate(width as usize, height as usize);
+
+    let floor = flip_horz(l_room(width as usize, height as usize, 2, 3));
+    let walled = wrap_walls(floor);
+    let shadow_walls = shadowize(walled);
+    let tile_grid = utility_to_cosmic(shadow_walls);
+
     let map_size = TilemapSize {
         x: width,
         y: height,
