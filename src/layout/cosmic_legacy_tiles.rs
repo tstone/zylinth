@@ -158,10 +158,19 @@ pub fn utility_to_cosmic(
                         CosmicLegacyTile::wall_tiles().choose(rng).copied()
                     }
                 }
-                Some(UtilityTile::WallTopLeft) => Some(CosmicLegacyTile::TopLeftOuterCorner),
-                Some(UtilityTile::WallTopRight) => Some(CosmicLegacyTile::TopRightOuterCorner),
+                Some(UtilityTile::WallOutlineTopLeft) => Some(CosmicLegacyTile::TopLeftOuterCorner),
+                Some(UtilityTile::WallOutlineTopRight) => {
+                    Some(CosmicLegacyTile::TopRightOuterCorner)
+                }
                 Some(UtilityTile::WallLeft) => Some(CosmicLegacyTile::TopCapLeft),
                 Some(UtilityTile::WallRight) => Some(CosmicLegacyTile::TopCapRight),
+                Some(UtilityTile::WallOutlineTop) => Some(CosmicLegacyTile::TopCapTopSimple),
+                Some(UtilityTile::WallOutlineOuterLeft) => {
+                    Some(CosmicLegacyTile::BottomRightCorner)
+                }
+                Some(UtilityTile::WallOutlineOuterRight) => {
+                    Some(CosmicLegacyTile::BottomLeftCorner)
+                }
                 Some(UtilityTile::Floor) => {
                     if rand::random_bool(0.975) {
                         Some(CosmicLegacyTile::Floor)
