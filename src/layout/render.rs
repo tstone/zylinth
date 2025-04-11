@@ -18,7 +18,7 @@ pub fn generate_layout(
         ArrayTextureLoader,
     >,
 ) {
-    let mut rng = ChaCha8Rng::seed_from_u64(2);
+    let mut rng = ChaCha8Rng::seed_from_u64(1);
     let width: u32 = 12;
     let height: u32 = 12;
 

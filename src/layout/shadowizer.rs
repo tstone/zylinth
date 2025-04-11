@@ -38,7 +38,7 @@ lazy_static! {
         // left
         Replacement {
             target: UtilityTile::Floor,
-            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallTop]),
+            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallTop, UtilityTile::WallOutlineInnerCornerTopRight]),
             replacement: UtilityTile::FloorShadowLeft,
             ..Default::default()
         }
@@ -63,6 +63,7 @@ lazy_static! {
             below: HashSet::from([
                 UtilityTile::FloorShadowLeft,
                 UtilityTile::FloorShadowOuterCorner,
+                UtilityTile::WallOutlineInnerCornerTopRight,
                 UtilityTile::WallTop,
                 UtilityTile::WallRight,
                 UtilityTile::WallLeft,
