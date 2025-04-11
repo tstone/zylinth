@@ -39,10 +39,7 @@ pub fn replace_tiles(
                         _ if replacement.below.len() == 0 => true,
                         None if replacement.below.contains(&UtilityTile::Empty) => true,
                         None if replacement.below.len() > 0 => false,
-                        Some(t) => {
-                            println!("contains {:?}", t);
-                            replacement.below.contains(&t)
-                        }
+                        Some(t) => replacement.below.contains(&t),
                         _ => true,
                     };
                     let left_of = match get_tile_left_of(x, y, &grid) {
@@ -89,9 +86,9 @@ pub fn replace_tiles(
                         _ => true,
                     };
 
-                    println!(
-                        "({x},{y}) above: {above}, below: {below}, left: {left_of}, right: {right_of}"
-                    );
+                    // println!(
+                    //     "({x},{y}) above: {above}, below: {below}, left: {left_of}, right: {right_of}"
+                    // );
 
                     if above
                         && below
@@ -112,15 +109,23 @@ pub fn replace_tiles(
     grid
 }
 
-fn is_edge(x: usize, y: usize, width: usize, height: usize) -> bool {
+pub(crate) fn is_edge(x: usize, y: usize, width: usize, height: usize) -> bool {
     x == 0 || y == 0 || x == (width - 1) || y == (height - 1)
 }
 
-fn get_tile_above(x: usize, y: usize, grid: &Vec<Vec<Option<UtilityTile>>>) -> Option<UtilityTile> {
+pub(crate) fn get_tile_above(
+    x: usize,
+    y: usize,
+    grid: &Vec<Vec<Option<UtilityTile>>>,
+) -> Option<UtilityTile> {
     if y > 0 { grid[x][y - 1] } else { None }
 }
 
-fn get_tile_below(x: usize, y: usize, grid: &Vec<Vec<Option<UtilityTile>>>) -> Option<UtilityTile> {
+pub(crate) fn get_tile_below(
+    x: usize,
+    y: usize,
+    grid: &Vec<Vec<Option<UtilityTile>>>,
+) -> Option<UtilityTile> {
     if y < (grid[x].len() - 1) {
         grid[x][y + 1]
     } else {
@@ -128,7 +133,7 @@ fn get_tile_below(x: usize, y: usize, grid: &Vec<Vec<Option<UtilityTile>>>) -> O
     }
 }
 
-fn get_tile_left_of(
+pub(crate) fn get_tile_left_of(
     x: usize,
     y: usize,
     grid: &Vec<Vec<Option<UtilityTile>>>,
@@ -136,7 +141,7 @@ fn get_tile_left_of(
     if x > 0 { grid[x - 1][y] } else { None }
 }
 
-fn get_tile_right_of(
+pub(crate) fn get_tile_right_of(
     x: usize,
     y: usize,
     grid: &Vec<Vec<Option<UtilityTile>>>,
@@ -148,7 +153,7 @@ fn get_tile_right_of(
     }
 }
 
-fn get_top_left_tile(
+pub(crate) fn get_top_left_tile(
     x: usize,
     y: usize,
     grid: &Vec<Vec<Option<UtilityTile>>>,
@@ -160,7 +165,7 @@ fn get_top_left_tile(
     }
 }
 
-fn get_top_right_tile(
+pub(crate) fn get_top_right_tile(
     x: usize,
     y: usize,
     grid: &Vec<Vec<Option<UtilityTile>>>,
@@ -172,7 +177,7 @@ fn get_top_right_tile(
     }
 }
 
-fn get_bottom_left_tile(
+pub(crate) fn get_bottom_left_tile(
     x: usize,
     y: usize,
     grid: &Vec<Vec<Option<UtilityTile>>>,
@@ -184,7 +189,7 @@ fn get_bottom_left_tile(
     }
 }
 
-fn get_bottom_right_tile(
+pub(crate) fn get_bottom_right_tile(
     x: usize,
     y: usize,
     grid: &Vec<Vec<Option<UtilityTile>>>,

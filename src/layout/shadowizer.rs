@@ -16,15 +16,15 @@ lazy_static! {
         Replacement {
             target: UtilityTile::Floor,
             above: HashSet::from([UtilityTile::WallTop]),
-            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallOutlineInnerCornerRight]),
+            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallTop, UtilityTile::WallOutlineInnerCornerTopLeft]),
             replacement: UtilityTile::FloorShadowInnerCorner,
             ..Default::default()
         },
         // outer corner
         Replacement {
             target: UtilityTile::Floor,
-            above: HashSet::from([UtilityTile::FloorShadowLeft]),
-            on_left: HashSet::from([UtilityTile::FloorShadowTop]),
+            above: HashSet::from([UtilityTile::FloorShadowLeft, UtilityTile::FloorShadowInnerCorner]),
+            on_left: HashSet::from([UtilityTile::FloorShadowTop, UtilityTile::FloorShadowInnerCorner]),
             replacement: UtilityTile::FloorShadowOuterCorner,
             ..Default::default()
         },
