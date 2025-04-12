@@ -21,10 +21,8 @@ pub fn utility_to_cosmic(
                         CosmicLegacyTile::wall_tiles().choose(rng).copied()
                     }
                 }
-                Some(UtilityTile::WallOutlineTopLeft) => Some(CosmicLegacyTile::TopLeftOuterCorner),
-                Some(UtilityTile::WallOutlineTopRight) => {
-                    Some(CosmicLegacyTile::TopRightOuterCorner)
-                }
+                Some(UtilityTile::WallTopLeft) => Some(CosmicLegacyTile::TopLeftOuterCorner),
+                Some(UtilityTile::WallTopRight) => Some(CosmicLegacyTile::TopRightOuterCorner),
                 Some(UtilityTile::WallLeft) => Some(CosmicLegacyTile::TopCapLeft),
                 Some(UtilityTile::WallRight) => Some(CosmicLegacyTile::TopCapRight),
                 Some(UtilityTile::WallBottom) => Some(CosmicLegacyTile::TopCapBottomSimple),
@@ -32,17 +30,17 @@ pub fn utility_to_cosmic(
                 Some(UtilityTile::WallBottomRight) => {
                     Some(CosmicLegacyTile::BottomRightOuterCorner)
                 }
-                Some(UtilityTile::WallOutlineTop) => Some(CosmicLegacyTile::TopCapTopSimple),
-                Some(UtilityTile::WallOutlineInnerCornerTopLeft) => {
+                Some(UtilityTile::WallTopmost) => Some(CosmicLegacyTile::TopCapTopSimple),
+                Some(UtilityTile::WallInnerCornerTopLeft) => {
                     Some(CosmicLegacyTile::TopLeftInnerCorner)
                 }
-                Some(UtilityTile::WallOutlineInnerCornerBottomLeft) => {
+                Some(UtilityTile::WallInnerCornerBottomLeft) => {
                     Some(CosmicLegacyTile::BottomLeftCorner)
                 }
-                Some(UtilityTile::WallOutlineInnerCornerTopRight) => {
+                Some(UtilityTile::WallInnerCornerTopRight) => {
                     Some(CosmicLegacyTile::TopRightInnerCorner)
                 }
-                Some(UtilityTile::WallOutlineInnerCornerBottomRight) => {
+                Some(UtilityTile::WallInnerCornerBottomRight) => {
                     Some(CosmicLegacyTile::BottomRightCorner)
                 }
                 Some(UtilityTile::Floor) => {

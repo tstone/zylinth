@@ -26,7 +26,7 @@ pub fn generate_layout(
     // 16931032955856955107 - weird top left corners
     let seed = random_range(0..u64::MAX);
     println!("Using seed: {seed}");
-    let mut rng = ChaCha8Rng::seed_from_u64(8);
+    let mut rng = ChaCha8Rng::seed_from_u64(1);
 
     // TODO: randomize size a little
     let width: u32 = 12;
@@ -36,9 +36,9 @@ pub fn generate_layout(
     let floor = perlin_room(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
-    // let shadow_walls = shadowize(walled, &mut rng);
+    let shadow_walls = shadowize(walled, &mut rng);
     // let decorations = decorate(&shadow_walls, &mut rng);
-    let tile_grid = utility_to_cosmic(walled, &mut rng);
+    let tile_grid = utility_to_cosmic(shadow_walls, &mut rng);
 
     let width: u32 = tile_grid.len() as u32;
     let height: u32 = tile_grid[0].len() as u32;
@@ -71,21 +71,6 @@ pub fn generate_layout(
                 }
                 _ => {}
             }
-
-            // match decorations[x as usize][y as usize] {
-            //     Some(sprite) => {
-            //         let tile_entity = commands
-            //             .spawn(TileBundle {
-            //                 position: tile_pos,
-            //                 texture_index: TileTextureIndex(sprite.into()),
-            //                 tilemap_id: TilemapId(tilemap_entity),
-            //                 ..default()
-            //             })
-            //             .id();
-            //         tile_storage.set(&tile_pos, tile_entity);
-            //     }
-            //     _ => {}
-            // }
         }
     }
 

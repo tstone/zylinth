@@ -7,7 +7,10 @@ pub trait Replaceable {
     fn is_empty(self: Self) -> bool;
 }
 
+#[derive(Debug)]
 pub struct TileContext<T> {
+    pub x: usize,
+    pub y: usize,
     pub above: Option<T>,
     pub below: Option<T>,
     pub left: Option<T>,
@@ -95,6 +98,8 @@ pub fn replace_tiles<
                     || (source[x][y] == None && replacement.target.is_empty())
                 {
                     let tile_ctx = TileContext {
+                        x,
+                        y,
                         above: get_tile_above(x, y, source),
                         below: get_tile_below(x, y, source),
                         left: get_tile_left_of(x, y, source),
@@ -153,7 +158,7 @@ pub fn replace_tiles<
                         }
 
                         // skip remaining constraints since this one matched
-                        continue;
+                        break;
                     }
                 }
             }
