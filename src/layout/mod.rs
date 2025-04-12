@@ -10,3 +10,4 @@ mod shadowizer;
 mod wall_wrap;
 
 pub use render::generate_layout;
+pub use render::spot_lights;

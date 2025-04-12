@@ -1,8 +1,7 @@
-use std::hash::Hash;
-
-use bevy::prelude::*;
+use bevy::{color::palettes::tailwind::GREEN_500, prelude::*};
 use bevy_ecs_tilemap::prelude::*;
 
+use bevy_lit::prelude::PointLight2d;
 use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
@@ -12,11 +11,13 @@ use crate::layout::{
 };
 
 use super::{
+    cosmic_legacy::CosmicLegacyTile,
     floor_plan::{l_room, perlin_room},
-    modifications::flip_horz,
     shadowizer::shadowize,
     wall_wrap::wrap_walls,
 };
+
+struct DemoRoom;
 
 pub fn generate_layout(
     mut commands: Commands,
@@ -29,13 +30,12 @@ pub fn generate_layout(
     // 16931032955856955107 - weird top left corners
     let seed = random_range(0..u64::MAX);
     println!("Using seed: {seed}");
-    let mut rng = ChaCha8Rng::seed_from_u64(1160306710765765082);
+    let mut rng = ChaCha8Rng::seed_from_u64(1);
 
     // TODO: randomize size a little
     let width: u32 = 14;
     let height: u32 = 14;
 
-    // let floor = flip_horz(l_room(width as usize, height as usize, 3, 2));
     let floor = perlin_room(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
@@ -61,6 +61,7 @@ pub fn generate_layout(
         tile_grid,
         &mut commands,
         texture_handle.clone(),
+        10.0,
     );
     // Upper layer (decorations)
     render_layer(
@@ -69,6 +70,7 @@ pub fn generate_layout(
         decorations,
         &mut commands,
         texture_handle,
+        20.0,
     );
 
     #[cfg(all(not(feature = "atlas"), feature = "render"))]
@@ -81,12 +83,13 @@ pub fn generate_layout(
     }
 }
 
-fn render_layer<T: Copy + Into<u32>>(
+fn render_layer<T: PartialEq + Eq + Copy + Into<u32>>(
     map_size: &TilemapSize,
     tile_size: &TilemapTileSize,
     tile_grid: Vec<Vec<Option<T>>>,
     commands: &mut Commands,
     texture_handle: Handle<Image>,
+    z: f32,
 ) {
     let grid_size = TilemapGridSize {
         x: tile_size.x,
@@ -126,7 +129,36 @@ fn render_layer<T: Copy + Into<u32>>(
         storage: tile_storage,
         texture: TilemapTexture::Single(texture_handle),
         tile_size: *tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
+        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, z),
         ..Default::default()
     });
+}
+
+pub fn spot_lights(
+    sprites: Query<(&TileTextureIndex, &TilePos, &TilemapId)>,
+    tilemaps: Query<(&TilemapGridSize, &TilemapType, &Transform)>,
+    mut commands: Commands,
+) {
+    for (idx, pos, tilemap_id) in sprites.iter() {
+        if idx.0 == (CosmicLegacyTile::AlienTop as u32) {
+            let (grid_size, map_type, tilemap_transform) = tilemaps.get(tilemap_id.0).unwrap();
+            let center = pos.center_in_world(grid_size, map_type);
+            println!("center {center}");
+            println!("tilemap xyz {:?}", tilemap_transform.translation);
+            commands.spawn((
+                PointLight2d {
+                    color: Color::from(GREEN_500),
+                    radius: 40.0,
+                    intensity: 4.0,
+                    falloff: 8.0,
+                    ..default()
+                },
+                Transform::from_xyz(
+                    tilemap_transform.translation.x + center.x,
+                    tilemap_transform.translation.y + (center.y - (grid_size.y / 2.)),
+                    tilemap_transform.translation.z - 1.0,
+                ),
+            ));
+        }
+    }
 }
