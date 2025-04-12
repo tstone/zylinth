@@ -1,4 +1,5 @@
-mod cosmic_legacy_tiles;
+mod cosmic_legacy;
+mod fixer;
 mod floor_plan;
 pub mod functional_tiles;
 mod maze;
