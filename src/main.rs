@@ -1,6 +1,8 @@
+use bevy::color::palettes::tailwind::GRAY_300;
 use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_lit::prelude::{AmbientLight2d, Lighting2dPlugin, Lighting2dSettings};
 use bevy_pancam::{PanCam, PanCamPlugin};
 
 mod layout;
@@ -27,7 +29,10 @@ fn main() {
                     ..Default::default()
                 }),
         )
-        .add_plugins((TilemapPlugin, PanCamPlugin::default()))
+        .add_plugins((
+            TilemapPlugin,
+            Lighting2dPlugin, /* PanCamPlugin::default()) */
+        ))
         .insert_resource(ClearColor(BASE_MAROON))
         .add_systems(Startup, startup)
         .add_systems(PostStartup, zoom)
@@ -36,7 +41,15 @@ fn main() {
 }
 
 fn startup(mut commands: Commands) {
-    commands.spawn((Camera2d, Msaa::Off, PanCam::default()));
+    commands.spawn((
+        Camera2d,
+        Msaa::Off,
+        Lighting2dSettings { ..default() },
+        AmbientLight2d {
+            brightness: 0.1,
+            color: Color::from(GRAY_300),
+        },
+    ));
 }
 
 fn zoom(mut query: Query<&mut OrthographicProjection, With<Camera2d>>) {

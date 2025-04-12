@@ -760,6 +760,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_lit"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "801daa2c2242690f462d9996e05c54b524ed34efff2200c6e9d0e453784a6123"
+dependencies = [
+ "bevy",
+ "bevy_voronoi",
+]
+
+[[package]]
 name = "bevy_log"
 version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1200,6 +1210,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "bevy_voronoi"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "615dcf02c48c059463dfa1506785dc51d60d1f19c7e06f9b6c46df7b5841e31d"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
@@ -4995,6 +5014,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_ecs_tilemap",
+ "bevy_lit",
  "bevy_pancam",
  "itertools 0.14.0",
  "lazy_static",
