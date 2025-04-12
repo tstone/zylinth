@@ -97,6 +97,12 @@ lazy_static! {
         Replacement::from_to(Empty, WallTop, |ctx| {
             ctx.below == Some(WallTop)
         }),
+        Replacement::from_to(WallInnerCornerTopLeft, WallTop, |ctx| {
+            ctx.below == Some(WallTop)
+        }),
+        Replacement::from_to(WallInnerCornerTopRight, WallTop, |ctx| {
+            ctx.below == Some(WallTop)
+        }),
         Replacement::from_to(WallLeft, WallTop, |ctx| {
             ctx.below == Some(WallTop)
         }),
@@ -119,8 +125,14 @@ lazy_static! {
         Replacement::from_to(WallTopLeft, WallInnerCornerBottomRight, |ctx| {
             ctx.below == Some(WallTop) && ctx.right == Some(WallTop)
         }),
+        Replacement::from_to(WallBottomLeft, WallInnerCornerBottomRight, |ctx| {
+            ctx.below == Some(WallTop) && ctx.right == Some(WallTop)
+        }),
         // └ - inner corner top right
         Replacement::from_to(WallTopRight, WallInnerCornerBottomLeft, |ctx| {
+            ctx.below == Some(WallTop) && ctx.left == Some(WallTop)
+        }),
+        Replacement::from_to(WallBottomRight, WallInnerCornerBottomLeft, |ctx| {
             ctx.below == Some(WallTop) && ctx.left == Some(WallTop)
         }),
         // swap top-left & top-right to wall left since it was moved up
@@ -143,86 +155,4 @@ lazy_static! {
             ctx.below == Some(WallTop)
         }),
     ];
-
-    // static ref THIRD_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
-    //     // inner bottom left
-    //     Replacement {
-    //         target: UtilityTile::WallOutlineTopRight,
-    //         on_left: HashSet::from([UtilityTile::WallTop]),
-    //         on_bottom_left: HashSet::from([UtilityTile::WallTop]),
-    //         below: HashSet::from([UtilityTile::WallTop]),
-    //         replacement: UtilityTile::WallOutlineInnerCornerBottomLeft,
-    //         ..Default::default()
-    //     },
-    //     // inner bottom right
-    //     Replacement {
-    //         target: UtilityTile::WallOutlineTopLeft,
-    //         on_right: HashSet::from([UtilityTile::WallTop]),
-    //         on_bottom_right: HashSet::from([UtilityTile::WallTop]),
-    //         below: HashSet::from([UtilityTile::WallTop]),
-    //         replacement: UtilityTile::WallOutlineInnerCornerBottomRight,
-    //         ..Default::default()
-    //     },
-    //     // move caps up a third time to be on top of 2nd wall
-    //     Replacement {
-    //         target: UtilityTile::Empty,
-    //         below: HashSet::from([UtilityTile::WallOutlineTopLeft]),
-    //         above: HashSet::from([UtilityTile::Empty]),
-    //         replacement: UtilityTile::WallOutlineTopLeft,
-    //         ..Default::default()
-    //     },
-    //     Replacement {
-    //         target: UtilityTile::WallOutlineTopLeft,
-    //         above: HashSet::from([UtilityTile::WallOutlineTopLeft]),
-    //         replacement: UtilityTile::WallLeft,
-    //         ..Default::default()
-    //     },
-    //     Replacement {
-    //         target: UtilityTile::Empty,
-    //         below: HashSet::from([UtilityTile::WallOutlineTopRight]),
-    //         above: HashSet::from([UtilityTile::Empty]),
-    //         replacement: UtilityTile::WallOutlineTopRight,
-    //         ..Default::default()
-    //     },
-    //     Replacement {
-    //         target: UtilityTile::WallOutlineTopRight,
-    //         above: HashSet::from([UtilityTile::WallOutlineTopRight]),
-    //         replacement: UtilityTile::WallRight,
-    //         ..Default::default()
-    //     },
-    //     Replacement {
-    //         target: UtilityTile::WallOutlineInnerCornerTopRight,
-    //         below: HashSet::from([UtilityTile::WallTop]),
-    //         replacement: UtilityTile::WallTop,
-    //         ..Default::default()
-    //     },
-    //     // Top cap
-    //     Replacement {
-    //         target: UtilityTile::Empty,
-    //         below: HashSet::from([UtilityTile::WallTop]),
-    //         above: HashSet::from([UtilityTile::Empty]),
-    //         replacement: UtilityTile::WallOutlineTop,
-    //         ..Default::default()
-    //     },
-    //     // inner bottom-right corner
-    //     Replacement {
-    //         target: UtilityTile::WallLeft,
-    //         on_left: HashSet::from([UtilityTile::WallOutlineTop, UtilityTile::WallOutlineTopLeft]),
-    //         above: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallOutlineTopLeft]),
-    //         below: HashSet::from([UtilityTile::WallTop]),
-    //         replacement: UtilityTile::WallOutlineInnerCornerBottomRight,
-    //         ..Default::default()
-    //     },
-    //     // inner bottom-left corner
-    //     Replacement {
-    //         target: UtilityTile::WallRight,
-    //         on_left: HashSet::from([UtilityTile::Floor]),
-    //         above: HashSet::from([UtilityTile::WallRight, UtilityTile::WallOutlineTopRight]),
-    //         below: HashSet::from([UtilityTile::WallTop]),
-    //         replacement: UtilityTile::WallOutlineInnerCornerBottomLeft,
-    //         ..Default::default()
-    //     },
-    // ];
-
-    // TODO: also handle top left/right inner corner to wall top if above wall top
 }
