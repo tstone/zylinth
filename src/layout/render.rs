@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
@@ -44,92 +46,30 @@ pub fn generate_layout(
 
     let width: u32 = tile_grid.len() as u32;
     let height: u32 = tile_grid[0].len() as u32;
+    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
     let map_size = TilemapSize {
         x: width,
         y: height,
     };
 
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
-    let grid_size = tile_size.into();
-    let map_type = TilemapType::default();
+    let texture_handle: Handle<Image> = asset_server.load("CosmicLegacy_PetricakeGames.png");
 
     // Lower layer (walls/floors)
-    let tilemap_entity = commands.spawn_empty().id();
-    let mut tile_storage = TileStorage::empty(map_size);
-
-    for x in 0..width {
-        for y in 0..height {
-            // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
-            let flipped_y = height - y - 1;
-            let tile_pos = TilePos { x, y: flipped_y };
-
-            match tile_grid[x as usize][y as usize] {
-                Some(sprite) => {
-                    let tile_entity = commands
-                        .spawn(TileBundle {
-                            position: tile_pos,
-                            texture_index: TileTextureIndex(sprite.into()),
-                            tilemap_id: TilemapId(tilemap_entity),
-                            ..default()
-                        })
-                        .id();
-                    tile_storage.set(&tile_pos, tile_entity);
-                }
-                _ => {}
-            }
-        }
-    }
-
-    let texture_handle: Handle<Image> = asset_server.load("CosmicLegacy_PetricakeGames.png");
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        map_type,
-        size: map_size,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
-        tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
-        ..Default::default()
-    });
-
+    render_layer(
+        &map_size,
+        &tile_size,
+        tile_grid,
+        &mut commands,
+        texture_handle.clone(),
+    );
     // Upper layer (decorations)
-    let tilemap_entity = commands.spawn_empty().id();
-    let mut tile_storage = TileStorage::empty(map_size);
-
-    for x in 0..width {
-        for y in 0..height {
-            // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
-            let flipped_y = height - y - 1;
-            let tile_pos = TilePos { x, y: flipped_y };
-
-            match decorations[x as usize][y as usize] {
-                Some(sprite) => {
-                    let tile_entity = commands
-                        .spawn(TileBundle {
-                            position: tile_pos,
-                            texture_index: TileTextureIndex(sprite.into()),
-                            tilemap_id: TilemapId(tilemap_entity),
-                            ..default()
-                        })
-                        .id();
-                    tile_storage.set(&tile_pos, tile_entity);
-                }
-                _ => {}
-            }
-        }
-    }
-
-    let texture_handle: Handle<Image> = asset_server.load("CosmicLegacy_PetricakeGames.png");
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        map_type,
-        size: map_size,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
-        tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
-        ..Default::default()
-    });
+    render_layer(
+        &map_size,
+        &tile_size,
+        decorations,
+        &mut commands,
+        texture_handle,
+    );
 
     #[cfg(all(not(feature = "atlas"), feature = "render"))]
     {
@@ -139,4 +79,54 @@ pub fn generate_layout(
             ..Default::default()
         });
     }
+}
+
+fn render_layer<T: Copy + Into<u32>>(
+    map_size: &TilemapSize,
+    tile_size: &TilemapTileSize,
+    tile_grid: Vec<Vec<Option<T>>>,
+    commands: &mut Commands,
+    texture_handle: Handle<Image>,
+) {
+    let grid_size = TilemapGridSize {
+        x: tile_size.x,
+        y: tile_size.y,
+    };
+    let map_type = TilemapType::default();
+    let tilemap_entity = commands.spawn_empty().id();
+    let mut tile_storage = TileStorage::empty(*map_size);
+
+    for x in 0..map_size.x {
+        for y in 0..map_size.y {
+            // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
+            let flipped_y = map_size.y - y - 1;
+            let tile_pos = TilePos { x, y: flipped_y };
+
+            match &tile_grid[x as usize][y as usize] {
+                Some(tile) => {
+                    let tile_entity = commands
+                        .spawn(TileBundle {
+                            position: tile_pos,
+                            texture_index: TileTextureIndex((*tile).into()),
+                            tilemap_id: TilemapId(tilemap_entity),
+                            ..default()
+                        })
+                        .id();
+                    tile_storage.set(&tile_pos, tile_entity);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    commands.entity(tilemap_entity).insert(TilemapBundle {
+        grid_size,
+        map_type,
+        size: *map_size,
+        storage: tile_storage,
+        texture: TilemapTexture::Single(texture_handle),
+        tile_size: *tile_size,
+        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
+        ..Default::default()
+    });
 }

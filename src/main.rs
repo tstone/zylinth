@@ -37,6 +37,7 @@ fn main() {
         .add_systems(Startup, startup)
         .add_systems(PostStartup, zoom)
         .add_systems(Startup, layout::generate_layout)
+        .add_systems(PostStartup, spot_lights)
         .run();
 }
 
@@ -56,3 +57,5 @@ fn zoom(mut query: Query<&mut OrthographicProjection, With<Camera2d>>) {
     let mut projection = query.single_mut();
     projection.scale = 0.3;
 }
+
+fn spot_lights() {}
