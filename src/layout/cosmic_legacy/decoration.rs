@@ -3,7 +3,6 @@ use crate::layout::functional_tiles::UtilityTile;
 use crate::layout::replacement::{Replacement, replace_tiles};
 use lazy_static::lazy_static;
 use rand_chacha::ChaCha8Rng;
-use std::collections::HashSet;
 
 pub fn decorate(
     input: &Vec<Vec<Option<UtilityTile>>>,
@@ -23,11 +22,14 @@ pub fn decorate(
 }
 
 lazy_static! {
-    static ref DECORATIONS: Vec<Replacement<UtilityTile, CosmicLegacyTile>> = vec![Replacement {
-        target: UtilityTile::WallTop,
-        below: HashSet::from([UtilityTile::WallTop]),
-        replacement: CosmicLegacyTile::LockerClosedTop,
-        replacement_below: Some(CosmicLegacyTile::LockerClosedBottom),
-        ..Default::default()
-    },];
+    static ref DECORATIONS: Vec<Replacement<UtilityTile, CosmicLegacyTile>> = vec![
+        // locker
+        Replacement {
+            target: UtilityTile::WallTop,
+            condition: |ctx| { ctx.below == Some(UtilityTile::WallTop) },
+            replacement: CosmicLegacyTile::LockerClosedTop,
+            replacement_below: Some(CosmicLegacyTile::LockerClosedBottom),
+            ..Default::default()
+        },
+    ];
 }

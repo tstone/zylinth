@@ -1,7 +1,6 @@
-use super::{functional_tiles::UtilityTile, replacement::*};
+use super::{functional_tiles::UtilityTile, functional_tiles::UtilityTile::*, replacement::*};
 use lazy_static::lazy_static;
 use rand_chacha::ChaCha8Rng;
-use std::collections::HashSet;
 
 // Sometimes a randomly generated room has features that can't be properly rendered into tiles
 // The "fixer" removes these via constraints
@@ -16,40 +15,20 @@ pub fn floor_fixer(
 lazy_static! {
     static ref FIRST_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
         // one-tile cut bottom
-        Replacement {
-            target: UtilityTile::Empty,
-            above: HashSet::from([UtilityTile::Floor]),
-            on_left: HashSet::from([UtilityTile::Floor]),
-            on_right: HashSet::from([UtilityTile::Floor]),
-            replacement: UtilityTile::Floor,
-            ..Default::default()
-        },
+        Replacement::from_to(Empty, Floor, |ctx| {
+            ctx.above == Some(Floor) && ctx.left == Some(Floor) && ctx.right == Some(Floor)
+        }),
         // one-tile cut left
-        Replacement {
-            target: UtilityTile::Empty,
-            above: HashSet::from([UtilityTile::Floor]),
-            on_right: HashSet::from([UtilityTile::Floor]),
-            below: HashSet::from([UtilityTile::Floor]),
-            replacement: UtilityTile::Floor,
-            ..Default::default()
-        },
+        Replacement::from_to(Empty, Floor, |ctx| {
+            ctx.above == Some(Floor) && ctx.right == Some(Floor) && ctx.below == Some(Floor)
+        }),
         // one-tile cut top
-        Replacement {
-            target: UtilityTile::Empty,
-            on_left: HashSet::from([UtilityTile::Floor]),
-            on_right: HashSet::from([UtilityTile::Floor]),
-            below: HashSet::from([UtilityTile::Floor]),
-            replacement: UtilityTile::Floor,
-            ..Default::default()
-        },
+        Replacement::from_to(Empty, Floor, |ctx| {
+            ctx.left == Some(Floor) && ctx.right == Some(Floor) && ctx.below == Some(Floor)
+        }),
         // one-tile cut right
-        Replacement {
-            target: UtilityTile::Empty,
-            on_left: HashSet::from([UtilityTile::Floor]),
-            above: HashSet::from([UtilityTile::Floor]),
-            below: HashSet::from([UtilityTile::Floor]),
-            replacement: UtilityTile::Floor,
-            ..Default::default()
-        },
+        Replacement::from_to(Empty, Floor, |ctx| {
+            ctx.left == Some(Floor) && ctx.above == Some(Floor) && ctx.below == Some(Floor)
+        }),
     ];
 }

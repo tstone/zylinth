@@ -1,81 +1,44 @@
-use super::{functional_tiles::UtilityTile, replacement::*};
+use super::{functional_tiles::UtilityTile, functional_tiles::UtilityTile::*, replacement::*};
 use lazy_static::lazy_static;
 use rand_chacha::ChaCha8Rng;
-use std::collections::HashSet;
 
 pub fn shadowize(
     grid: Vec<Vec<Option<UtilityTile>>>,
     rng: &mut ChaCha8Rng,
 ) -> Vec<Vec<Option<UtilityTile>>> {
-    let first_pass = replace_tiles(&grid, FIRST_PASS.to_vec(), grid.clone(), rng);
-    replace_tiles(&first_pass, SECOND_PASS.to_vec(), first_pass.clone(), rng)
+    replace_tiles(&grid, FIRST_PASS.to_vec(), grid.clone(), rng)
 }
 
 lazy_static! {
     static ref FIRST_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
         // inner corner
-        Replacement {
-            target: UtilityTile::Floor,
-            above: HashSet::from([UtilityTile::WallTop]),
-            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallTop, UtilityTile::WallOutlineInnerCornerTopLeft]),
-            replacement: UtilityTile::FloorShadowInnerCorner,
-            ..Default::default()
-        },
+        Replacement::from_to(Floor, FloorShadowInnerCorner, |ctx| {
+            ctx.above == Some(WallTop) && (
+                ctx.left == Some(WallLeft) || ctx.left == Some(WallTop) || ctx.left == Some(WallOutlineInnerCornerTopLeft)
+            )
+        }),
         // outer corner
-        Replacement {
-            target: UtilityTile::Floor,
-            above: HashSet::from([UtilityTile::FloorShadowLeft, UtilityTile::FloorShadowInnerCorner]),
-            on_left: HashSet::from([UtilityTile::FloorShadowTop, UtilityTile::FloorShadowInnerCorner]),
-            replacement: UtilityTile::FloorShadowOuterCorner,
-            ..Default::default()
-        },
+        Replacement::from_to(Floor, FloorShadowOuterCorner, |ctx| {
+            (ctx.above == Some(FloorShadowLeft) || ctx.above == Some(FloorShadowInnerCorner)) && (
+                ctx.left == Some(FloorShadowTop) || ctx.left == Some(FloorShadowInnerCorner)
+            )
+        }),
+        // top transition
+        Replacement::from_to(Floor, FloorShadowTopTransition, |ctx| {
+            ctx.above == Some(WallTop) && ctx.left == Some(Floor) && ctx.top_left == Some(Floor)
+        }),
+        // left transition
+        Replacement::from_to(Floor, FloorShadowLeftTransition, |ctx| {
+            // TODO: double check this
+            ctx.left == Some(WallLeft) && ctx.above == Some(Floor) && ctx.top_right == Some(Floor)
+        }),
         // top
-        Replacement {
-            target: UtilityTile::Floor,
-            above: HashSet::from([UtilityTile::WallTop]),
-            replacement: UtilityTile::FloorShadowTop,
-            ..Default::default()
-        },
+        Replacement::from_to(Floor, FloorShadowTop, |ctx| {
+            ctx.above == Some(WallTop)
+        }),
         // left
-        Replacement {
-            target: UtilityTile::Floor,
-            on_left: HashSet::from([UtilityTile::WallLeft, UtilityTile::WallTop, UtilityTile::WallOutlineInnerCornerTopRight]),
-            replacement: UtilityTile::FloorShadowLeft,
-            ..Default::default()
-        }
-    ];
-
-    static ref SECOND_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
-        Replacement {
-            target: UtilityTile::FloorShadowTop,
-            on_right: HashSet::from([
-                UtilityTile::FloorShadowTop,
-                UtilityTile::FloorShadowOuterCorner,
-                UtilityTile::WallTop,
-                UtilityTile::WallLeft,
-                UtilityTile::WallRight,
-            ]),
-            on_left: HashSet::from([UtilityTile::Floor]),
-            replacement: UtilityTile::FloorShadowTopTransition,
-            ..Default::default()
-        },
-        Replacement {
-            target: UtilityTile::FloorShadowLeft,
-            above: HashSet::from([UtilityTile::Floor]),
-            below: HashSet::from([
-                UtilityTile::FloorShadowLeft,
-                UtilityTile::FloorShadowOuterCorner,
-                UtilityTile::WallOutlineInnerCornerBottomLeft,
-                UtilityTile::WallOutlineInnerCornerBottomRight,
-                UtilityTile::WallOutlineInnerCornerTopLeft,
-                UtilityTile::WallOutlineInnerCornerTopRight,
-                UtilityTile::WallTop,
-                UtilityTile::WallRight,
-                UtilityTile::WallLeft,
-                UtilityTile::WallBottom,
-            ]),
-            replacement: UtilityTile::FloorShadowLeftTransition,
-            ..Default::default()
-        },
+        Replacement::from_to(Floor, FloorShadowLeft, |ctx| {
+            ctx.left == Some(WallLeft) || ctx.left == Some(WallTop) || ctx.left == Some(WallOutlineInnerCornerTopRight)
+        }),
     ];
 }
