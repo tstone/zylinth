@@ -97,6 +97,12 @@ lazy_static! {
         Replacement::from_to(Empty, WallTop, |ctx| {
             ctx.below == Some(WallTop)
         }),
+        Replacement::from_to(WallInnerCornerTopLeft, WallTop, |ctx| {
+            ctx.below == Some(WallTop)
+        }),
+        Replacement::from_to(WallInnerCornerTopRight, WallTop, |ctx| {
+            ctx.below == Some(WallTop)
+        }),
         Replacement::from_to(WallLeft, WallTop, |ctx| {
             ctx.below == Some(WallTop)
         }),
@@ -119,8 +125,14 @@ lazy_static! {
         Replacement::from_to(WallTopLeft, WallInnerCornerBottomRight, |ctx| {
             ctx.below == Some(WallTop) && ctx.right == Some(WallTop)
         }),
+        Replacement::from_to(WallBottomLeft, WallInnerCornerBottomRight, |ctx| {
+            ctx.below == Some(WallTop) && ctx.right == Some(WallTop)
+        }),
         // └ - inner corner top right
         Replacement::from_to(WallTopRight, WallInnerCornerBottomLeft, |ctx| {
+            ctx.below == Some(WallTop) && ctx.left == Some(WallTop)
+        }),
+        Replacement::from_to(WallBottomRight, WallInnerCornerBottomLeft, |ctx| {
             ctx.below == Some(WallTop) && ctx.left == Some(WallTop)
         }),
         // swap top-left & top-right to wall left since it was moved up

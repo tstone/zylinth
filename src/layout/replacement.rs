@@ -155,10 +155,10 @@ pub fn replace_tiles<
                                 (Some(br), Some(_)) => dest[x + 1][y + 1] = Some(br),
                                 _ => {}
                             }
-                        }
 
-                        // skip remaining constraints since this one matched
-                        break;
+                            // skip remaining constraints since this one matched
+                            break;
+                        }
                     }
                 }
             }

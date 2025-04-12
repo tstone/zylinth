@@ -30,5 +30,9 @@ lazy_static! {
         Replacement::from_to(Empty, Floor, |ctx| {
             ctx.left == Some(Floor) && ctx.above == Some(Floor) && ctx.below == Some(Floor)
         }),
+        // one-tile vertical gap
+        Replacement::from_to(Empty, Floor, |ctx| {
+            ctx.above == Some(Floor) && ctx.below == Some(Floor) && ctx.left == None && ctx.right == None
+        }),
     ];
 }
