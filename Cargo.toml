@@ -11,7 +11,6 @@ bevy = { version = "0.15.3", features = [
     "bevy_sprite",
     "bevy_dev_tools",
 ] }
-bevy_ecs_tilemap = "0.15.0"
 bevy_lit = "0.6.0"
 bevy_pancam = "0.17.0"
 itertools = "0.14.0"
