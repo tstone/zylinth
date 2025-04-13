@@ -1,6 +1,8 @@
+use bevy::ecs::component::Component;
+
 use super::replacement::Replaceable;
 
-#[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
+#[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
 pub enum UtilityTile {
     #[default]
