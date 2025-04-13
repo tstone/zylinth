@@ -82,6 +82,7 @@ fn render_layer<T: PartialEq + Eq + Copy + Into<u32>>(
     let map_type = TilemapType::default();
     let tilemap_entity = commands.spawn_empty().id();
     let mut tile_storage = TileStorage::empty(*map_size);
+    let mut tiles: Vec<Entity> = Vec::new();
 
     for x in 0..map_size.x {
         for y in 0..map_size.y {
@@ -99,6 +100,7 @@ fn render_layer<T: PartialEq + Eq + Copy + Into<u32>>(
                             ..default()
                         })
                         .id();
+                    tiles.push(tile_entity);
                     tile_storage.set(&tile_pos, tile_entity);
                 }
                 _ => {}
@@ -116,6 +118,9 @@ fn render_layer<T: PartialEq + Eq + Copy + Into<u32>>(
         transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, z),
         ..Default::default()
     });
+    for tile in tiles {
+        commands.entity(tilemap_entity).add_child(tile);
+    }
 }
 
 pub fn spot_lights(
