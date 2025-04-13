@@ -1,7 +1,7 @@
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 use std::fmt::Debug;
-use std::{collections::HashSet, hash::Hash};
+use std::hash::Hash;
 
 pub trait Replaceable {
     fn is_empty(self: Self) -> bool;
@@ -9,7 +9,9 @@ pub trait Replaceable {
 
 #[derive(Debug)]
 pub struct TileContext<T> {
+    #[allow(unused)]
     pub x: usize,
+    #[allow(unused)]
     pub y: usize,
     pub above: Option<T>,
     pub below: Option<T>,
@@ -167,10 +169,7 @@ pub fn replace_tiles<
     dest
 }
 
-fn set_contains_empty<T: PartialEq + Eq + Copy + Replaceable>(set: &HashSet<T>) -> bool {
-    set.iter().find(|i| i.is_empty()).is_some()
-}
-
+#[allow(unused)]
 pub(crate) fn is_edge(x: usize, y: usize, width: usize, height: usize) -> bool {
     x == 0 || y == 0 || x == (width - 1) || y == (height - 1)
 }

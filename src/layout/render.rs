@@ -11,9 +11,7 @@ use crate::layout::{
 };
 
 use super::{
-    cosmic_legacy::CosmicLegacyTile,
-    floor_plan::{l_room, perlin_room},
-    shadowizer::shadowize,
+    cosmic_legacy::CosmicLegacyTile, floor_plan::perlin_room, shadowizer::shadowize,
     wall_wrap::wrap_walls,
 };
 

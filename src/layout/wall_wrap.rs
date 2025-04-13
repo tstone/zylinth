@@ -2,7 +2,6 @@ use super::{
     functional_tiles::UtilityTile, functional_tiles::UtilityTile::*, modifications::padding,
     replacement::*,
 };
-use bevy::log::*;
 use lazy_static::lazy_static;
 use rand_chacha::ChaCha8Rng;
 

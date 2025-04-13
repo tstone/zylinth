@@ -1,5 +1,6 @@
 use super::functional_tiles::UtilityTile;
 
+#[allow(unused)]
 pub fn flip_horz(input: Vec<Vec<Option<UtilityTile>>>) -> Vec<Vec<Option<UtilityTile>>> {
     let width = input.len();
     let mut output: Vec<Vec<Option<UtilityTile>>> = vec![vec![]; width];
