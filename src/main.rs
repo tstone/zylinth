@@ -1,7 +1,6 @@
 use bevy::dev_tools::fps_overlay::*;
 use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
 use character::CharacterPlugin;
@@ -38,7 +37,6 @@ fn main() {
         )
         .add_plugins(FpsOverlayPlugin { ..default() })
         .add_plugins((
-            TilemapPlugin,
             Lighting2dPlugin,
             CharacterPlugin,
             SpriteAnimationPlugin,
