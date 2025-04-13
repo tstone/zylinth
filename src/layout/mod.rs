@@ -7,6 +7,7 @@ mod modifications;
 mod render;
 mod replacement;
 mod shadowizer;
+mod tilemap;
 mod wall_wrap;
 
 pub use render::generate_layout;

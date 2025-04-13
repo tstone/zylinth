@@ -1,23 +1,21 @@
 use bevy::{color::palettes::tailwind::GREEN_500, prelude::*};
-use bevy_ecs_tilemap::prelude::*;
 
 use bevy_lit::prelude::PointLight2d;
 use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
-use crate::layout::{
-    cosmic_legacy::{decorate, utility_to_cosmic},
-    fixer::floor_fixer,
-};
+use crate::layout::{cosmic_legacy::decorate, fixer::floor_fixer, tilemap::render_tilemap};
 
 use super::{
-    cosmic_legacy::CosmicLegacyTile,
-    floor_plan::{l_room, perlin_room},
-    shadowizer::shadowize,
+    cosmic_legacy::CosmicLegacyTile, floor_plan::perlin_room, shadowizer::shadowize,
     wall_wrap::wrap_walls,
 };
 
-pub fn generate_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn generate_layout(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
     // needs fixes:
     // 16931032955856955107 - weird top left corners
     // 4952264456829212967 - shadow left transition is wrong
@@ -32,120 +30,35 @@ pub fn generate_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     let floor = perlin_room(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
-    let background_decorations = decorate(&walled, &mut rng);
-
+    let bg_decorations = decorate(&walled, &mut rng);
     let shadow_walls = shadowize(walled, &mut rng);
-    let tile_grid = utility_to_cosmic(shadow_walls, &mut rng);
 
-    let width: u32 = tile_grid.len() as u32;
-    let height: u32 = tile_grid[0].len() as u32;
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
-    let map_size = TilemapSize {
-        x: width,
-        y: height,
-    };
-
-    let texture_handle: Handle<Image> = asset_server.load("CosmicLegacy_PetricakeGames.png");
-
-    // Lower layer (walls/floors)
-    render_layer(
-        &map_size,
-        &tile_size,
-        tile_grid,
+    render_tilemap(
+        shadow_walls,
+        &CosmicLegacyTile::to_utility_tileset(&asset_server, &mut texture_atlas_layouts),
+        Transform::from_xyz(0.0, 0.0, 1.0),
         &mut commands,
-        texture_handle.clone(),
-        10.0,
+        &mut rng,
     );
-    // Upper layer (decorations)
-    render_layer(
-        &map_size,
-        &tile_size,
-        background_decorations,
+    render_tilemap(
+        bg_decorations,
+        &CosmicLegacyTile::to_cosmic_tileset(&asset_server, &mut texture_atlas_layouts),
+        Transform::from_xyz(0.0, 0.0, 2.0),
         &mut commands,
-        texture_handle,
-        11.0,
+        &mut rng,
     );
 }
 
-fn render_layer<T: PartialEq + Eq + Copy + Into<u32>>(
-    map_size: &TilemapSize,
-    tile_size: &TilemapTileSize,
-    tile_grid: Vec<Vec<Option<T>>>,
-    commands: &mut Commands,
-    texture_handle: Handle<Image>,
-    z: f32,
-) {
-    let grid_size = TilemapGridSize {
-        x: tile_size.x,
-        y: tile_size.y,
-    };
-    let map_type = TilemapType::default();
-    let tilemap_entity = commands.spawn_empty().id();
-    let mut tile_storage = TileStorage::empty(*map_size);
-    let mut tiles: Vec<Entity> = Vec::new();
-
-    for x in 0..map_size.x {
-        for y in 0..map_size.y {
-            // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
-            let flipped_y = map_size.y - y - 1;
-            let tile_pos = TilePos { x, y: flipped_y };
-
-            match &tile_grid[x as usize][y as usize] {
-                Some(tile) => {
-                    let tile_entity = commands
-                        .spawn(TileBundle {
-                            position: tile_pos,
-                            texture_index: TileTextureIndex((*tile).into()),
-                            tilemap_id: TilemapId(tilemap_entity),
-                            ..default()
-                        })
-                        .id();
-                    tiles.push(tile_entity);
-                    tile_storage.set(&tile_pos, tile_entity);
-                }
-                _ => {}
-            }
-        }
-    }
-
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        map_type,
-        size: *map_size,
-        storage: tile_storage,
-        texture: TilemapTexture::Single(texture_handle),
-        tile_size: *tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, z),
-        ..Default::default()
-    });
-    for tile in tiles {
-        commands.entity(tilemap_entity).add_child(tile);
-    }
-}
-
-pub fn spot_lights(
-    sprites: Query<(&TileTextureIndex, &TilePos, &TilemapId)>,
-    tilemaps: Query<(&TilemapGridSize, &TilemapType, &Transform)>,
-    mut commands: Commands,
-) {
-    for (idx, pos, tilemap_id) in sprites.iter() {
-        if idx.0 == (CosmicLegacyTile::AlienTop as u32) {
-            let (grid_size, map_type, tilemap_transform) = tilemaps.get(tilemap_id.0).unwrap();
-            let center = pos.center_in_world(grid_size, map_type);
-            commands.spawn((
-                PointLight2d {
-                    color: Color::from(GREEN_500),
-                    radius: 40.0,
-                    intensity: 4.0,
-                    falloff: 8.0,
-                    ..default()
-                },
-                Transform::from_xyz(
-                    tilemap_transform.translation.x + center.x,
-                    tilemap_transform.translation.y + (center.y - (grid_size.y / 2.)),
-                    tilemap_transform.translation.z - 1.0,
-                ),
-            ));
+pub fn spot_lights(tiles: Query<(&CosmicLegacyTile, Entity)>, mut commands: Commands) {
+    for (tile, entity) in tiles.iter() {
+        if *tile == CosmicLegacyTile::AlienTop {
+            commands.entity(entity).insert((PointLight2d {
+                color: Color::from(GREEN_500),
+                radius: 40.0,
+                intensity: 4.0,
+                falloff: 8.0,
+                ..default()
+            },));
         }
     }
 }

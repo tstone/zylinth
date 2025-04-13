@@ -5,7 +5,7 @@ use rand::seq::IteratorRandom;
 /// A maze describes a graph of nodes and their interconnections.
 /// This is used to connect rooms.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
+#[allow(unused)]
 pub struct Maze {
     pub width: u16,
     pub height: u16,
@@ -15,6 +15,7 @@ pub struct Maze {
 }
 
 impl Maze {
+    #[allow(unused)]
     pub fn generate(width: u16, height: u16) -> Maze {
         let mut connected_nodes = HashSet::<u32>::new();
         let mut unconnected_nodes = HashSet::<u32>::new();
@@ -117,6 +118,7 @@ impl Maze {
         return possible_edges;
     }
 
+    #[allow(unused)]
     pub fn node_to_grid_coords(node: u32, width: u32) -> (u32, u32) {
         let y = node / width;
         let x = node - (y * width);
@@ -182,7 +184,6 @@ mod tests {
     // TODO: fix
     #[test]
     fn node_id_to_grid_coords() {
-        let maze = Maze::generate(3, 3);
         let coords1 = Maze::node_to_grid_coords(2, 3);
         assert_eq!(coords1, (2, 0));
 

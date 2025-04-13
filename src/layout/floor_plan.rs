@@ -1,11 +1,9 @@
-use super::{
-    functional_tiles::UtilityTile,
-    replacement::{get_tile_above, is_edge},
-};
+use super::functional_tiles::UtilityTile;
 use noise::{NoiseFn, Perlin};
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
+#[allow(unused)]
 pub fn rect_room(width: usize, height: usize) -> Vec<Vec<Option<UtilityTile>>> {
     let mut grid: Vec<Vec<Option<UtilityTile>>> = vec![vec![None; height]; width];
     for x in 0..grid.len() {
@@ -16,6 +14,7 @@ pub fn rect_room(width: usize, height: usize) -> Vec<Vec<Option<UtilityTile>>> {
     grid
 }
 
+#[allow(unused)]
 pub fn l_room(
     width: usize,
     height: usize,
@@ -33,6 +32,7 @@ pub fn l_room(
     grid
 }
 
+#[allow(unused)]
 pub fn perlin_room(
     width: usize,
     height: usize,

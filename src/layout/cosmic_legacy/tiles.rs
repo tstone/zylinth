@@ -1,6 +1,10 @@
+use super::utility_to_cosmic;
+use crate::layout::functional_tiles::UtilityTile;
 use crate::layout::replacement::Replaceable;
+use crate::layout::tilemap::Tileset;
+use bevy::prelude::*;
 
-#[derive(Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
+#[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
 pub enum CosmicLegacyTile {
     // Row 1
@@ -134,11 +138,59 @@ impl CosmicLegacyTile {
             Self::FloorScuffed,
         ]
     }
+
+    pub fn to_utility_tileset(
+        asset_server: &Res<AssetServer>,
+        texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
+    ) -> Tileset<UtilityTile> {
+        let atlas_layout = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
+            UVec2::splat(16),
+            17,
+            8,
+            None,
+            None,
+        ));
+
+        Tileset {
+            tile_width: 16,
+            tile_height: 16,
+            image: asset_server.load("CosmicLegacy_PetricakeGames.png"),
+            layout: atlas_layout,
+            render: |utility, rng| utility_to_cosmic(utility, rng).into(),
+        }
+    }
+
+    pub fn to_cosmic_tileset(
+        asset_server: &Res<AssetServer>,
+        texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
+    ) -> Tileset<CosmicLegacyTile> {
+        let atlas_layout = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
+            UVec2::splat(16),
+            17,
+            8,
+            None,
+            None,
+        ));
+
+        Tileset {
+            tile_width: 16,
+            tile_height: 16,
+            image: asset_server.load("CosmicLegacy_PetricakeGames.png"),
+            layout: atlas_layout,
+            render: |t, rng| t.into(),
+        }
+    }
 }
 
 impl Into<u32> for CosmicLegacyTile {
     fn into(self) -> u32 {
         self as u32
+    }
+}
+
+impl Into<usize> for CosmicLegacyTile {
+    fn into(self) -> usize {
+        self as usize
     }
 }
 
