@@ -1,12 +1,18 @@
-use bevy::color::palettes::tailwind::GRAY_300;
+use bevy::dev_tools::fps_overlay::*;
 use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use bevy_lit::prelude::{AmbientLight2d, Lighting2dPlugin, Lighting2dSettings};
-use bevy_pancam::{PanCam, PanCamPlugin};
-use layout::spot_lights;
+use bevy_lit::prelude::Lighting2dPlugin;
+use camera::CameraSetup;
+use character::CharacterPlugin;
+use player::PlayerPlugin;
+use sprite_animation::SpriteAnimationPlugin;
 
+mod camera;
+mod character;
 mod layout;
+mod player;
+mod sprite_animation;
 
 const BASE_MAROON: Color = Color::hsl(281., 0.51, 0.17);
 
@@ -30,29 +36,17 @@ fn main() {
                     ..Default::default()
                 }),
         )
-        .add_plugins((TilemapPlugin, Lighting2dPlugin, PanCamPlugin))
+        .add_plugins(FpsOverlayPlugin { ..default() })
+        .add_plugins((
+            TilemapPlugin,
+            Lighting2dPlugin,
+            CharacterPlugin,
+            SpriteAnimationPlugin,
+            PlayerPlugin,
+        ))
+        .add_plugins(CameraSetup)
         .insert_resource(ClearColor(BASE_MAROON))
-        .add_systems(Startup, startup)
-        .add_systems(PostStartup, zoom)
         .add_systems(Startup, layout::generate_layout)
-        .add_systems(PostStartup, spot_lights)
+        .add_systems(PostStartup, layout::spot_lights)
         .run();
-}
-
-fn startup(mut commands: Commands) {
-    commands.spawn((
-        Camera2d,
-        Msaa::Off,
-        PanCam::default(),
-        Lighting2dSettings { ..default() },
-        AmbientLight2d {
-            brightness: 0.2,
-            color: Color::from(GRAY_300),
-        },
-    ));
-}
-
-fn zoom(mut query: Query<&mut OrthographicProjection, With<Camera2d>>) {
-    let mut projection = query.single_mut();
-    projection.scale = 0.3;
 }
