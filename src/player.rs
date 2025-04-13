@@ -1,29 +1,32 @@
 use bevy::prelude::*;
 use bevy_lit::prelude::PointLight2d;
 
+use crate::character::Velocity;
 use crate::sprite_animation::SpriteAnimConfig;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_player);
+        app.add_systems(Startup, spawn_player);
+        app.add_systems(Update, player_keyboard_input);
     }
 }
 
 #[derive(Component)]
-struct Player;
+pub struct Player;
 
-fn setup_player(
+fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 16, 1, None, None);
-    let mut anim_config = SpriteAnimConfig::new(0, 15, 11);
+    let anim_config = SpriteAnimConfig::new(0, 15, 11);
 
     commands.spawn((
         Player,
+        Velocity::starting_speed(66.0),
         Sprite {
             image: asset_server.load("D2.png"),
             texture_atlas: Some(TextureAtlas {
@@ -44,4 +47,40 @@ fn setup_player(
     ));
 }
 
-// TODO: light to follow player
+fn player_keyboard_input(
+    input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut Velocity, &mut Sprite), With<Player>>,
+) {
+    for (mut vel, mut sprite) in query.iter_mut() {
+        // X
+        if input.just_pressed(KeyCode::ArrowLeft) || input.just_pressed(KeyCode::KeyA) {
+            vel.x = -1.0;
+        } else if input.just_released(KeyCode::ArrowLeft) || input.just_released(KeyCode::KeyA) {
+            vel.x = 0.0;
+        }
+        if input.just_pressed(KeyCode::ArrowRight) || input.just_pressed(KeyCode::KeyD) {
+            vel.x = 1.0;
+        } else if input.just_released(KeyCode::ArrowRight) || input.just_released(KeyCode::KeyD) {
+            vel.x = 0.0;
+        }
+
+        // Y
+        if input.just_pressed(KeyCode::ArrowUp) || input.just_pressed(KeyCode::KeyW) {
+            vel.y = 1.0;
+        } else if input.just_released(KeyCode::ArrowUp) || input.just_released(KeyCode::KeyW) {
+            vel.y = 0.0;
+        }
+        if input.just_pressed(KeyCode::ArrowDown) || input.just_pressed(KeyCode::KeyS) {
+            vel.y = -1.0;
+        } else if input.just_released(KeyCode::ArrowDown) || input.just_released(KeyCode::KeyS) {
+            vel.y = 0.0;
+        }
+
+        // Change facing of playler sprite
+        if vel.x > 0.0 {
+            sprite.flip_x = false;
+        } else if vel.x < 0.0 {
+            sprite.flip_x = true;
+        }
+    }
+}

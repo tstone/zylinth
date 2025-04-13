@@ -17,23 +17,22 @@ use super::{
     wall_wrap::wrap_walls,
 };
 
-struct DemoRoom;
-
 pub fn generate_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     // needs fixes:
     // 16931032955856955107 - weird top left corners
+    // 4952264456829212967 - shadow left transition is wrong
     let seed = random_range(0..u64::MAX);
-    println!("Using seed: {seed}");
+    debug!("Using seed: {seed}");
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     // TODO: randomize size a little
-    let width: u32 = 14;
+    let width: u32 = 20;
     let height: u32 = 14;
 
     let floor = perlin_room(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
-    let decorations = decorate(&walled, &mut rng);
+    let background_decorations = decorate(&walled, &mut rng);
 
     let shadow_walls = shadowize(walled, &mut rng);
     let tile_grid = utility_to_cosmic(shadow_walls, &mut rng);
@@ -61,10 +60,10 @@ pub fn generate_layout(mut commands: Commands, asset_server: Res<AssetServer>) {
     render_layer(
         &map_size,
         &tile_size,
-        decorations,
+        background_decorations,
         &mut commands,
         texture_handle,
-        30.0,
+        11.0,
     );
 }
 
@@ -128,8 +127,6 @@ pub fn spot_lights(
         if idx.0 == (CosmicLegacyTile::AlienTop as u32) {
             let (grid_size, map_type, tilemap_transform) = tilemaps.get(tilemap_id.0).unwrap();
             let center = pos.center_in_world(grid_size, map_type);
-            println!("center {center}");
-            println!("tilemap xyz {:?}", tilemap_transform.translation);
             commands.spawn((
                 PointLight2d {
                     color: Color::from(GREEN_500),

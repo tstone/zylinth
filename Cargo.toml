@@ -9,6 +9,7 @@ bevy = { version = "0.15.3", features = [
     "bevy_render",
     "bevy_asset",
     "bevy_sprite",
+    "bevy_dev_tools",
 ] }
 bevy_ecs_tilemap = "0.15.0"
 bevy_lit = "0.6.0"

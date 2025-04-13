@@ -1,15 +1,18 @@
+use bevy::dev_tools::fps_overlay::*;
 use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
-use bevy_pancam::PanCamPlugin;
+use camera::CameraSetup;
+use character::CharacterPlugin;
 use player::PlayerPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
+mod camera;
+mod character;
 mod layout;
 mod player;
 mod sprite_animation;
-mod startup;
 
 const BASE_MAROON: Color = Color::hsl(281., 0.51, 0.17);
 
@@ -33,16 +36,16 @@ fn main() {
                     ..Default::default()
                 }),
         )
+        .add_plugins(FpsOverlayPlugin { ..default() })
         .add_plugins((
             TilemapPlugin,
             Lighting2dPlugin,
-            PanCamPlugin,
+            CharacterPlugin,
             SpriteAnimationPlugin,
             PlayerPlugin,
         ))
+        .add_plugins(CameraSetup)
         .insert_resource(ClearColor(BASE_MAROON))
-        .add_systems(Startup, startup::camera)
-        .add_systems(PostStartup, startup::zoom)
         .add_systems(Startup, layout::generate_layout)
         .add_systems(PostStartup, layout::spot_lights)
         .run();
