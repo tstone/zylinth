@@ -4,6 +4,7 @@ use bevy_lit::prelude::PointLight2d;
 use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
+use crate::layout::floor_plan::perlin_dog_bone;
 use crate::layout::{cosmic_legacy::decorate, fixer::floor_fixer, tilemap::render_tilemap};
 
 use super::{
@@ -16,19 +17,27 @@ pub fn generate_layout(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
+    // TODO: make room type generates
+    // - biology lab
+    // - hydroponics lab
+    // - library
+    // - sewers
+    // - office
+
     // needs fixes:
     // 16931032955856955107 - weird top left corners
     // 4952264456829212967 - shadow left transition is wrong
     // 12594041454820947593 don't keep 1 tile islands
+
     let seed = random_range(0..u64::MAX);
     debug!("Using seed: {seed}");
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     // TODO: randomize size a little
-    let width: u32 = 20;
-    let height: u32 = 14;
+    let width: u32 = 40;
+    let height: u32 = 12;
 
-    let floor = perlin_room(width as usize, height as usize, &mut rng);
+    let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
     let bg_decorations = decorate(&walled, &mut rng);

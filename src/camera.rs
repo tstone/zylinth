@@ -28,7 +28,7 @@ fn camera(mut commands: Commands) {
 
 fn zoom(mut query: Query<&mut OrthographicProjection, With<Camera2d>>) {
     let mut projection = query.single_mut();
-    projection.scale = 0.3;
+    projection.scale = 0.25;
 }
 
 /// Force the camera to follow the player (at least in certain game modes)

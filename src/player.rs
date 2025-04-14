@@ -32,6 +32,7 @@ fn spawn_player(
                 layout: texture_atlas_layouts.add(layout),
                 index: anim_config.first_sprite_index,
             }),
+            custom_size: Some(Vec2::new(24.0, 24.0)),
             ..default()
         },
         anim_config,
@@ -45,7 +46,7 @@ fn spawn_player(
         // starting position
         Transform::from_xyz(120., -120., 20.),
         RigidBody::Dynamic,
-        Collider::circle(14.0),
+        Collider::circle(12.0),
         TranslationExtrapolation,
         LockedAxes::ROTATION_LOCKED,
         LinearDamping(2.75),

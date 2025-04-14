@@ -1,7 +1,9 @@
 use super::functional_tiles::UtilityTile;
+use bevy::prelude::*;
 use noise::{NoiseFn, Perlin};
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
+use std::cmp;
 
 #[allow(unused)]
 pub fn rect_room(width: usize, height: usize) -> Vec<Vec<Option<UtilityTile>>> {
@@ -65,4 +67,46 @@ pub fn perlin_room(
 
     // TODO: add constraint for single block missing
     // TODO: implement culling of islands
+}
+
+pub fn perlin_dog_bone(
+    width: usize,
+    height: usize,
+    rng: &mut ChaCha8Rng,
+) -> Vec<Vec<Option<UtilityTile>>> {
+    let fortyfive_width = cmp::max(1, (width as f32 * 0.45).floor() as usize);
+    debug!("45% width {fortyfive_width}");
+
+    let left = perlin_room(fortyfive_width, height, rng);
+    let right = perlin_room(fortyfive_width, height, rng);
+
+    let mut combined: Vec<Vec<Option<UtilityTile>>> = vec![vec![None; height]; width];
+    // copy in left room
+    for x in 0..fortyfive_width {
+        for y in 0..height {
+            combined[x][y] = left[x][y];
+        }
+    }
+    // copy in right room
+    let rem_width = width - fortyfive_width;
+    for x in rem_width..width {
+        let offset_x = x - rem_width;
+        for y in 0..height {
+            combined[x][y] = right[offset_x][y];
+        }
+    }
+    // generate hall
+    let hall_x = cmp::max(0, (fortyfive_width as f32 * 0.5).floor() as usize);
+    let hall_y = cmp::max(0, (height as f32 * 0.25).floor() as usize);
+    let hall_height = cmp::max(3, (height as f32 * 0.4).floor() as usize);
+    let hall_width = hall_x * 3;
+    debug!("hall: x {hall_x},  y {hall_y}, width {hall_width}, height {hall_height}");
+
+    for x in hall_x..(hall_width + hall_x) {
+        for y in hall_y..(hall_height + hall_y) {
+            combined[x][y] = Some(UtilityTile::Floor);
+        }
+    }
+
+    combined
 }
