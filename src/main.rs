@@ -3,13 +3,14 @@ use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
-use character::CharacterPlugin;
+use movement::MovementPlugin;
 use player::PlayerPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
 mod camera;
-mod character;
+pub mod collision;
 mod layout;
+mod movement;
 mod player;
 mod sprite_animation;
 
@@ -36,15 +37,11 @@ fn main() {
                 }),
         )
         .add_plugins(FpsOverlayPlugin { ..default() })
-        .add_plugins((
-            Lighting2dPlugin,
-            CharacterPlugin,
-            SpriteAnimationPlugin,
-            PlayerPlugin,
-        ))
+        .add_plugins((Lighting2dPlugin, MovementPlugin, SpriteAnimationPlugin))
         .add_plugins(CameraSetup)
         .insert_resource(ClearColor(BASE_MAROON))
         .add_systems(Startup, layout::generate_layout)
         .add_systems(PostStartup, layout::spot_lights)
+        .add_plugins(PlayerPlugin)
         .run();
 }

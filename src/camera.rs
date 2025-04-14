@@ -20,7 +20,7 @@ fn camera(mut commands: Commands) {
         Msaa::Off,
         Lighting2dSettings { ..default() },
         AmbientLight2d {
-            brightness: 0.2,
+            brightness: 0.175,
             color: Color::from(GRAY_300),
         },
     ));

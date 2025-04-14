@@ -4,6 +4,7 @@ use bevy_lit::prelude::PointLight2d;
 use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
+use crate::layout::impassable::to_impassable;
 use crate::layout::{cosmic_legacy::decorate, fixer::floor_fixer, tilemap::render_tilemap};
 
 use super::{
@@ -19,6 +20,7 @@ pub fn generate_layout(
     // needs fixes:
     // 16931032955856955107 - weird top left corners
     // 4952264456829212967 - shadow left transition is wrong
+    // 12594041454820947593 don't keep 1 tile islands
     let seed = random_range(0..u64::MAX);
     debug!("Using seed: {seed}");
     let mut rng = ChaCha8Rng::seed_from_u64(seed);

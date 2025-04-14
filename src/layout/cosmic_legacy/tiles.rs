@@ -1,5 +1,6 @@
 use super::utility_to_cosmic;
 use crate::layout::functional_tiles::UtilityTile;
+use crate::layout::impassable::IsImpassable;
 use crate::layout::replacement::Replaceable;
 use crate::layout::tilemap::Tileset;
 use bevy::prelude::*;
@@ -197,5 +198,14 @@ impl Into<usize> for CosmicLegacyTile {
 impl Replaceable for CosmicLegacyTile {
     fn is_empty(self: Self) -> bool {
         false
+    }
+}
+
+impl IsImpassable for CosmicLegacyTile {
+    fn is_impassable(&self) -> bool {
+        *self == Self::AlienBottom
+            || *self == Self::BookcaseBottom
+            || *self == Self::LockerOpenBottom
+            || *self == Self::LockerClosedBottom
     }
 }

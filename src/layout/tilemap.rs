@@ -4,6 +4,9 @@ use bevy::prelude::*;
 
 use rand_chacha::ChaCha8Rng;
 
+use super::Impassable;
+use super::impassable::{IsImpassable, to_impassable};
+
 #[derive(Clone, Debug)]
 pub struct Tileset<T> {
     pub render: fn(T, &mut ChaCha8Rng) -> usize,
@@ -13,19 +16,34 @@ pub struct Tileset<T> {
     pub layout: Handle<TextureAtlasLayout>,
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct Tile {
-    x: u32,
-    y: u32,
+    grid_x: u32,
+    grid_y: u32,
+    width: u8,
+    height: u8,
+    tile_index: usize,
 }
 
-#[derive(Component)]
+impl Tile {
+    pub fn into_rect(&self, transform: &GlobalTransform) -> Rect {
+        let translation = transform.translation();
+        Rect::new(
+            translation.x,
+            translation.y,
+            translation.x + self.width as f32,
+            translation.y + self.height as f32,
+        )
+    }
+}
+
+#[derive(Component, Debug)]
 pub struct Tilemap {
     width: u32,
     height: u32,
 }
 
-pub fn render_tilemap<T: Component + Copy + Clone>(
+pub fn render_tilemap<T: Component + Copy + Clone + IsImpassable>(
     tiles: Vec<Vec<Option<T>>>,
     tileset: &Tileset<T>,
     transform: Transform,
@@ -38,18 +56,25 @@ pub fn render_tilemap<T: Component + Copy + Clone>(
         .spawn((Tilemap { width, height }, transform, Visibility::Visible))
         .id();
     let mut tile_entities: Vec<Entity> = Vec::new();
+    let tiles = to_impassable(tiles);
 
     for x in 0..width {
         for y in 0..height {
-            if let Some(t) = tiles[x as usize][y as usize] {
+            if let Some((t, impassable)) = tiles[x as usize][y as usize] {
                 let tile_index = (tileset.render)(t, rng);
                 let offset_x = x as f32 * tileset.tile_width as f32;
                 let offset_y = y as f32 * tileset.tile_height as f32;
                 // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
                 let flipped_y = width as f32 - offset_y - 1.0;
-                let tile_entity = commands.spawn((
+                let mut tile_entity = commands.spawn((
                     t,
-                    Tile { x, y },
+                    Tile {
+                        grid_x: x,
+                        grid_y: y,
+                        width: tileset.tile_width,
+                        height: tileset.tile_height,
+                        tile_index,
+                    },
                     Sprite {
                         image: tileset.image.clone(),
                         texture_atlas: Some(TextureAtlas {
@@ -60,6 +85,11 @@ pub fn render_tilemap<T: Component + Copy + Clone>(
                     },
                     Transform::from_xyz(offset_x, flipped_y, 0.0),
                 ));
+
+                if impassable {
+                    tile_entity.insert(Impassable);
+                }
+
                 tile_entities.push(tile_entity.id());
             }
         }
