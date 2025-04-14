@@ -9,7 +9,17 @@ pub fn floor_fixer(
     grid: Vec<Vec<Option<UtilityTile>>>,
     rng: &mut ChaCha8Rng,
 ) -> Vec<Vec<Option<UtilityTile>>> {
-    replace_tiles(&grid, FIRST_PASS.to_vec(), grid.clone(), rng)
+    let mut fixed = replace_tiles(&grid, FIRST_PASS.to_vec(), grid.clone(), rng);
+
+    for x in 0..fixed.len() {
+        for y in 0..fixed[x].len() {
+            if fixed[x][y] == Some(Empty) {
+                fixed[x][y] = None;
+            }
+        }
+    }
+
+    fixed
 }
 
 lazy_static! {
@@ -32,19 +42,19 @@ lazy_static! {
         }),
         // one tile wart top
         Replacement::from_to(Floor, Empty, |ctx| {
-            ctx.left == Some(Empty) && ctx.above == Some(Empty) && ctx.right == Some(Empty)
+            ctx.left == None && ctx.above == None && ctx.right == None
         }),
         // one tile wart bottom
         Replacement::from_to(Floor, Empty, |ctx| {
-            ctx.left == Some(Empty) && ctx.below == Some(Empty) && ctx.right == Some(Empty)
+            ctx.left == None && ctx.below == None && ctx.right == None
         }),
         // one tile wart left
         Replacement::from_to(Floor, Empty, |ctx| {
-            ctx.left == Some(Empty) && ctx.above == Some(Empty) && ctx.below == Some(Empty)
+            ctx.left == None && ctx.above == None && ctx.below == None
         }),
         // one tile wart right
         Replacement::from_to(Floor, Empty, |ctx| {
-            ctx.right == Some(Empty) && ctx.above == Some(Empty) && ctx.below == Some(Empty)
+            ctx.right == None && ctx.above == None && ctx.below == None
         }),
         // one tile vertical gap
         Replacement::from_to(Empty, Floor, |ctx| {

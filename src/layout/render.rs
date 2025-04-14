@@ -21,35 +21,40 @@ pub fn generate_layout(
     // - sewers
     // - office
 
+    // FIX: 17750124620171070706 -- incorrect bottom left corner
+    // TODO: use perlin noise or voronoi to slightly tint the floor to give large spaces variety
+    // Drone type 1 uses scanning and vaporizes targets
+    // Drone type 2 has x-ray vision but leaves targets
+
     let seed = random_range(0..u64::MAX);
     debug!("Using seed: {seed}");
-    let mut rng = ChaCha8Rng::seed_from_u64(4952264456829212967);
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     // TODO: randomize size a little
     let width: u32 = 40;
     let height: u32 = 12;
 
-    let floor = perlin_room(width as usize, height as usize, &mut rng);
-    // let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
+    // let floor = perlin_room(width as usize, height as usize, &mut rng);
+    let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
-    // let bg_decorations = decorate(&walled, &mut rng);
-    // let shadow_walls = shadowize(walled, &mut rng);
+    let bg_decorations = decorate(&walled, &mut rng);
+    let shadow_walls = shadowize(walled, &mut rng);
 
     render_tilemap(
-        walled,
+        shadow_walls,
         &CosmicLegacyTile::to_utility_tileset(&asset_server, &mut texture_atlas_layouts),
         Transform::from_xyz(0.0, 0.0, -1.0),
         &mut commands,
         &mut rng,
     );
-    // render_tilemap(
-    //     bg_decorations,
-    //     &CosmicLegacyTile::to_cosmic_tileset(&asset_server, &mut texture_atlas_layouts),
-    //     Transform::from_xyz(0.0, 0.0, 2.0),
-    //     &mut commands,
-    //     &mut rng,
-    // );
+    render_tilemap(
+        bg_decorations,
+        &CosmicLegacyTile::to_cosmic_tileset(&asset_server, &mut texture_atlas_layouts),
+        Transform::from_xyz(0.0, 0.0, 2.0),
+        &mut commands,
+        &mut rng,
+    );
 }
 
 pub fn spot_lights(tiles: Query<(&CosmicLegacyTile, Entity)>, mut commands: Commands) {

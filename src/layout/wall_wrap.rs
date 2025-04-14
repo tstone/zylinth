@@ -112,27 +112,6 @@ lazy_static! {
 
     // third pass wraps the wall in the top most layer
     static ref THIRD_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
-        // ┐ - remove this case to avoid it looking weird
-        Replacement {
-            target: WallInnerCornerTopRight,
-            replacement: WallTopUpper,
-            replacement_left: Some(WallInnerCornerBottomRight),
-            condition: |ctx| {
-                ctx.below == Some(WallTopUpper) && ctx.above == Some(Floor)
-            },
-            ..Default::default()
-        },
-        // ┌ - remove this case to avoid it looking weird
-        Replacement {
-            target: WallInnerCornerTopLeft,
-            replacement: WallTopUpper,
-            replacement_right: Some(WallInnerCornerBottomLeft),
-            condition: |ctx| {
-                ctx.below == Some(WallTopUpper) && ctx.above == Some(Floor)
-            },
-            ..Default::default()
-        },
-
         // move top-left outer corner up
         Replacement::from_to(Empty, WallTopLeft, |ctx| {
             ctx.below == Some(WallTopLeft)
