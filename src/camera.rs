@@ -1,4 +1,4 @@
-use bevy::color::palettes::tailwind::GRAY_300;
+use bevy::color::palettes::tailwind::GRAY_200;
 use bevy::prelude::*;
 use bevy_lit::prelude::{AmbientLight2d, Lighting2dSettings};
 
@@ -20,8 +20,8 @@ fn camera(mut commands: Commands) {
         Msaa::Off,
         Lighting2dSettings { ..default() },
         AmbientLight2d {
-            brightness: 0.2,
-            color: Color::from(GRAY_300),
+            brightness: 0.15,
+            color: Color::from(GRAY_200),
         },
     ));
 }

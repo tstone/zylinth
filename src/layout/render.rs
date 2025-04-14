@@ -19,6 +19,7 @@ pub fn generate_layout(
     // needs fixes:
     // 16931032955856955107 - weird top left corners
     // 4952264456829212967 - shadow left transition is wrong
+    // 12594041454820947593 don't keep 1 tile islands
     let seed = random_range(0..u64::MAX);
     debug!("Using seed: {seed}");
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
@@ -36,7 +37,7 @@ pub fn generate_layout(
     render_tilemap(
         shadow_walls,
         &CosmicLegacyTile::to_utility_tileset(&asset_server, &mut texture_atlas_layouts),
-        Transform::from_xyz(0.0, 0.0, 1.0),
+        Transform::from_xyz(0.0, 0.0, -1.0),
         &mut commands,
         &mut rng,
     );

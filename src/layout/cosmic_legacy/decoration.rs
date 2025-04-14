@@ -26,12 +26,12 @@ lazy_static! {
     static ref VERT_DECORATIONS: Vec<Replacement<UtilityTile, CosmicLegacyTile>> = vec![
         // locker
         Replacement {
-            target: UtilityTile::WallTop,
+            target: UtilityTile::WallTopLower,
             replacement: CosmicLegacyTile::LockerClosedTop,
             replacement_below: Some(CosmicLegacyTile::LockerClosedBottom),
             condition: |ctx| {
                 ctx.below == Some(Floor) && (
-                    ctx.left == Some(WallTop) && ctx.right == Some(WallTop)
+                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
                 )
             },
             chance: 0.2,
@@ -39,12 +39,12 @@ lazy_static! {
         },
         // alien
         Replacement {
-            target: UtilityTile::WallTop,
+            target: UtilityTile::WallTopLower,
             replacement: CosmicLegacyTile::AlienTop,
             replacement_below: Some(CosmicLegacyTile::AlienBottom),
             condition: |ctx| {
                 ctx.below == Some(Floor) && (
-                    ctx.left == Some(WallTop) && ctx.right == Some(WallTop)
+                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
                 )
             },
             chance: 0.2,
@@ -52,12 +52,12 @@ lazy_static! {
         },
         // bookshelf
         Replacement {
-            target: UtilityTile::WallTop,
+            target: UtilityTile::WallTopLower,
             replacement: CosmicLegacyTile::BookcaseTop,
             replacement_below: Some(CosmicLegacyTile::BookcaseBottom),
             condition: |ctx| {
                 ctx.below == Some(Floor) && (
-                    ctx.left == Some(WallTop) && ctx.right == Some(WallTop)
+                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
                 )
             },
             chance: 0.2,

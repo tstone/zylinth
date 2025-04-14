@@ -8,7 +8,7 @@ use super::CosmicLegacyTile;
 /// Translate the generic utility tiles into Cosmic Legacy tiles
 pub fn utility_to_cosmic(utility: UtilityTile, rng: &mut ChaCha8Rng) -> CosmicLegacyTile {
     match utility {
-        UtilityTile::WallTop => {
+        UtilityTile::WallTopLower | UtilityTile::WallTopUpper => {
             if rand::random_bool(0.9) {
                 CosmicLegacyTile::Wall
             } else {
