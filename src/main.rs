@@ -1,14 +1,13 @@
+use avian2d::prelude::*;
 use bevy::dev_tools::fps_overlay::*;
 use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
-use character::CharacterPlugin;
 use player::PlayerPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
 mod camera;
-mod character;
 mod layout;
 mod player;
 mod sprite_animation;
@@ -36,15 +35,12 @@ fn main() {
                 }),
         )
         .add_plugins(FpsOverlayPlugin { ..default() })
-        .add_plugins((
-            Lighting2dPlugin,
-            CharacterPlugin,
-            SpriteAnimationPlugin,
-            PlayerPlugin,
-        ))
-        .add_plugins(CameraSetup)
+        .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
+        .add_plugins(PhysicsPlugins::default())
+        // .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_MAROON))
         .add_systems(Startup, layout::generate_layout)
         .add_systems(PostStartup, layout::spot_lights)
+        .add_plugins(PlayerPlugin)
         .run();
 }

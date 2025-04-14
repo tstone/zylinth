@@ -2,6 +2,7 @@ mod cosmic_legacy;
 mod fixer;
 mod floor_plan;
 pub mod functional_tiles;
+mod impassable;
 mod maze;
 mod modifications;
 mod render;
