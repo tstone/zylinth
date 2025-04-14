@@ -112,6 +112,27 @@ lazy_static! {
 
     // third pass wraps the wall in the top most layer
     static ref THIRD_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
+        // ┐ - remove this case to avoid it looking weird
+        Replacement {
+            target: WallInnerCornerTopRight,
+            replacement: WallTopUpper,
+            replacement_left: Some(WallInnerCornerBottomRight),
+            condition: |ctx| {
+                ctx.below == Some(WallTopUpper) && ctx.above == Some(Floor)
+            },
+            ..Default::default()
+        },
+        // ┌ - remove this case to avoid it looking weird
+        Replacement {
+            target: WallInnerCornerTopLeft,
+            replacement: WallTopUpper,
+            replacement_right: Some(WallInnerCornerBottomLeft),
+            condition: |ctx| {
+                ctx.below == Some(WallTopUpper) && ctx.above == Some(Floor)
+            },
+            ..Default::default()
+        },
+
         // move top-left outer corner up
         Replacement::from_to(Empty, WallTopLeft, |ctx| {
             ctx.below == Some(WallTopLeft)
@@ -142,11 +163,11 @@ lazy_static! {
         // to inner corners
         // ┘ - inner corner top left
         Replacement::from_to(WallLeft, WallInnerCornerBottomRight, |ctx| {
-            ctx.below == Some(WallTopUpper) && ctx.bottom_left == Some(WallTopLeft)
+            ctx.below == Some(WallTopUpper) && (ctx.bottom_left == Some(WallTopLeft) || ctx.bottom_left == Some(WallTopUpper))
         }),
         // └ - inner corner top right
         Replacement::from_to(WallRight, WallInnerCornerBottomLeft, |ctx| {
-            ctx.below == Some(WallTopUpper) && ctx.bottom_right == Some(WallTopRight)
+            ctx.below == Some(WallTopUpper) && (ctx.bottom_right == Some(WallTopRight) || ctx.bottom_right == Some(WallTopUpper))
         }),
 
         // top most

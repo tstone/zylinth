@@ -14,23 +14,39 @@ pub fn floor_fixer(
 
 lazy_static! {
     static ref FIRST_PASS: Vec<Replacement<UtilityTile, UtilityTile>> = vec![
-        // one-tile cut bottom
+        // one tile cut bottom
         Replacement::from_to(Empty, Floor, |ctx| {
             ctx.above == Some(Floor) && ctx.left == Some(Floor) && ctx.right == Some(Floor)
         }),
-        // one-tile cut left
+        // one tile cut left
         Replacement::from_to(Empty, Floor, |ctx| {
             ctx.above == Some(Floor) && ctx.right == Some(Floor) && ctx.below == Some(Floor)
         }),
-        // one-tile cut top
+        // one tile cut top
         Replacement::from_to(Empty, Floor, |ctx| {
             ctx.left == Some(Floor) && ctx.right == Some(Floor) && ctx.below == Some(Floor)
         }),
-        // one-tile cut right
+        // one tile cut right
         Replacement::from_to(Empty, Floor, |ctx| {
             ctx.left == Some(Floor) && ctx.above == Some(Floor) && ctx.below == Some(Floor)
         }),
-        // one-tile vertical gap
+        // one tile wart top
+        Replacement::from_to(Floor, Empty, |ctx| {
+            ctx.left == Some(Empty) && ctx.above == Some(Empty) && ctx.right == Some(Empty)
+        }),
+        // one tile wart bottom
+        Replacement::from_to(Floor, Empty, |ctx| {
+            ctx.left == Some(Empty) && ctx.below == Some(Empty) && ctx.right == Some(Empty)
+        }),
+        // one tile wart left
+        Replacement::from_to(Floor, Empty, |ctx| {
+            ctx.left == Some(Empty) && ctx.above == Some(Empty) && ctx.below == Some(Empty)
+        }),
+        // one tile wart right
+        Replacement::from_to(Floor, Empty, |ctx| {
+            ctx.right == Some(Empty) && ctx.above == Some(Empty) && ctx.below == Some(Empty)
+        }),
+        // one tile vertical gap
         Replacement::from_to(Empty, Floor, |ctx| {
             ctx.above == Some(Floor) && ctx.below == Some(Floor) && ctx.left == None && ctx.right == None
         }),

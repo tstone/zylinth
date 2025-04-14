@@ -69,6 +69,7 @@ pub fn perlin_room(
     // TODO: implement culling of islands
 }
 
+// IDEA: maybe instead of hard-coded shapes, what if there was an "add one room to the right" or "add one room above/below" method
 pub fn perlin_dog_bone(
     width: usize,
     height: usize,
