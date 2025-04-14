@@ -1,7 +1,4 @@
-use avian2d::prelude::{
-    AngularVelocity, Collider, LinearDamping, LinearVelocity, LockedAxes, NoRotationEasing,
-    RigidBody, TransformInterpolation, TranslationExtrapolation, TranslationInterpolation,
-};
+use avian2d::prelude::*;
 use bevy::prelude::*;
 use bevy_lit::prelude::PointLight2d;
 
@@ -40,9 +37,9 @@ fn spawn_player(
         anim_config,
         PointLight2d {
             color: Color::hsl(57.0, 0.6, 0.79),
-            intensity: 3.0,
-            radius: 150.0,
-            falloff: 3.0,
+            intensity: 3.25,
+            radius: 160.0,
+            falloff: 3.5,
             ..default()
         },
         // starting position

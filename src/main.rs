@@ -8,7 +8,6 @@ use player::PlayerPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
 mod camera;
-pub mod collision;
 mod layout;
 mod player;
 mod sprite_animation;

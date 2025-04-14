@@ -24,18 +24,7 @@ pub struct Tile {
     tile_index: usize,
 }
 
-impl Tile {
-    pub fn into_rect(&self, transform: &GlobalTransform) -> Rect {
-        let translation = transform.translation();
-        Rect::new(
-            translation.x,
-            translation.y,
-            translation.x + self.width as f32,
-            translation.y + self.height as f32,
-        )
-    }
-}
-
+// TODO: should I still render a parent Tilemap?
 #[derive(Component, Debug)]
 pub struct Tilemap {
     width: u32,

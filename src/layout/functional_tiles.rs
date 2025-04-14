@@ -16,8 +16,8 @@ pub enum UtilityTile {
     WallInnerCornerTopRight,
     WallInnerCornerBottomLeft,
     WallInnerCornerBottomRight,
-    // TODO have "WallLower" and "WallUpper" and only have a collider on wall upper
-    WallTop,
+    WallTopUpper,
+    WallTopLower,
     WallLeft,
     WallRight,
     WallBottom,
@@ -47,7 +47,7 @@ impl IsImpassable for UtilityTile {
             || *self == Self::WallInnerCornerTopRight
             || *self == Self::WallInnerCornerBottomLeft
             || *self == Self::WallInnerCornerBottomRight
-            || *self == Self::WallTop
+            || *self == Self::WallTopUpper
             || *self == Self::WallLeft
             || *self == Self::WallRight
             || *self == Self::WallBottom

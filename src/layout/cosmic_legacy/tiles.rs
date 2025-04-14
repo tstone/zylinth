@@ -178,7 +178,7 @@ impl CosmicLegacyTile {
             tile_height: 16,
             image: asset_server.load("CosmicLegacy_PetricakeGames.png"),
             layout: atlas_layout,
-            render: |t, rng| t.into(),
+            render: |t, _rng| t.into(),
         }
     }
 }

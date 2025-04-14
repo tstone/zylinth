@@ -11,7 +11,5 @@ mod shadowizer;
 mod tilemap;
 mod wall_wrap;
 
-pub use impassable::Impassable;
 pub use render::generate_layout;
 pub use render::spot_lights;
-pub use tilemap::Tile;

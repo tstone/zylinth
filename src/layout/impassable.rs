@@ -1,11 +1,6 @@
-use bevy::prelude::*;
-
 pub trait IsImpassable {
     fn is_impassable(&self) -> bool;
 }
-
-#[derive(Component)]
-pub struct Impassable;
 
 pub fn to_impassable<T: IsImpassable + Clone>(
     grid: Vec<Vec<Option<T>>>,
