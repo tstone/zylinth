@@ -34,7 +34,20 @@ lazy_static! {
                     ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
                 )
             },
-            chance: 0.2,
+            chance: 0.125,
+            ..Default::default()
+        },
+        // locker open
+        Replacement {
+            target: UtilityTile::WallTopLower,
+            replacement: CosmicLegacyTile::LockerOpenTop,
+            replacement_below: Some(CosmicLegacyTile::LockerOpenBottom),
+            condition: |ctx| {
+                ctx.below == Some(Floor) && (
+                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
+                )
+            },
+            chance: 0.08,
             ..Default::default()
         },
         // alien
@@ -47,7 +60,7 @@ lazy_static! {
                     ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
                 )
             },
-            chance: 0.2,
+            chance: 0.19,
             ..Default::default()
         },
         // bookshelf

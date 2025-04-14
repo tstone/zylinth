@@ -21,7 +21,7 @@ pub enum CosmicLegacyTile {
     TopCapBottomSimple = 9,
     PlateGrill = 10,
     WallCircuits = 11,
-    WallSmall = 12,
+    PanelGreen = 12,
     RootsTopLeft = 13,
     RootsTopRight = 14,
     ShelfLeft = 15,

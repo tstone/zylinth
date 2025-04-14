@@ -32,8 +32,8 @@ pub struct Replacement<S: Replaceable, D: Replaceable> {
     pub replacement: D,
     pub replacement_above: Option<D>,
     pub replacement_below: Option<D>,
-    pub replacement_on_left: Option<D>,
-    pub replacement_on_right: Option<D>,
+    pub replacement_left: Option<D>,
+    pub replacement_right: Option<D>,
     pub replacement_top_left: Option<D>,
     pub replacement_top_right: Option<D>,
     pub replacement_bottom_left: Option<D>,
@@ -69,8 +69,8 @@ where
             replacement: Default::default(),
             replacement_above: Default::default(),
             replacement_below: Default::default(),
-            replacement_on_left: Default::default(),
-            replacement_on_right: Default::default(),
+            replacement_left: Default::default(),
+            replacement_right: Default::default(),
             replacement_top_left: Default::default(),
             replacement_top_right: Default::default(),
             replacement_bottom_left: Default::default(),
@@ -128,12 +128,12 @@ pub fn replace_tiles<
                                 _ => {}
                             }
                             // replace left
-                            match (replacement.replacement_on_left, tile_ctx.left) {
+                            match (replacement.replacement_left, tile_ctx.left) {
                                 (Some(left), Some(_)) => dest[x - 1][y] = Some(left),
                                 _ => {}
                             }
                             // replace right
-                            match (replacement.replacement_on_right, tile_ctx.right) {
+                            match (replacement.replacement_right, tile_ctx.right) {
                                 (Some(right), Some(_)) => dest[x + 1][y] = Some(right),
                                 _ => {}
                             }

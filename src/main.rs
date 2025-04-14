@@ -21,7 +21,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         name: Some("Game".to_string()),
-                        resolution: (1200., 1200.).into(),
+                        resolution: (1920., 1080.).into(),
                         // mode: bevy::window::WindowMode::Fullscreen(MonitorSelection::Primary),
                         ..default()
                     }),
