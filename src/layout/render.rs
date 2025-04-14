@@ -4,7 +4,6 @@ use bevy_lit::prelude::PointLight2d;
 use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
-use crate::layout::impassable::to_impassable;
 use crate::layout::{cosmic_legacy::decorate, fixer::floor_fixer, tilemap::render_tilemap};
 
 use super::{
@@ -38,7 +37,7 @@ pub fn generate_layout(
     render_tilemap(
         shadow_walls,
         &CosmicLegacyTile::to_utility_tileset(&asset_server, &mut texture_atlas_layouts),
-        Transform::from_xyz(0.0, 0.0, 1.0),
+        Transform::from_xyz(0.0, 0.0, -1.0),
         &mut commands,
         &mut rng,
     );

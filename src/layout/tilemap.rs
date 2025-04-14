@@ -1,10 +1,9 @@
 use std::fmt::Debug;
 
+use avian2d::prelude::*;
 use bevy::prelude::*;
-
 use rand_chacha::ChaCha8Rng;
 
-use super::Impassable;
 use super::impassable::{IsImpassable, to_impassable};
 
 #[derive(Clone, Debug)]
@@ -87,7 +86,11 @@ pub fn render_tilemap<T: Component + Copy + Clone + IsImpassable>(
                 ));
 
                 if impassable {
-                    tile_entity.insert(Impassable);
+                    tile_entity.insert((
+                        RigidBody::Static,
+                        Collider::rectangle(tileset.tile_width as f32, tileset.tile_height as f32),
+                        CollisionMargin(0.1),
+                    ));
                 }
 
                 tile_entities.push(tile_entity.id());

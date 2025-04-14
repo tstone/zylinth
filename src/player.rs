@@ -1,8 +1,10 @@
+use avian2d::prelude::{
+    AngularVelocity, Collider, LinearDamping, LinearVelocity, LockedAxes, NoRotationEasing,
+    RigidBody, TransformInterpolation, TranslationExtrapolation, TranslationInterpolation,
+};
 use bevy::prelude::*;
 use bevy_lit::prelude::PointLight2d;
 
-use crate::collision::Collidable;
-use crate::movement::Velocity;
 use crate::sprite_animation::SpriteAnimConfig;
 
 pub struct PlayerPlugin;
@@ -21,22 +23,12 @@ fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    //
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 16, 1, None, None);
     let anim_config = SpriteAnimConfig::new(0, 15, 11);
 
-    let rect = meshes.add(Rectangle::new(32.0, 32.0));
-
     commands.spawn((
         Player,
-        Collidable {
-            width: 32.0,
-            height: 32.0,
-        },
-        Velocity::starting_speed(85.0),
         Sprite {
             image: asset_server.load("D2.png"),
             texture_atlas: Some(TextureAtlas {
@@ -53,45 +45,39 @@ fn spawn_player(
             falloff: 3.0,
             ..default()
         },
-        Transform::from_xyz(100., -100., 20.),
-        Mesh2d(rect),
-        MeshMaterial2d(materials.add(Color::hsl(100.0, 1.0, 0.5))),
+        // starting position
+        Transform::from_xyz(120., -120., 20.),
+        RigidBody::Dynamic,
+        Collider::circle(14.0),
+        TranslationExtrapolation,
+        LockedAxes::ROTATION_LOCKED,
+        LinearDamping(2.75),
     ));
 }
 
 fn player_keyboard_input(
     input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Velocity, &mut Sprite), With<Player>>,
+    mut query: Query<(&mut LinearVelocity, &mut Sprite), With<Player>>,
+    time: Res<Time>,
 ) {
+    let delta_secs = time.delta_secs();
+
+    let up = input.any_pressed([KeyCode::KeyW, KeyCode::ArrowUp]);
+    let down = input.any_pressed([KeyCode::KeyS, KeyCode::ArrowDown]);
+    let left = input.any_pressed([KeyCode::KeyA, KeyCode::ArrowLeft]);
+    let right = input.any_pressed([KeyCode::KeyD, KeyCode::ArrowRight]);
+
+    let horizontal = right as i8 - left as i8;
+    let vertical = up as i8 - down as i8;
+    let direction = Vec2::new(horizontal as f32, vertical as f32).clamp_length_max(1.0);
+
     for (mut vel, mut sprite) in query.iter_mut() {
-        // X
-        if input.just_pressed(KeyCode::ArrowLeft) || input.just_pressed(KeyCode::KeyA) {
-            vel.x = -1.0;
-        } else if input.just_released(KeyCode::ArrowLeft) || input.just_released(KeyCode::KeyA) {
-            vel.x = 0.0;
-        }
-        if input.just_pressed(KeyCode::ArrowRight) || input.just_pressed(KeyCode::KeyD) {
-            vel.x = 1.0;
-        } else if input.just_released(KeyCode::ArrowRight) || input.just_released(KeyCode::KeyD) {
-            vel.x = 0.0;
-        }
+        vel.0 += 700.0 * delta_secs * direction;
 
-        // Y
-        if input.just_pressed(KeyCode::ArrowUp) || input.just_pressed(KeyCode::KeyW) {
-            vel.y = 1.0;
-        } else if input.just_released(KeyCode::ArrowUp) || input.just_released(KeyCode::KeyW) {
-            vel.y = 0.0;
-        }
-        if input.just_pressed(KeyCode::ArrowDown) || input.just_pressed(KeyCode::KeyS) {
-            vel.y = -1.0;
-        } else if input.just_released(KeyCode::ArrowDown) || input.just_released(KeyCode::KeyS) {
-            vel.y = 0.0;
-        }
-
-        // Change facing of playler sprite
-        if vel.x > 0.0 {
+        // Change facing of player sprite
+        if direction.x > 0.0 {
             sprite.flip_x = false;
-        } else if vel.x < 0.0 {
+        } else if direction.x < 0.0 {
             sprite.flip_x = true;
         }
     }

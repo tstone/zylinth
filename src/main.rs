@@ -1,16 +1,15 @@
+use avian2d::prelude::*;
 use bevy::dev_tools::fps_overlay::*;
 use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
-use movement::MovementPlugin;
 use player::PlayerPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
 mod camera;
 pub mod collision;
 mod layout;
-mod movement;
 mod player;
 mod sprite_animation;
 
@@ -37,8 +36,9 @@ fn main() {
                 }),
         )
         .add_plugins(FpsOverlayPlugin { ..default() })
-        .add_plugins((Lighting2dPlugin, MovementPlugin, SpriteAnimationPlugin))
-        .add_plugins(CameraSetup)
+        .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
+        .add_plugins(PhysicsPlugins::default())
+        // .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_MAROON))
         .add_systems(Startup, layout::generate_layout)
         .add_systems(PostStartup, layout::spot_lights)

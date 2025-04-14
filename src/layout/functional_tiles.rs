@@ -16,6 +16,7 @@ pub enum UtilityTile {
     WallInnerCornerTopRight,
     WallInnerCornerBottomLeft,
     WallInnerCornerBottomRight,
+    // TODO have "WallLower" and "WallUpper" and only have a collider on wall upper
     WallTop,
     WallLeft,
     WallRight,
