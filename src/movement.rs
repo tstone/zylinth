@@ -56,13 +56,18 @@ fn character_movement(
         let new_x = old_x + movement_x;
         let new_y = old_y + movement_y;
 
-        // // bottom left to top right
-        // let collidable_rect = Rect::new(
-        //     new_x,
-        //     new_y,
-        //     new_x + collidable.width,
-        //     new_y + collidable.height,
-        // );
+        let collidable_x = Rect::new(
+            new_x,
+            old_y,
+            new_x + collidable.width,
+            old_y + collidable.height,
+        );
+        let collidabley_y = Rect::new(
+            old_x,
+            new_y,
+            old_x + collidable.width,
+            new_y + collidable.height,
+        );
 
         // check first that this move is allowed and skip it if not
         let mut intersect_x = false;
@@ -83,8 +88,16 @@ fn character_movement(
             // intersect_y = (intersect_up && (intersect_left || intersect_right))
             //     || (intersect_down && (intersect_left || intersect_right));
 
-            intersect_x = tile_rect.contains(Vec2::new(new_x, old_y));
-            intersect_y = tile_rect.contains(Vec2::new(old_x, new_y));
+            // intersect_x = tile_rect.contains(Vec2::new(new_x, old_y));
+            // intersect_y = tile_rect.contains(Vec2::new(old_x, new_y));
+
+            debug!(
+                "width: {}, height: {}",
+                tile_rect.intersect(collidable_x).width(),
+                tile_rect.intersect(collidabley_y).height()
+            );
+            intersect_x = tile_rect.intersect(collidable_x).width() > 0.0;
+            intersect_y = tile_rect.intersect(collidabley_y).height() > 0.0;
 
             if (intersect_x || intersect_y) {
                 debug!("intersected tile {:?}", tile);
