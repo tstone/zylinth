@@ -119,9 +119,9 @@ impl Maze {
     }
 
     #[allow(unused)]
-    pub fn node_to_grid_coords(node: u32, width: u32) -> (u32, u32) {
-        let y = node / width;
-        let x = node - (y * width);
+    pub fn node_to_grid_coords(&self, node: u32) -> (u32, u32) {
+        let y = node / self.width as u32;
+        let x = node - (y * self.width as u32);
         (x, y)
     }
 }

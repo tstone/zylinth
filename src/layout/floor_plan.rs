@@ -1,4 +1,5 @@
 use super::functional_tiles::UtilityTile;
+use super::maze::Maze;
 use bevy::prelude::*;
 use noise::{NoiseFn, Perlin};
 use rand::prelude::*;
@@ -110,4 +111,85 @@ pub fn perlin_dog_bone(
     }
 
     combined
+}
+
+pub fn from_maze(
+    maze: &Maze,
+    room_width: u16,
+    room_height: u16,
+    rng: &mut ChaCha8Rng,
+) -> Vec<Vec<Option<UtilityTile>>> {
+    let total_width = maze.width * room_width;
+    let total_height = maze.height * room_height;
+    let mut grid: Vec<Vec<Option<UtilityTile>>> =
+        vec![vec![None; total_height as usize]; total_width as usize];
+
+    // start with a grid of rooms
+    for maze_x in 0..maze.width {
+        let x_offset = (maze_x * room_width) as usize;
+        let lesser_room_width = room_width as usize - 2;
+
+        for maze_y in 0..maze.height {
+            let y_offset = (maze_y * room_height) as usize;
+            let leser_room_height = room_height as usize - 4;
+            let room = if rng.random_bool(0.5) {
+                perlin_room(lesser_room_width, leser_room_height, rng)
+            } else {
+                rect_room(lesser_room_width, leser_room_height)
+            };
+
+            // copy room into grid
+            for x in 0..lesser_room_width {
+                for y in 0..leser_room_height {
+                    grid[x + x_offset][y + y_offset] = room[x][y];
+                }
+            }
+        }
+    }
+
+    // add hallways
+    for (from_id, to_id) in maze.edges.iter() {
+        let from = maze.node_to_grid_coords(*from_id);
+        let to = maze.node_to_grid_coords(*to_id);
+        let half_room = (room_width / 2) as u32;
+        let from_center = (
+            (from.0 * room_width as u32 + half_room) as usize,
+            (from.1 * room_height as u32 + half_room) as usize,
+        );
+        let to_center = (
+            (to.0 * room_width as u32 + half_room) as usize,
+            (to.1 * room_height as u32 + half_room) as usize,
+        );
+
+        println!("from {:?} to {:?}", from_center, to_center);
+
+        let hall_x = if from_center.0 < to_center.0 {
+            from_center.0 - 1
+        } else {
+            to_center.0 - 1
+        };
+        let hall_y = if from_center.1 < to_center.1 {
+            from_center.1 - 1
+        } else {
+            to_center.1 - 1
+        };
+        let hall_width = if from_center.0 == to_center.0 {
+            *vec![3, 4, 5].choose(rng).unwrap() as usize
+        } else {
+            room_width as usize
+        };
+        let hall_height = if from_center.1 == to_center.1 {
+            *vec![3, 4, 5].choose(rng).unwrap() as usize
+        } else {
+            room_height as usize
+        };
+
+        for x in hall_x..(hall_x + hall_width) {
+            for y in hall_y..(hall_y + hall_height) {
+                grid[x][y] = Some(UtilityTile::Floor);
+            }
+        }
+    }
+
+    grid
 }

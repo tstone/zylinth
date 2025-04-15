@@ -37,7 +37,7 @@ fn main() {
         .add_plugins(FpsOverlayPlugin { ..default() })
         .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
         .add_plugins(PhysicsPlugins::default())
-        // .insert_resource(Gravity::ZERO)
+        .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_MAROON))
         .add_systems(Startup, layout::generate_layout)
         .add_systems(PostStartup, layout::spot_lights)

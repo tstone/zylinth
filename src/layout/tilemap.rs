@@ -78,7 +78,7 @@ pub fn render_tilemap<T: Component + Copy + Clone + IsImpassable>(
                     tile_entity.insert((
                         RigidBody::Static,
                         Collider::rectangle(tileset.tile_width as f32, tileset.tile_height as f32),
-                        CollisionMargin(0.1),
+                        // CollisionMargin(0.1),
                     ));
                 }
 

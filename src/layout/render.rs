@@ -4,7 +4,8 @@ use bevy_lit::prelude::PointLight2d;
 use rand::{prelude::*, random_range};
 use rand_chacha::ChaCha8Rng;
 
-use crate::layout::floor_plan::{perlin_dog_bone, perlin_room};
+use crate::layout::floor_plan::{from_maze, perlin_dog_bone, perlin_room};
+use crate::layout::maze::Maze;
 use crate::layout::{cosmic_legacy::decorate, fixer::floor_fixer, tilemap::render_tilemap};
 
 use super::{cosmic_legacy::CosmicLegacyTile, shadowizer::shadowize, wall_wrap::wrap_walls};
@@ -14,15 +15,20 @@ pub fn generate_layout(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    // TODO: make room type generates
+    // TODO: revert back to bevy_ecs_tilemap to see if that improves performance
+    // TODO: randomly offset halls + allow "Z" paths -- need to have a "hallway" function
+    // TODO: randomly relocate room center
+
+    // TODO: create new "composite room" type that works by unioning together multiple random noise shapes
+    // TODO: make room decoration types
     // - biology lab
     // - hydroponics lab
     // - library
     // - sewers
     // - office
-
-    // FIX: 17750124620171070706 -- incorrect bottom left corner
     // TODO: use perlin noise or voronoi to slightly tint the floor to give large spaces variety
+
+    // IDEAS:
     // Drone type 1 uses scanning and vaporizes targets
     // Drone type 2 has x-ray vision but leaves targets
 
@@ -30,12 +36,15 @@ pub fn generate_layout(
     debug!("Using seed: {seed}");
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
+    let maze = Maze::generate(6, 4);
+    let floor = from_maze(&maze, 18, 12, &mut rng);
+
     // TODO: randomize size a little
     let width: u32 = 40;
     let height: u32 = 12;
 
     // let floor = perlin_room(width as usize, height as usize, &mut rng);
-    let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
+    // let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
     let bg_decorations = decorate(&walled, &mut rng);
