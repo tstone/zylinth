@@ -140,44 +140,20 @@ impl CosmicLegacyTile {
         ]
     }
 
-    pub fn to_utility_tileset(
-        asset_server: &Res<AssetServer>,
-        texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
-    ) -> Tileset<UtilityTile> {
-        let atlas_layout = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
-            UVec2::splat(16),
-            17,
-            8,
-            None,
-            None,
-        ));
-
+    pub fn to_utility_tileset(asset_server: &Res<AssetServer>) -> Tileset<UtilityTile> {
         Tileset {
             tile_width: 16,
             tile_height: 16,
             image: asset_server.load("CosmicLegacy_PetricakeGames.png"),
-            layout: atlas_layout,
             render: |utility, rng| utility_to_cosmic(utility, rng).into(),
         }
     }
 
-    pub fn to_cosmic_tileset(
-        asset_server: &Res<AssetServer>,
-        texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
-    ) -> Tileset<CosmicLegacyTile> {
-        let atlas_layout = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
-            UVec2::splat(16),
-            17,
-            8,
-            None,
-            None,
-        ));
-
+    pub fn to_cosmic_tileset(asset_server: &Res<AssetServer>) -> Tileset<CosmicLegacyTile> {
         Tileset {
             tile_width: 16,
             tile_height: 16,
             image: asset_server.load("CosmicLegacy_PetricakeGames.png"),
-            layout: atlas_layout,
             render: |t, _rng| t.into(),
         }
     }
