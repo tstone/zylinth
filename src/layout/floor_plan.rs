@@ -77,6 +77,7 @@ pub fn perlin_dog_bone(
     rng: &mut ChaCha8Rng,
 ) -> Vec<Vec<Option<UtilityTile>>> {
     let fortyfive_width = cmp::max(1, (width as f32 * 0.45).floor() as usize);
+    debug!("45% width {fortyfive_width}");
 
     let left = perlin_room(fortyfive_width, height, rng);
     let right = perlin_room(fortyfive_width, height, rng);
@@ -101,6 +102,7 @@ pub fn perlin_dog_bone(
     let hall_y = cmp::max(0, (height as f32 * 0.25).floor() as usize);
     let hall_height = cmp::max(3, (height as f32 * 0.4).floor() as usize);
     let hall_width = hall_x * 3;
+    debug!("hall: x {hall_x},  y {hall_y}, width {hall_width}, height {hall_height}");
 
     for x in hall_x..(hall_width + hall_x) {
         for y in hall_y..(hall_height + hall_y) {
