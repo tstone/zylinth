@@ -34,17 +34,17 @@ pub fn generate_layout(
 
     let seed = random_range(0..u64::MAX);
     debug!("Using seed: {seed}");
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    let mut rng = ChaCha8Rng::seed_from_u64(9462047973480547711);
 
-    let maze = Maze::generate(6, 4);
-    let floor = from_maze(&maze, 18, 12, &mut rng);
+    // let maze = Maze::generate(4, 4);
+    // let floor = from_maze(&maze, 18, 12, &mut rng);
 
     // TODO: randomize size a little
     let width: u32 = 40;
     let height: u32 = 12;
 
     // let floor = perlin_room(width as usize, height as usize, &mut rng);
-    // let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
+    let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
     let bg_decorations = decorate(&walled, &mut rng);

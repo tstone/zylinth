@@ -3,7 +3,7 @@ pub trait IsImpassable {
 }
 
 pub fn to_impassable<T: IsImpassable + Clone>(
-    grid: Vec<Vec<Option<T>>>,
+    grid: &Vec<Vec<Option<T>>>,
 ) -> Vec<Vec<Option<(T, bool)>>> {
     let width = grid.len();
     let mut output: Vec<Vec<Option<(T, bool)>>> = vec![vec![]; width];
