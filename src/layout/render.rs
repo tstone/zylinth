@@ -36,8 +36,8 @@ pub fn generate_layout(
     debug!("Using seed: {seed}");
     let mut rng = ChaCha8Rng::seed_from_u64(9462047973480547711);
 
-    let maze = Maze::generate(8, 4);
-    let floor = from_maze(&maze, 17, 12, &mut rng);
+    let maze = Maze::generate(50, 10);
+    let floor = from_maze(&maze, 18, 12, &mut rng);
 
     // TODO: randomize size a little
     let width: u32 = 40;
