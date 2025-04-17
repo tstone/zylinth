@@ -40,8 +40,8 @@ fn main() {
         .add_plugins(PhysicsDebugPlugin::default())
         .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_MAROON))
+        .add_plugins(PlayerPlugin)
         .add_systems(Startup, layout::generate_layout)
         .add_systems(PostStartup, layout::spot_lights)
-        .add_plugins(PlayerPlugin)
         .run();
 }

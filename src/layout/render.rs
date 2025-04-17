@@ -6,6 +6,7 @@ use rand_chacha::ChaCha8Rng;
 
 use crate::layout::floor_plan::{from_maze, perlin_dog_bone, perlin_room};
 use crate::layout::maze::Maze;
+use crate::layout::starter::set_player_inside;
 use crate::layout::{cosmic_legacy::decorate, fixer::floor_fixer, tilemap::render_tilemap};
 
 use super::{cosmic_legacy::CosmicLegacyTile, shadowizer::shadowize, wall_wrap::wrap_walls};
@@ -32,12 +33,14 @@ pub fn generate_layout(
     // Drone type 1 uses scanning and vaporizes targets
     // Drone type 2 has x-ray vision but leaves targets
 
-    let seed = random_range(0..u64::MAX);
+    // let seed = random_range(0..u64::MAX);
+    let seed = 2;
     debug!("Using seed: {seed}");
-    let mut rng = ChaCha8Rng::seed_from_u64(9462047973480547711);
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
-    let maze = Maze::generate(50, 10);
-    let floor = from_maze(&maze, 18, 12, &mut rng);
+    let maze = Maze::generate(2, 2, &mut rng);
+    println!("maze {:?}", maze);
+    let floor = from_maze(&maze, 18, 12, 2, &mut rng);
 
     // TODO: randomize size a little
     let width: u32 = 40;
@@ -47,23 +50,25 @@ pub fn generate_layout(
     // let floor = perlin_dog_bone(width as usize, height as usize, &mut rng);
     let floor_fixed = floor_fixer(floor, &mut rng);
     let walled = wrap_walls(floor_fixed, &mut rng);
-    let bg_decorations = decorate(&walled, &mut rng);
-    let shadow_walls = shadowize(walled, &mut rng);
+    set_player_inside(&walled, &mut commands);
+
+    // let bg_decorations = decorate(&walled, &mut rng);
+    // let shadow_walls = shadowize(walled, &mut rng);
 
     render_tilemap(
-        shadow_walls,
+        walled,
         &CosmicLegacyTile::to_utility_tileset(&asset_server, &mut texture_atlas_layouts),
         Transform::from_xyz(0.0, 0.0, -1.0),
         &mut commands,
         &mut rng,
     );
-    render_tilemap(
-        bg_decorations,
-        &CosmicLegacyTile::to_cosmic_tileset(&asset_server, &mut texture_atlas_layouts),
-        Transform::from_xyz(0.0, 0.0, 2.0),
-        &mut commands,
-        &mut rng,
-    );
+    // render_tilemap(
+    //     bg_decorations,
+    //     &CosmicLegacyTile::to_cosmic_tileset(&asset_server, &mut texture_atlas_layouts),
+    //     Transform::from_xyz(0.0, 0.0, 2.0),
+    //     &mut commands,
+    //     &mut rng,
+    // );
 }
 
 pub fn spot_lights(tiles: Query<(&CosmicLegacyTile, Entity)>, mut commands: Commands) {

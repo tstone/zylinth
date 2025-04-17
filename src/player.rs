@@ -45,7 +45,7 @@ fn spawn_player(
         },
         // starting position
         // Transform::from_xyz(120., -120., 20.),
-        Transform::from_xyz(60., -20., 20.),
+        Transform::from_xyz(60., -40., 20.),
         RigidBody::Dynamic,
         Collider::circle(12.0),
         TranslationExtrapolation,

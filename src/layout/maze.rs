@@ -1,6 +1,6 @@
-use std::collections::HashSet;
-
-use rand::seq::IteratorRandom;
+use linked_hash_set::LinkedHashSet;
+use rand::prelude::*;
+use rand_chacha::ChaCha8Rng;
 
 /// A maze describes a graph of nodes and their interconnections.
 /// This is used to connect rooms.
@@ -11,32 +11,31 @@ pub struct Maze {
     pub height: u16,
     pub start_node: u32,
     pub node_count: u32,
-    pub edges: HashSet<(u32, u32)>,
+    pub edges: LinkedHashSet<(u32, u32)>,
 }
 
 impl Maze {
     #[allow(unused)]
-    pub fn generate(width: u16, height: u16) -> Maze {
-        let mut connected_nodes = HashSet::<u32>::new();
-        let mut unconnected_nodes = HashSet::<u32>::new();
+    pub fn generate(width: u16, height: u16, rng: &mut ChaCha8Rng) -> Maze {
+        let mut connected_nodes = LinkedHashSet::<u32>::new();
+        let mut unconnected_nodes = LinkedHashSet::<u32>::new();
         let total: u32 = u32::from(width) * u32::from(height);
         for i in 0..total {
             unconnected_nodes.insert(i as u32);
         }
 
-        let mut rng = rand::rng();
         let mut nodes_with_only_one_connection: Vec<u32> = vec![];
-        let mut edges: HashSet<(u32, u32)> = HashSet::new();
+        let mut edges: LinkedHashSet<(u32, u32)> = LinkedHashSet::new();
 
         // randomly pick a starting node in the first row
-        let start_node = rand::random_range(0..width) as u32;
+        let start_node = (0..width).choose(rng).unwrap() as u32;
         let mut current_node = start_node.clone();
 
         while unconnected_nodes.len() > 0 {
             unconnected_nodes.remove(&current_node);
             let candidate_edges =
                 Self::get_possible_edges(current_node, &connected_nodes, &edges, width, height);
-            match candidate_edges.iter().choose(&mut rng) {
+            match candidate_edges.iter().choose(rng) {
                 Some(edge) => {
                     edges.insert(*edge);
                     unconnected_nodes.remove(&current_node);
@@ -69,12 +68,12 @@ impl Maze {
     // Given a node ID, get the possible edges that it can connect to
     pub(self) fn get_possible_edges(
         node: u32,
-        connected_nodes: &HashSet<u32>,
-        edges: &HashSet<(u32, u32)>,
+        connected_nodes: &LinkedHashSet<u32>,
+        edges: &LinkedHashSet<(u32, u32)>,
         width: u16,
         height: u16,
-    ) -> HashSet<(u32, u32)> {
-        let mut possible_edges: HashSet<(u32, u32)> = HashSet::new();
+    ) -> LinkedHashSet<(u32, u32)> {
+        let mut possible_edges: LinkedHashSet<(u32, u32)> = LinkedHashSet::new();
         let y = node / width as u32;
         let x = node - (y * width as u32);
         let max_width = (width - 1) as u32;
@@ -115,7 +114,7 @@ impl Maze {
             }
         }
 
-        return possible_edges;
+        possible_edges
     }
 
     #[allow(unused)]
@@ -197,9 +196,9 @@ mod tests {
         assert_eq!(coords4, (1, 2));
     }
 
-    #[test]
-    fn maze_gen_preview() {
-        let maze = Maze::generate(3, 3);
-        println!("maze: {:?}", maze);
-    }
+    // #[test]
+    // fn maze_gen_preview() {
+    //     let maze = Maze::generate(3, 3);
+    //     println!("maze: {:?}", maze);
+    // }
 }

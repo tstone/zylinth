@@ -8,6 +8,7 @@ mod modifications;
 mod render;
 mod replacement;
 mod shadowizer;
+mod starter;
 mod tilemap;
 mod wall_wrap;
 

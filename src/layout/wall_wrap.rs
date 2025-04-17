@@ -108,6 +108,22 @@ lazy_static! {
         Replacement::from_to(WallRight, WallTopUpper, |ctx| {
             ctx.below == Some(WallTopLower)
         }),
+        // when rooms are close together make double walls come up to room above
+        Replacement::from_to(WallBottom, WallTopUpper, |ctx| {
+            ctx.below == Some(WallTopLower)
+        }),
+        Replacement::from_to(WallBottomLeft, WallTopUpper, |ctx| {
+            ctx.below == Some(WallTopLower)
+        }),
+        Replacement::from_to(WallBottomRight, WallTopUpper, |ctx| {
+            ctx.below == Some(WallTopLower)
+        }),
+        Replacement::from_to(WallInnerCornerTopLeft, WallTopUpper, |ctx| {
+            ctx.below == Some(WallTopLower)
+        }),
+        Replacement::from_to(WallInnerCornerTopRight, WallTopUpper, |ctx| {
+            ctx.below == Some(WallTopLower)
+        }),
     ];
 
     // third pass wraps the wall in the top most layer

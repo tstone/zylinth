@@ -37,7 +37,11 @@ lazy_static! {
         }),
         // left
         Replacement::from_to(Floor, FloorShadowLeft, |ctx| {
-            ctx.left == Some(WallLeft) || ctx.left == Some(WallTopUpper) || ctx.left == Some(WallTopLower) || ctx.left == Some(WallInnerCornerTopRight)
+            ctx.left == Some(WallLeft)
+            || ctx.left == Some(WallTopUpper)
+            || ctx.left == Some(WallTopLower)
+            || ctx.left == Some(WallInnerCornerTopRight)
+            || ctx.left == Some(WallInnerCornerBottomRight)
         }),
     ];
 }
