@@ -47,7 +47,6 @@ pub fn render_tilemap<T: Component + Copy + Clone + IsImpassable>(
         .spawn((Tilemap { width, height }, transform, Visibility::Visible))
         .id();
     let mut tile_entities: Vec<Entity> = Vec::new();
-    let mut count = 0;
     let collisions = spawn_collisions(width, height, tileset, &tiles, commands);
 
     for x in 0..width {
@@ -89,8 +88,6 @@ pub fn render_tilemap<T: Component + Copy + Clone + IsImpassable>(
         }
     }
 
-    debug!("{count} colliders");
-
     // set tiles as child of parent so that transforms cascade
     for tile in tile_entities {
         commands.entity(tilemap_entity).add_child(tile);
@@ -108,7 +105,9 @@ fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
     commands: &mut Commands,
 ) -> Vec<Vec<Option<Entity>>> {
     // resolve tile ID to which are/aren't passable
-    let grid = to_impassable(grid);
+    let mut grid = to_impassable(grid);
+
+    let mut count = 0;
 
     // group all horizontal neighbors
     let mut contiguous_impassables: Vec<(u32, u32, u32, u32)> = Vec::new();
@@ -116,6 +115,10 @@ fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
         let mut start_x: Option<u32> = None;
         for x in 0..width {
             let tile = grid[x as usize][y as usize];
+
+            if tile.map_or(false, |(_, impassable)| impassable) {
+                count += 1;
+            }
 
             if start_x.is_none() && tile.map_or(false, |(_, impassable)| impassable) {
                 // if there is no start x and the current tile is impassible
@@ -126,19 +129,49 @@ fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
                 && (tile.map_or(true, |(_, impassable)| !impassable) || x == (width - 1))
             {
                 if let Some(start) = start_x {
-                    contiguous_impassables.push((start, y, x, y));
+                    // only save regions more than 1
+                    if x - start > 2 {
+                        // remove these tiles from the grid so as not to duplicate them with the vertical pass
+                        for nx in start..=x {
+                            grid[nx as usize][y as usize] = None;
+                        }
+                        contiguous_impassables.push((start, y, x, y));
+                    }
                     start_x = None;
                 }
             }
         }
     }
 
-    // TODO: also group vertically
     // group all vertical neighbors excluding those who have been grouped by the horizontal grouping
+    for x in 0..width {
+        let mut start_y: Option<u32> = None;
+        for y in 0..height {
+            let tile = grid[x as usize][y as usize];
+
+            if start_y.is_none() && tile.map_or(false, |(_, impassable)| impassable) {
+                // if there is no start x and the current tile is impassible
+                start_y = Some(y);
+
+                // if there is a start x AND this tile is not impassable or not defined or it's the last tile
+            } else if start_y.is_some()
+                && (tile.map_or(true, |(_, impassable)| !impassable) || y == (height - 1))
+            {
+                if let Some(start) = start_y {
+                    contiguous_impassables.push((x, start, x, y));
+                    start_y = None;
+                }
+            }
+        }
+    }
+
+    let mut coll_count = 0;
 
     // turn the list of collision neighbors into collider regions
     let mut colliders = vec![vec![None; height as usize]; width as usize];
     for (x0, y0, x1, y1) in contiguous_impassables {
+        coll_count += 1;
+
         // x/y here are grid coordinates so they need to be scaled into
         // since they will be added to the parent the transform can be relative to the parent tilemap's position
         let width = cmp::max(x1 - x0, 1) * tileset.tile_width as u32;
@@ -151,6 +184,8 @@ fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
         ));
         colliders[x0 as usize][y0 as usize] = Some(collider.id());
     }
+
+    debug!("collisable tiles: {count}, colliders: {coll_count}");
 
     colliders
 }

@@ -132,11 +132,12 @@ pub fn from_maze(
         for maze_y in 0..maze.height {
             let y_offset = (maze_y * room_height) as usize;
             let leser_room_height = room_height as usize - 4;
-            let room = if rng.random_bool(0.5) {
-                perlin_room(lesser_room_width, leser_room_height, rng)
-            } else {
-                rect_room(lesser_room_width, leser_room_height)
-            };
+            // let room = if rng.random_bool(0.5) {
+            //     perlin_room(lesser_room_width, leser_room_height, rng)
+            // } else {
+            //     rect_room(lesser_room_width, leser_room_height)
+            // };
+            let room = rect_room(lesser_room_width, leser_room_height);
 
             // copy room into grid
             for x in 0..lesser_room_width {
@@ -186,7 +187,9 @@ pub fn from_maze(
 
         for x in hall_x..(hall_x + hall_width) {
             for y in hall_y..(hall_y + hall_height) {
-                grid[x][y] = Some(UtilityTile::Floor);
+                if x < grid.len() && y < grid[x].len() {
+                    grid[x][y] = Some(UtilityTile::Floor);
+                }
             }
         }
     }
