@@ -8,7 +8,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player);
+        app.add_systems(PreStartup, spawn_player);
         app.add_systems(Update, player_keyboard_input);
     }
 }
@@ -43,9 +43,7 @@ fn spawn_player(
             falloff: 3.5,
             ..default()
         },
-        // starting position
-        // Transform::from_xyz(120., -120., 20.),
-        Transform::from_xyz(60., -40., 20.),
+        Transform::default(),
         RigidBody::Dynamic,
         Collider::circle(12.0),
         TranslationExtrapolation,

@@ -4,6 +4,7 @@ use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
+use layout::{SpawnBuilding, TileLayoutPlugin};
 use player::PlayerPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
@@ -38,10 +39,14 @@ fn main() {
         .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins(PlayerPlugin)
+        .add_plugins(TileLayoutPlugin)
         .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_MAROON))
-        .add_plugins(PlayerPlugin)
-        .add_systems(Startup, layout::generate_layout)
-        .add_systems(PostStartup, layout::spot_lights)
+        .add_systems(Startup, startup)
         .run();
+}
+
+fn startup(mut commands: Commands) {
+    commands.queue(SpawnBuilding::new(200, 100));
 }

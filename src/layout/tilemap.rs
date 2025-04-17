@@ -1,78 +1,78 @@
 use std::fmt::Debug;
 
-use crate::layout::impassable;
 use avian2d::prelude::*;
 use bevy::prelude::*;
-use bevy::text::cosmic_text::ttf_parser::gpos::Anchor;
-use rand_chacha::ChaCha8Rng;
 use std::cmp;
 
-use super::impassable::{IsImpassable, to_impassable};
-
-#[derive(Clone, Debug)]
-pub struct Tileset<T> {
-    pub render: fn(T, &mut ChaCha8Rng) -> usize,
-    pub tile_width: u8,
-    pub tile_height: u8,
-    pub image: Handle<Image>,
-    pub layout: Handle<TextureAtlasLayout>,
-}
+use super::plugin::{TileLayer, TileSprite};
+use super::tileset::{Tileset, TilesetId};
 
 #[derive(Component, Debug)]
 pub struct Tile {
-    grid_x: u32,
-    grid_y: u32,
-    width: u8,
-    height: u8,
-    tile_index: usize,
+    pub grid_x: u32,
+    pub grid_y: u32,
+    pub width: u8,
+    pub height: u8,
+    pub tile_index: usize,
+    pub tileset_name: &'static str,
 }
 
-// TODO: should I still render a parent Tilemap?
 #[derive(Component, Debug)]
 pub struct Tilemap {
     width: u32,
     height: u32,
 }
 
-pub fn render_tilemap<T: Component + Copy + Clone + IsImpassable>(
-    tiles: Vec<Vec<Option<T>>>,
-    tileset: &Tileset<T>,
-    transform: Transform,
-    commands: &mut Commands,
-    rng: &mut ChaCha8Rng,
+#[derive(Event)]
+pub struct RenderedTileLayer;
+
+pub fn render_tilemap(
+    trigger: Trigger<OnAdd, TileLayer>,
+    query: Query<(&TileLayer, &Transform)>,
+    tileset_ids: Query<(&Name, &TilesetId)>,
+    tileset_assets: Res<Assets<Tileset>>,
+    mut commands: Commands,
+    mut ev_rendered: EventWriter<RenderedTileLayer>,
 ) {
-    let width = tiles.len() as u32;
-    let height = tiles[0].len() as u32;
+    let (layer, transform) = query.get(trigger.entity()).unwrap();
+    let tileset_id = tileset_ids
+        .iter()
+        .find(|(name, id)| **name == Name::new(layer.tileset_name))
+        .map(|(_, id)| id)
+        .unwrap();
+    let tileset = tileset_assets.get(tileset_id.id).unwrap();
+
+    let width = layer.grid.len() as u32;
+    let height = layer.grid[0].len() as u32;
     let tilemap_entity = commands
-        .spawn((Tilemap { width, height }, transform, Visibility::Visible))
+        .spawn((Tilemap { width, height }, *transform, Visibility::Visible))
         .id();
+
     let mut tile_entities: Vec<Entity> = Vec::new();
-    let collisions = spawn_collisions(width, height, tileset, &tiles, commands);
+    let collisions = spawn_collisions(width, height, tileset, &layer.grid, &mut commands);
 
     for x in 0..width {
         for y in 0..height {
-            if let Some(t) = tiles[x as usize][y as usize] {
-                let tile_index = (tileset.render)(t, rng);
+            if let Some(t) = layer.grid[x as usize][y as usize] {
                 let offset_x = x as f32 * tileset.tile_width as f32;
                 let offset_y = y as f32 * tileset.tile_height as f32;
                 // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
                 let flipped_y = width as f32 - offset_y - 1.0;
                 let mut tile_entity = commands.spawn((
-                    t,
                     Tile {
                         grid_x: x,
                         grid_y: y,
                         width: tileset.tile_width,
                         height: tileset.tile_height,
-                        tile_index,
+                        tile_index: t.index,
+                        tileset_name: layer.tileset_name,
                     },
                     Sprite {
                         image: tileset.image.clone(),
                         texture_atlas: Some(TextureAtlas {
                             layout: tileset.layout.clone(),
-                            index: tile_index,
+                            index: t.index,
                         }),
-                        anchor: bevy::sprite::Anchor::TopLeft,
                         ..default()
                     },
                     Transform::from_xyz(offset_x, flipped_y, 0.0),
@@ -92,22 +92,22 @@ pub fn render_tilemap<T: Component + Copy + Clone + IsImpassable>(
     for tile in tile_entities {
         commands.entity(tilemap_entity).add_child(tile);
     }
+
+    ev_rendered.send(RenderedTileLayer);
 }
 
 /// It becomes way too imperformant to create a collider per tile
 /// Instead this method takes a grid of tiles and finds all neighboring impassible tiles
 /// Then resolves those into a set of colliders mapped to the tile it should be inserted on
-fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
+fn spawn_collisions(
     width: u32,
     height: u32,
-    tileset: &Tileset<T>,
-    grid: &Vec<Vec<Option<T>>>,
+    tileset: &Tileset,
+    grid: &Vec<Vec<Option<TileSprite>>>,
     commands: &mut Commands,
 ) -> Vec<Vec<Option<Entity>>> {
-    // resolve tile ID to which are/aren't passable
-    let mut grid = to_impassable(grid);
-
     let mut count = 0;
+    let mut grid = grid.clone();
 
     // group all horizontal neighbors
     let mut contiguous_impassables: Vec<(u32, u32, u32, u32)> = Vec::new();
@@ -116,17 +116,16 @@ fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
         for x in 0..width {
             let tile = grid[x as usize][y as usize];
 
-            if tile.map_or(false, |(_, impassable)| impassable) {
+            if tile.map_or(false, |t| t.collider) {
                 count += 1;
             }
 
-            if start_x.is_none() && tile.map_or(false, |(_, impassable)| impassable) {
+            if start_x.is_none() && tile.map_or(false, |t| t.collider) {
                 // if there is no start x and the current tile is impassible
                 start_x = Some(x);
 
                 // if there is a start x AND this tile is not impassable or not defined or it's the last tile
-            } else if start_x.is_some()
-                && (tile.map_or(true, |(_, impassable)| !impassable) || x == (width - 1))
+            } else if start_x.is_some() && (tile.map_or(true, |t| !t.collider) || x == (width - 1))
             {
                 if let Some(start) = start_x {
                     // only save regions more than 1
@@ -149,13 +148,12 @@ fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
         for y in 0..height {
             let tile = grid[x as usize][y as usize];
 
-            if start_y.is_none() && tile.map_or(false, |(_, impassable)| impassable) {
+            if start_y.is_none() && tile.map_or(false, |t| t.collider) {
                 // if there is no start x and the current tile is impassible
                 start_y = Some(y);
 
                 // if there is a start x AND this tile is not impassable or not defined or it's the last tile
-            } else if start_y.is_some()
-                && (tile.map_or(true, |(_, impassable)| !impassable) || y == (height - 1))
+            } else if start_y.is_some() && (tile.map_or(true, |t| !t.collider) || y == (height - 1))
             {
                 if let Some(start) = start_y {
                     contiguous_impassables.push((x, start, x, y));
@@ -180,7 +178,11 @@ fn spawn_collisions<T: Component + Copy + Clone + IsImpassable>(
         let collider = commands.spawn((
             RigidBody::Static,
             Collider::rectangle(width as f32, height as f32),
-            Transform::from_xyz(width as f32 / 2.0, height as f32 / -2.0, 0.1),
+            Transform::from_xyz(
+                (width as f32 / 2.0) - (tileset.tile_width as f32 / 2.0),
+                (height as f32 / -2.0) + (tileset.tile_height as f32 / 2.0),
+                0.1,
+            ),
         ));
         colliders[x0 as usize][y0 as usize] = Some(collider.id());
     }
