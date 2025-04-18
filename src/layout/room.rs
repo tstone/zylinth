@@ -85,15 +85,15 @@ impl TileRect {
 
     /// Return a new rect that fits withinside of the bounding rectangle
     pub fn clamp(&self, bounding: &TileRect) -> Self {
-        let x0 = if bounding.min.x > self.min.x {
-            self.min.x
-        } else {
+        let x0 = if self.min.x < bounding.min.x {
             bounding.min.x
-        };
-        let y0 = if bounding.min.y > self.min.y {
-            self.min.y
         } else {
+            self.min.x
+        };
+        let y0 = if self.min.y < bounding.min.y {
             bounding.min.y
+        } else {
+            self.min.y
         };
         let x1 = if bounding.max.x < self.max.x {
             bounding.max.x

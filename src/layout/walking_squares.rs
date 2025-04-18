@@ -22,7 +22,16 @@ pub fn walking_squares(
     let mut dir: TileDir = TileDir::rnd(rng);
     let mut density: f32 = 0.0;
 
+    // IDEA: Can walls or empty regions be inserted into huge open rooms?
+
     while density < target_density {
+        // TODO: there seems to be a bug where sometimes these do not overlap
+        debug!(
+            "previous region w: {}, h: {} -- {:?}",
+            previous_region.width(),
+            previous_region.height(),
+            previous_region
+        );
         let starting_region = match dir {
             TileDir::Left => previous_region.get_left_slice(previous_region.width() / 2),
             TileDir::Right => previous_region.get_right_slice(previous_region.width() / 2),
@@ -31,10 +40,7 @@ pub fn walking_squares(
         };
 
         let room = Room::gen_rect(&starting_region, 6, 14, 6, 10, rng);
-        debug!(
-            "Generated a room targeting {:?} at {},{} that is {}x{}",
-            starting_region, room.x, room.y, room.width, room.height
-        );
+        debug!("Generated a room {:?}", room.rect());
         room.copy_grid_into(&mut grid);
 
         let room_rect = room.rect().clamp(&bounding);
@@ -89,7 +95,7 @@ pub fn walking_squares(
         }
 
         // Update for next run
-        previous_region = room_rect;
+        previous_region = room_rect.clone();
         density = measure_density(&grid);
     }
 
