@@ -1,14 +1,12 @@
 mod cosmic_legacy;
 mod fixer;
-mod floor_plan;
 pub mod functional_tiles;
-mod impassable;
 mod lighting;
 mod maze;
 mod modifications;
-mod overlapping_rooms;
 mod plugin;
 mod replacement;
+mod room;
 mod shadowizer;
 mod spawn_building;
 mod starter;
@@ -19,4 +17,6 @@ mod wall_wrap;
 
 pub use plugin::*;
 pub use spawn_building::SpawnBuildingMap;
+
+#[allow(unused)]
 pub use tilemap::*;

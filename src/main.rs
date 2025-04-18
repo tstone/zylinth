@@ -6,11 +6,13 @@ use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
 use layout::{SpawnBuildingMap, TileLayoutPlugin};
 use player::PlayerPlugin;
+use seed::SeedPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
 mod camera;
 mod layout;
 mod player;
+mod seed;
 mod sprite_animation;
 
 const BASE_MAROON: Color = Color::hsl(281., 0.51, 0.17);
@@ -39,8 +41,7 @@ fn main() {
         .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(PhysicsDebugPlugin::default())
-        .add_plugins(PlayerPlugin)
-        .add_plugins(TileLayoutPlugin)
+        .add_plugins((SeedPlugin, PlayerPlugin, TileLayoutPlugin))
         .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_MAROON))
         .add_systems(Startup, startup)
@@ -48,5 +49,10 @@ fn main() {
 }
 
 fn startup(mut commands: Commands) {
-    commands.queue(SpawnBuildingMap::new(200, 100));
+    commands.queue(SpawnBuildingMap {
+        width: 200,
+        height: 50,
+        density: 0.25,
+        wander_factor: 0.25,
+    });
 }

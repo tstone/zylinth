@@ -1,10 +1,7 @@
-use std::cmp;
 use std::collections::HashMap;
 use std::usize;
 
-use super::replacement::*;
-use super::{functional_tiles::UtilityTile, functional_tiles::UtilityTile::*};
-use lazy_static::lazy_static;
+use super::functional_tiles::UtilityTile;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
@@ -14,6 +11,7 @@ pub struct TileRect {
     pub max: TilePoint,
 }
 
+#[allow(unused)]
 impl TileRect {
     pub fn new(x0: usize, y0: usize, x1: usize, y1: usize) -> TileRect {
         TileRect {
@@ -127,16 +125,6 @@ impl TilePoint {
         let b = (other.y as i32 - self.y as i32).pow(2).abs();
         (a as f32 + b as f32).sqrt()
     }
-
-    /// Get a new point, going the direction and length
-    pub fn from_dir(&self, dir: TileDir, len: usize) -> TilePoint {
-        match dir {
-            TileDir::Left => TilePoint::new(self.x.saturating_sub(len), self.y),
-            TileDir::Right => TilePoint::new(self.x.saturating_add(len), self.y),
-            TileDir::Up => TilePoint::new(self.x, self.y.saturating_sub(len)),
-            TileDir::Down => TilePoint::new(self.x, self.y.saturating_add(len)),
-        }
-    }
 }
 
 pub struct Room {
@@ -200,23 +188,9 @@ impl TileDir {
         vec![TileDir::Left, TileDir::Right, TileDir::Up, TileDir::Down]
     }
 
-    /// Get all directions as a list, except the one given
-    pub fn vec_without(dir: TileDir) -> Vec<TileDir> {
-        Self::vec()
-            .iter()
-            .filter(|d| **d != dir)
-            .map(|v| *v)
-            .collect::<Vec<_>>()
-    }
-
     /// Randomly pick a direction
     pub fn rnd(rng: &mut ChaCha8Rng) -> TileDir {
         *Self::vec().choose(rng).unwrap()
-    }
-
-    /// Randomly pick a direction that is not the given value
-    pub fn rnd_without(dir: TileDir, rng: &mut ChaCha8Rng) -> TileDir {
-        *Self::vec_without(dir).choose(rng).unwrap()
     }
 
     /// Randomly pick a direction using weights. Only weighted directions are used.

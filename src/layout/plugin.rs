@@ -10,11 +10,6 @@ pub struct TileLayoutPlugin;
 
 impl Plugin for TileLayoutPlugin {
     fn build(&self, app: &mut App) {
-        // let seed = random_range(0..u64::MAX);
-        let seed = 1;
-        debug!("Using rng seed: {seed}");
-        app.insert_resource(RngSeed(seed));
-
         app.add_event::<RenderedTileLayer>();
         app.add_event::<NewMap>();
 
@@ -34,9 +29,14 @@ pub struct TileSprite {
     pub role: Option<UtilityTile>,
 }
 
+pub trait IsImpassable {
+    fn is_impassable(&self) -> bool;
+}
+
 #[derive(Component)]
 pub struct PlayerStartTile;
 
+#[allow(unused)]
 #[derive(Debug, PartialEq, Eq)]
 pub enum TileLayerRole {
     Base,
@@ -44,6 +44,7 @@ pub enum TileLayerRole {
     ForegroundDecorations,
 }
 
+#[allow(unused)]
 #[derive(Component)]
 pub struct TileLayer {
     pub role: TileLayerRole,
@@ -51,10 +52,6 @@ pub struct TileLayer {
     pub tileset_name: &'static str,
     pub z: f32,
 }
-
-// TODO: extract this to a separate plugin
-#[derive(Resource)]
-pub struct RngSeed(pub u64);
 
 #[derive(Event)]
 pub struct NewMap;

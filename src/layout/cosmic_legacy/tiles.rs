@@ -1,6 +1,6 @@
 use super::utility_to_cosmic;
+use crate::layout::IsImpassable;
 use crate::layout::functional_tiles::UtilityTile;
-use crate::layout::impassable::IsImpassable;
 use crate::layout::plugin::TileSprite;
 use crate::layout::replacement::Replaceable;
 use bevy::prelude::*;

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use super::overlapping_rooms::*;
-use super::{functional_tiles::UtilityTile, functional_tiles::UtilityTile::*, replacement::*};
+use super::functional_tiles::UtilityTile;
+use super::room::*;
 use bevy::prelude::*;
 use rand::Rng;
 use rand_chacha::ChaCha8Rng;
@@ -75,6 +75,8 @@ pub fn walking_squares(
             // order by farthest to nearest
             let rev_distances = distances.iter().rev().collect::<Vec<_>>();
 
+            // TODO: maybe instead of weighting by distance, it could instead have equal weights if the
+            // point is far enough from the origin
             let mut weight_budget = 1.0;
             let mut weights: HashMap<TileDir, f32> = HashMap::new();
             for (dir, _) in rev_distances {

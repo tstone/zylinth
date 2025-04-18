@@ -1,6 +1,6 @@
 use bevy::ecs::component::Component;
 
-use super::impassable::IsImpassable;
+use super::IsImpassable;
 use super::replacement::Replaceable;
 
 #[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]

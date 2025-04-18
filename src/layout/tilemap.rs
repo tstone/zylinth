@@ -8,6 +8,7 @@ use super::functional_tiles::UtilityTile;
 use super::plugin::{PlayerStartTile, TileLayer, TileSprite};
 use super::tileset::{Tileset, TilesetId};
 
+#[allow(unused)]
 #[derive(Component, Debug, Default)]
 pub struct Tile {
     pub grid_x: u32,
@@ -19,6 +20,7 @@ pub struct Tile {
     pub role: Option<UtilityTile>,
 }
 
+#[allow(unused)]
 #[derive(Component, Debug)]
 pub struct Tilemap {
     pub width: u32,
@@ -41,7 +43,7 @@ pub fn render_tilemap(
     let (layer, transform) = query.get(trigger.entity()).unwrap();
     let tileset_id = tileset_ids
         .iter()
-        .find(|(name, id)| **name == Name::new(layer.tileset_name))
+        .find(|(name, _)| **name == Name::new(layer.tileset_name))
         .map(|(_, id)| id)
         .unwrap();
     let tileset = tileset_assets.get(tileset_id.id).unwrap();
