@@ -50,9 +50,9 @@ fn main() {
 
 fn startup(mut commands: Commands) {
     commands.queue(SpawnBuildingMap {
-        width: 200,
+        width: 100,
         height: 50,
-        density: 0.25,
+        density: 0.1,
         wander_factor: 0.25,
     });
 }

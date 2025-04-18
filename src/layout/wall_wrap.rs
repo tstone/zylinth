@@ -164,6 +164,14 @@ lazy_static! {
         Replacement::from_to(WallRight, WallInnerCornerBottomLeft, |ctx| {
             ctx.below == Some(WallTopUpper) && (ctx.bottom_right == Some(WallTopRight) || ctx.bottom_right == Some(WallTopUpper))
         }),
+        // ┐ - inner corner bottom left
+        Replacement::from_to(WallBottom, WallInnerCornerTopRight, |ctx| {
+            ctx.above == Some(Floor) && (ctx.right == Some(WallTopUpper) || ctx.right == Some(WallTopLower)) && ctx.top_right == Some(Floor)
+        }),
+        // ┌ - inner corner bottom right
+        Replacement::from_to(WallBottom, WallInnerCornerTopLeft, |ctx| {
+            ctx.above == Some(Floor) && (ctx.right == Some(WallTopUpper) || ctx.right == Some(WallTopLower)) && ctx.top_left == Some(Floor)
+        }),
 
         // top most
         Replacement::from_to(Empty, WallTopmost, |ctx| {
