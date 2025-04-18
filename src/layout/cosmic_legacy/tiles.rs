@@ -160,6 +160,7 @@ impl CosmicLegacyTile {
                     tilesprites[x].push(Some(TileSprite {
                         index: utility_to_cosmic(utility, rng).into(),
                         collider: UtilityTile::is_impassable(&utility),
+                        role: Some(utility),
                     }));
                 } else {
                     tilesprites[x].push(None);
@@ -181,6 +182,7 @@ impl CosmicLegacyTile {
                     tilesprites[x].push(Some(TileSprite {
                         index: tile.into(),
                         collider: CosmicLegacyTile::is_impassable(&tile),
+                        role: None,
                     }));
                 } else {
                     tilesprites[x].push(None);

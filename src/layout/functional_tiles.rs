@@ -25,6 +25,7 @@ pub enum UtilityTile {
     WallTopRight,
     WallBottomRight,
     WallBottomLeft,
+    PlayerStart,
     Floor,
     FloorShadowLeft,
     FloorShadowTop,

@@ -1,16 +1,10 @@
-use crate::layout::cosmic_legacy::{CosmicLegacyTile, decorate};
 use crate::layout::lighting::spot_lights;
-use crate::layout::shadowizer::shadowize;
 use crate::layout::tilemap::{RenderedTileLayer, render_tilemap};
 use crate::layout::tileset::init_cosmic_tileset;
-use crate::layout::wall_wrap::wrap_walls;
 
-use super::fixer::floor_fixer;
+use super::functional_tiles::UtilityTile;
 use super::tileset::Tileset;
-use super::walking_squares::walking_squares;
 use bevy::prelude::*;
-use rand::prelude::*;
-use rand_chacha::ChaCha8Rng;
 
 pub struct TileLayoutPlugin;
 
@@ -22,6 +16,7 @@ impl Plugin for TileLayoutPlugin {
         app.insert_resource(RngSeed(seed));
 
         app.add_event::<RenderedTileLayer>();
+        app.add_event::<NewMap>();
 
         app.init_asset::<Tileset>();
 
@@ -36,60 +31,30 @@ impl Plugin for TileLayoutPlugin {
 pub struct TileSprite {
     pub index: usize,
     pub collider: bool,
+    pub role: Option<UtilityTile>,
+}
+
+#[derive(Component)]
+pub struct PlayerStartTile;
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum TileLayerRole {
+    Base,
+    BackgroundDecorations,
+    ForegroundDecorations,
 }
 
 #[derive(Component)]
 pub struct TileLayer {
+    pub role: TileLayerRole,
     pub grid: Vec<Vec<Option<TileSprite>>>,
     pub tileset_name: &'static str,
     pub z: f32,
 }
 
-pub struct SpawnBuilding {
-    width: usize,
-    height: usize,
-}
-
-impl SpawnBuilding {
-    pub fn new(width: usize, height: usize) -> Self {
-        Self { width, height }
-    }
-}
-
-impl Command for SpawnBuilding {
-    fn apply(self, world: &mut World) {
-        let seed = world.get_resource::<RngSeed>().unwrap();
-        let mut rng = ChaCha8Rng::seed_from_u64(seed.0);
-
-        let floor = walking_squares(24, 100, 0.15, 0.15, &mut rng);
-        let floor_fixed = floor_fixer(floor, &mut rng);
-        let walled = wrap_walls(floor_fixed, &mut rng);
-        let bg_decorations = decorate(&walled, &mut rng);
-        let shadow_walls = shadowize(walled, &mut rng);
-        let base_layer = CosmicLegacyTile::from_utility_to_tile_sprite(shadow_walls, &mut rng);
-        let bg_layer = CosmicLegacyTile::to_tile_sprite(bg_decorations);
-
-        // TODO: make another system that listens for game start, grabs all the tile layers, and figures out where to spawn the player (or something like that)
-
-        // spawn layers
-        world.spawn((
-            TileLayer {
-                grid: base_layer,
-                tileset_name: CosmicLegacyTile::name(),
-                z: 0.0,
-            },
-            Transform::default(),
-        ));
-        world.spawn((
-            TileLayer {
-                grid: bg_layer,
-                tileset_name: CosmicLegacyTile::name(),
-                z: 1.0,
-            },
-            Transform::default(),
-        ));
-    }
-}
-
+// TODO: extract this to a separate plugin
 #[derive(Resource)]
-pub struct RngSeed(u64);
+pub struct RngSeed(pub u64);
+
+#[derive(Event)]
+pub struct NewMap;

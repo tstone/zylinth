@@ -4,10 +4,11 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::cmp;
 
-use super::plugin::{TileLayer, TileSprite};
+use super::functional_tiles::UtilityTile;
+use super::plugin::{PlayerStartTile, TileLayer, TileSprite};
 use super::tileset::{Tileset, TilesetId};
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Default)]
 pub struct Tile {
     pub grid_x: u32,
     pub grid_y: u32,
@@ -15,17 +16,20 @@ pub struct Tile {
     pub height: u8,
     pub tile_index: usize,
     pub tileset_name: &'static str,
+    pub role: Option<UtilityTile>,
 }
 
 #[derive(Component, Debug)]
 pub struct Tilemap {
-    width: u32,
-    height: u32,
+    pub width: u32,
+    pub height: u32,
 }
 
 #[derive(Event)]
 pub struct RenderedTileLayer;
 
+/// Whenever a new TileLayer is spawned this system will detect it and
+/// render it into sprites
 pub fn render_tilemap(
     trigger: Trigger<OnAdd, TileLayer>,
     query: Query<(&TileLayer, &Transform)>,
@@ -46,6 +50,7 @@ pub fn render_tilemap(
     let height = layer.grid[0].len() as u32;
     let tilemap_entity = commands
         .spawn((Tilemap { width, height }, *transform, Visibility::Visible))
+        .add_child(trigger.entity())
         .id();
 
     let mut tile_entities: Vec<Entity> = Vec::new();
@@ -58,6 +63,16 @@ pub fn render_tilemap(
                 let offset_y = y as f32 * tileset.tile_height as f32;
                 // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
                 let flipped_y = width as f32 - offset_y - 1.0;
+
+                let player_start = t.role == Some(UtilityTile::PlayerStart);
+                let role = t.role.map(|r| {
+                    if r == UtilityTile::PlayerStart {
+                        UtilityTile::Floor
+                    } else {
+                        r
+                    }
+                });
+
                 let mut tile_entity = commands.spawn((
                     Tile {
                         grid_x: x,
@@ -66,6 +81,7 @@ pub fn render_tilemap(
                         height: tileset.tile_height,
                         tile_index: t.index,
                         tileset_name: layer.tileset_name,
+                        role,
                     },
                     Sprite {
                         image: tileset.image.clone(),
@@ -75,8 +91,12 @@ pub fn render_tilemap(
                         }),
                         ..default()
                     },
-                    Transform::from_xyz(offset_x, flipped_y, 0.0),
+                    Transform::from_xyz(offset_x, flipped_y, layer.z),
                 ));
+
+                if player_start {
+                    tile_entity.insert(PlayerStartTile);
+                }
 
                 // attach collider to top-left tile
                 if let Some(collider) = &collisions[x as usize][y as usize] {

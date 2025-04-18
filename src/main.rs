@@ -4,7 +4,7 @@ use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
-use layout::{SpawnBuilding, TileLayoutPlugin};
+use layout::{SpawnBuildingMap, TileLayoutPlugin};
 use player::PlayerPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
@@ -48,5 +48,5 @@ fn main() {
 }
 
 fn startup(mut commands: Commands) {
-    commands.queue(SpawnBuilding::new(200, 100));
+    commands.queue(SpawnBuildingMap::new(200, 100));
 }

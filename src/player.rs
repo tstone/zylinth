@@ -1,7 +1,9 @@
 use avian2d::prelude::*;
 use bevy::prelude::*;
+use bevy::transform::TransformSystem;
 use bevy_lit::prelude::PointLight2d;
 
+use crate::layout::{NewMap, PlayerStartTile};
 use crate::sprite_animation::SpriteAnimConfig;
 
 pub struct PlayerPlugin;
@@ -10,6 +12,10 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PreStartup, spawn_player);
         app.add_systems(Update, player_keyboard_input);
+        app.add_systems(
+            PostUpdate,
+            set_player_start.after(TransformSystem::TransformPropagate),
+        );
     }
 }
 
@@ -76,6 +82,27 @@ fn player_keyboard_input(
             sprite.flip_x = false;
         } else if direction.x < 0.0 {
             sprite.flip_x = true;
+        }
+    }
+}
+
+fn set_player_start(
+    mut ev_newmap: EventReader<NewMap>,
+    query: Query<(&GlobalTransform, &PlayerStartTile)>,
+    mut player: Query<&mut Transform, With<Player>>,
+) {
+    for _ in ev_newmap.read() {
+        for (transform, _) in query.iter() {
+            let mut player = player.single_mut();
+            // TODO: why is this 0,0
+            debug!(
+                "moving player {},{}",
+                transform.translation().x,
+                transform.translation().y
+            );
+            player.translation.x = transform.translation().x;
+            player.translation.y = transform.translation().y;
+            player.translation.z = 20.0;
         }
     }
 }

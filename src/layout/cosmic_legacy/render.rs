@@ -45,5 +45,6 @@ pub fn utility_to_cosmic(utility: UtilityTile, rng: &mut ChaCha8Rng) -> CosmicLe
         UtilityTile::Test1 => CosmicLegacyTile::Pink,
         UtilityTile::Test2 => CosmicLegacyTile::LightYellow,
         UtilityTile::Test3 => CosmicLegacyTile::DarkestBlue,
+        UtilityTile::PlayerStart => CosmicLegacyTile::Floor,
     }
 }
