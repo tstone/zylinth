@@ -16,8 +16,9 @@ lazy_static! {
     static ref VERT_DECORATIONS: Vec<ReplacementRule<UtilityTile>> = vec![
         // locker
         ReplacementRule {
-            target: UtilityTile::WallTopLower,
+            target: Some(UtilityTile::WallTopLower),
             condition: |ctx| {
+                let ctx = ctx.layer(0);
                 ctx.down() == Floor && (
                     ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )
@@ -31,8 +32,9 @@ lazy_static! {
         },
         // locker open
         ReplacementRule {
-            target: UtilityTile::WallTopLower,
+            target: Some(UtilityTile::WallTopLower),
             condition: |ctx| {
+                let ctx = ctx.layer(0);
                 ctx.down() == Floor && (
                     ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )
@@ -46,8 +48,9 @@ lazy_static! {
         },
         // alien
         ReplacementRule {
-            target: UtilityTile::WallTopLower,
+            target: Some(UtilityTile::WallTopLower),
             condition: |ctx| {
+                let ctx = ctx.layer(0);
                 ctx.down() == Floor && (
                     ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )
@@ -61,8 +64,9 @@ lazy_static! {
         },
         // bookshelf
         ReplacementRule {
-            target: UtilityTile::WallTopLower,
+            target: Some(UtilityTile::WallTopLower),
             condition: |ctx| {
+                let ctx = ctx.layer(0);
                 ctx.down() == Floor && (
                     ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )

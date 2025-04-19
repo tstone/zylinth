@@ -32,7 +32,7 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest())
                 .set(LogPlugin {
-                    filter: "info,wgpu_core=warn,wgpu_hal=warn,zylinth=debug".to_string(),
+                    filter: "info,wgpu_core=warn,wgpu_hal=warn,zylinth=trace".to_string(),
                     level: Level::TRACE,
                     ..Default::default()
                 }),

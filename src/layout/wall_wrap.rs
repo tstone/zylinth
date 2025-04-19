@@ -9,8 +9,8 @@ pub fn wrap_walls(
 ) -> Vec<Vec<Vec<Option<UtilityTile>>>> {
     let mut padded = TileGrid::pad(&input, 3, 1, 1, 1);
     replace_tiles(&mut padded, 0, FIRST_PASS.to_vec(), rng);
-    // replace_tiles(&mut padded, 0, SECOND_PASS.to_vec(), rng);
-    // replace_tiles(&mut padded, 0, THIRD_PASS.to_vec(), rng);
+    replace_tiles(&mut padded, 0, SECOND_PASS.to_vec(), rng);
+    replace_tiles(&mut padded, 0, THIRD_PASS.to_vec(), rng);
     padded
 }
 
@@ -18,53 +18,53 @@ lazy_static! {
     // first pass establishes walls all the way around floors
     static ref FIRST_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
         // top-left outer corner (small)
-        ReplacementRule::from_to(Empty, WallTopLeft, |ctx| {
+        ReplacementRule::none_to(WallTopLeft, |ctx| {
             ctx.up() == None && ctx.down() == None && ctx.right() == None && ctx.bottom_right() == Floor
         }),
         // top-right outer corner (small)
-        ReplacementRule::from_to(Empty, WallTopRight, |ctx| {
+        ReplacementRule::none_to(WallTopRight, |ctx| {
             ctx.up() == None && ctx.down() == None && ctx.left() == None && ctx.bottom_left() == Floor
         }),
         // bottom-left outer corner (small)
-        ReplacementRule::from_to(Empty, WallBottomLeft, |ctx| {
+        ReplacementRule::none_to(WallBottomLeft, |ctx| {
             ctx.up() == None && ctx.down() == None && ctx.right() == None && ctx.top_right() == Floor
         }),
         // bottom-right outer corner (small)
-        ReplacementRule::from_to(Empty, WallBottomRight, |ctx| {
+        ReplacementRule::none_to(WallBottomRight, |ctx| {
             ctx.up() == None && ctx.down() == None && ctx.left() == None && ctx.top_left() == Floor
         }),
 
         // └ - inner corner top right
-        ReplacementRule::from_to(Empty, WallTopLower, |ctx| {
+        ReplacementRule::none_to(WallTopLower, |ctx| {
             ctx.up() == None && ctx.left() == Floor && ctx.down() == Floor
         }),
         // ┘ - inner corner top left
-        ReplacementRule::from_to(Empty, WallTopLower, |ctx| {
+        ReplacementRule::none_to(WallTopLower, |ctx| {
             ctx.up() == None && ctx.right() == Floor && ctx.down() == Floor
         }),
         // ┐ - inner corner bottom left
-        ReplacementRule::from_to(Empty, WallInnerCornerTopRight, |ctx| {
+        ReplacementRule::none_to(WallInnerCornerTopRight, |ctx| {
             ctx.up() == Floor && ctx.right() == Floor && ctx.top_right() == Floor
         }),
         // ┌ - inner corner bottom right
-        ReplacementRule::from_to(Empty, WallInnerCornerTopLeft, |ctx| {
+        ReplacementRule::none_to(WallInnerCornerTopLeft, |ctx| {
             ctx.up() == Floor && ctx.left() == Floor && ctx.top_left() == Floor
         }),
 
         // top wall
-        ReplacementRule::from_to(Empty, WallTopLower, |ctx| {
+        ReplacementRule::none_to(WallTopLower, |ctx| {
             ctx.up() == None && ctx.down() == Floor
         }),
         // left
-        ReplacementRule::from_to(Empty, WallLeft, |ctx| {
+        ReplacementRule::none_to(WallLeft, |ctx| {
             ctx.left() == None && ctx.right() == Floor
         }),
         // right
-        ReplacementRule::from_to(Empty, WallRight, |ctx| {
+        ReplacementRule::none_to(WallRight, |ctx| {
             ctx.right() == None && ctx.left() == Floor
         }),
         // bottom
-        ReplacementRule::from_to(Empty, WallBottom, |ctx| {
+        ReplacementRule::none_to(WallBottom, |ctx| {
             ctx.down() == None && ctx.up() == Floor
         }),
     ];
@@ -72,11 +72,11 @@ lazy_static! {
     // second pass makes the top wall aler double height
     static ref SECOND_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
         // move top-left outer corner up
-        ReplacementRule::from_to(Empty, WallTopLeft, |ctx| {
+        ReplacementRule::none_to(WallTopLeft, |ctx| {
             ctx.down() == Some(WallTopLeft)
         }),
         // move top-right outer corner up
-        ReplacementRule::from_to(Empty, WallTopRight, |ctx| {
+        ReplacementRule::none_to(WallTopRight, |ctx| {
             ctx.down() == Some(WallTopRight)
         }),
         // ┘ - inner corner top left
@@ -92,7 +92,7 @@ lazy_static! {
         ReplacementRule::from_to(WallTopRight, WallRight, |_| { true }),
 
         // double top wall
-        ReplacementRule::from_to(Empty, WallTopUpper, |ctx| {
+        ReplacementRule::none_to(WallTopUpper, |ctx| {
             ctx.down() == WallTopLower
         }),
         ReplacementRule::from_to(WallInnerCornerTopLeft, WallTopUpper, |ctx| {
@@ -128,11 +128,11 @@ lazy_static! {
     // third pass wraps the wall in the top most layer
     static ref THIRD_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
         // move top-left outer corner up
-        ReplacementRule::from_to(Empty, WallTopLeft, |ctx| {
+        ReplacementRule::none_to(WallTopLeft, |ctx| {
             ctx.down() == Some(WallTopLeft)
         }),
         // move top-right outer corner up
-        ReplacementRule::from_to(Empty, WallTopRight, |ctx| {
+        ReplacementRule::none_to(WallTopRight, |ctx| {
             ctx.down() == Some(WallTopRight)
         }),
         // ┘ - inner corner top left
@@ -173,7 +173,7 @@ lazy_static! {
         }),
 
         // top most
-        ReplacementRule::from_to(Empty, WallTopmost, |ctx| {
+        ReplacementRule::none_to(WallTopmost, |ctx| {
             ctx.down() == WallTopUpper
         }),
     ];

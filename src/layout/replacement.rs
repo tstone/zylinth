@@ -1,14 +1,11 @@
-use rand::{prelude::*, random_bool};
+use bevy::log::*;
+use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
 
 use super::modifications::TileGrid;
-
-pub trait Replaceable {
-    fn is_empty(self: Self) -> bool;
-}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TileContext<'a, T: Copy + PartialEq + Eq> {
@@ -115,6 +112,12 @@ where
     pub fn below(&self) -> TileContext<'a, T> {
         self.get(0, 0, -1)
     }
+
+    /// Get context at an absolute layer
+    pub fn layer(&self, layer: usize) -> TileContext<'a, T> {
+        let dist_to_zero = self.grid_depth() as i32 - self.z;
+        self.get(0, 0, dist_to_zero + layer as i32)
+    }
 }
 
 impl<'a, T> PartialEq<T> for TileContext<'a, T>
@@ -147,7 +150,7 @@ where
 }
 
 #[derive(Clone, Debug)]
-pub struct Replacement<T: Replaceable + Copy + PartialEq + Eq> {
+pub struct Replacement<T: Copy + PartialEq + Eq> {
     delta_x: i32,
     delta_y: i32,
     delta_z: i32,
@@ -156,7 +159,7 @@ pub struct Replacement<T: Replaceable + Copy + PartialEq + Eq> {
 
 impl<T> Replacement<T>
 where
-    T: Replaceable + Copy + PartialEq + Eq,
+    T: Copy + PartialEq + Eq,
 {
     pub fn new(delta_x: i32, delta_y: i32, delta_z: i32, replacement: Option<T>) -> Self {
         Self {
@@ -196,7 +199,7 @@ where
     }
 
     pub fn top_right(replacement: T) -> Self {
-        Self::new(-1, 1, 0, Some(replacement))
+        Self::new(1, -1, 0, Some(replacement))
     }
 
     pub fn bottom_left(replacement: T) -> Self {
@@ -217,8 +220,8 @@ where
 }
 
 #[derive(Clone, Debug)]
-pub struct ReplacementRule<T: Replaceable + Copy + PartialEq + Eq> {
-    pub target: T,
+pub struct ReplacementRule<T: Copy + PartialEq + Eq> {
+    pub target: Option<T>,
     pub condition: fn(&TileContext<T>) -> bool,
     pub replacements: Vec<Replacement<T>>,
     pub chance: f64,
@@ -226,12 +229,30 @@ pub struct ReplacementRule<T: Replaceable + Copy + PartialEq + Eq> {
 
 impl<T> ReplacementRule<T>
 where
-    T: Replaceable + Default + Copy + PartialEq + Eq,
+    T: Default + Copy + PartialEq + Eq,
 {
     pub fn from_to(target: T, replacement: T, condition: fn(&TileContext<T>) -> bool) -> Self {
         ReplacementRule {
-            target,
+            target: Some(target),
             replacements: vec![Replacement::some(0, 0, 0, replacement)],
+            condition,
+            ..Default::default()
+        }
+    }
+
+    pub fn none_to(replacement: T, condition: fn(&TileContext<T>) -> bool) -> Self {
+        ReplacementRule {
+            target: None,
+            replacements: vec![Replacement::some(0, 0, 0, replacement)],
+            condition,
+            ..Default::default()
+        }
+    }
+
+    pub fn from_to_none(target: T, condition: fn(&TileContext<T>) -> bool) -> Self {
+        ReplacementRule {
+            target: Some(target),
+            replacements: vec![Replacement::new(0, 0, 0, None)],
             condition,
             ..Default::default()
         }
@@ -240,7 +261,7 @@ where
 
 impl<T> Default for ReplacementRule<T>
 where
-    T: Replaceable + Default + Copy + PartialEq + Eq,
+    T: Default + Copy + PartialEq + Eq,
 {
     fn default() -> Self {
         Self {
@@ -254,7 +275,7 @@ where
 
 /// Given a source grid, and a set of constraints, update the destination grid
 /// Note that source and destination grid MUST have the same size for this to work
-pub fn replace_tiles<T: PartialEq + Eq + Copy + Hash + Replaceable + Debug>(
+pub fn replace_tiles<T: PartialEq + Eq + Copy + Hash + Debug>(
     grid: &mut Vec<Vec<Vec<Option<T>>>>,
     layer: usize,
     rules: Vec<ReplacementRule<T>>,
@@ -268,9 +289,7 @@ pub fn replace_tiles<T: PartialEq + Eq + Copy + Hash + Replaceable + Debug>(
     for x in 0..width {
         for y in 0..height {
             for rule in rules.iter() {
-                if source[x][y][layer] == Some(rule.target)
-                    || (source[x][y][layer] == None && rule.target.is_empty())
-                {
+                if source[x][y][layer] == rule.target {
                     let tile_ctx = TileContext {
                         x: x as i32,
                         y: y as i32,
@@ -296,8 +315,18 @@ pub fn replace_tiles<T: PartialEq + Eq + Copy + Hash + Replaceable + Debug>(
                                 && grid[0].len() > 0
                                 && (rz as usize) < grid.len()
                             {
+                                trace!(
+                                    "Applying replacement from {:?} to {:?} at {rx},{ry},{rz}",
+                                    grid[rx as usize][ry as usize][rz as usize],
+                                    replacement.replacement
+                                );
                                 grid[rx as usize][ry as usize][rz as usize] =
                                     replacement.replacement;
+                            } else {
+                                warn!(
+                                    "Unable to apply replacement {:?} for {:?}",
+                                    replacement, rule
+                                );
                             }
                         }
 

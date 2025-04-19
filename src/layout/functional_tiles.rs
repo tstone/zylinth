@@ -1,7 +1,6 @@
 use bevy::ecs::component::Component;
 
 use super::IsImpassable;
-use super::replacement::Replaceable;
 
 #[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
@@ -10,7 +9,6 @@ pub enum UtilityTile {
     Test1,
     Test2,
     Test3,
-    Empty,
     WallTopmost,
     WallInnerCornerTopLeft,
     WallInnerCornerTopRight,
@@ -40,12 +38,6 @@ pub enum UtilityTile {
     HorzDecorationLeft(u8),
     HorzDecorationMiddle(u8),
     HorzDecorationRight(u8),
-}
-
-impl Replaceable for UtilityTile {
-    fn is_empty(self: Self) -> bool {
-        return self == UtilityTile::Empty;
-    }
 }
 
 impl IsImpassable for UtilityTile {

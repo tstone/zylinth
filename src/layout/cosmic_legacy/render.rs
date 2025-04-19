@@ -52,7 +52,6 @@ pub fn utility_to_cosmic(utility: UtilityTile, rng: &mut ChaCha8Rng) -> CosmicLe
         UtilityTile::VertDecorationBottom(4) => CosmicLegacyTile::BookcaseBottom,
 
         // test & misc
-        UtilityTile::Empty => CosmicLegacyTile::DarkestBlue,
         UtilityTile::Test1 => CosmicLegacyTile::Pink,
         UtilityTile::Test2 => CosmicLegacyTile::LightYellow,
         UtilityTile::Test3 => CosmicLegacyTile::DarkestBlue,

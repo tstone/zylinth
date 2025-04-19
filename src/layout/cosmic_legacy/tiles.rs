@@ -2,7 +2,6 @@ use super::utility_to_cosmic;
 use crate::layout::IsImpassable;
 use crate::layout::functional_tiles::UtilityTile;
 use crate::layout::plugin::TileSprite;
-use crate::layout::replacement::Replaceable;
 use bevy::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
@@ -180,12 +179,6 @@ impl Into<u32> for CosmicLegacyTile {
 impl Into<usize> for CosmicLegacyTile {
     fn into(self) -> usize {
         self as usize
-    }
-}
-
-impl Replaceable for CosmicLegacyTile {
-    fn is_empty(self: Self) -> bool {
-        false
     }
 }
 
