@@ -1,5 +1,5 @@
-mod context;
-mod grid;
-mod replacement;
-mod replacement_rule;
-mod replacer;
+pub mod context;
+pub mod grid;
+pub mod replacement;
+pub mod replacement_rule;
+pub mod replacer;
