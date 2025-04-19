@@ -1,49 +1,67 @@
 use super::functional_tiles::UtilityTile;
 
-#[allow(unused)]
-pub fn flip_horz(input: Vec<Vec<Option<UtilityTile>>>) -> Vec<Vec<Option<UtilityTile>>> {
-    let width = input.len();
-    let mut output: Vec<Vec<Option<UtilityTile>>> = vec![vec![]; width];
+pub struct TileGrid;
 
-    for x in 0..width {
-        let height = input[x].len();
-        let invert_x = width - 1 - x;
-        for y in 0..height {
-            output[x].push(input[invert_x][y]);
+impl TileGrid {
+    pub fn get_width<T>(grid: &Vec<Vec<Vec<Option<T>>>>) -> usize {
+        grid.len()
+    }
+
+    pub fn get_height<T>(grid: &Vec<Vec<Vec<Option<T>>>>) -> usize {
+        if Self::get_width(grid) > 0 {
+            grid[0].len()
+        } else {
+            0
         }
     }
-    output
-}
 
-/// Wrap grid in padding
-pub fn padding(
-    input: Vec<Vec<Option<UtilityTile>>>,
-    top: u8,
-    right: u8,
-    bottom: u8,
-    left: u8,
-) -> Vec<Vec<Option<UtilityTile>>> {
-    let width = input.len() + left as usize + right as usize;
-    let mut output: Vec<Vec<Option<UtilityTile>>> = vec![vec![]; width];
+    pub fn get_depth<T>(grid: &Vec<Vec<Vec<Option<T>>>>) -> usize {
+        if Self::get_height(grid) > 0 {
+            grid[0][0].len()
+        } else {
+            0
+        }
+    }
 
-    for x in 0..width {
-        let height = input[0].len() + top as usize + bottom as usize;
-        if x >= left as usize && x < (width - right as usize) {
-            let input_x = x - left as usize;
-            for y in 0..height {
-                if y >= top as usize && y < (height - bottom as usize) {
-                    let input_y = y - top as usize;
-                    output[x].push(input[input_x][input_y]);
-                } else {
-                    output[x].push(None);
+    /// Wrap grid in padding
+    pub fn pad<T: Clone>(
+        input: &Vec<Vec<Vec<Option<T>>>>,
+        top: u8,
+        right: u8,
+        bottom: u8,
+        left: u8,
+    ) -> Vec<Vec<Vec<Option<T>>>> {
+        let width = Self::get_width(input) + left as usize + right as usize;
+        let height = Self::get_height(input) + top as usize + bottom as usize;
+        let depth = Self::get_depth(input);
+        let mut output = vec![vec![vec![None; depth]; height]; width];
+
+        for x in 0..width {
+            if x >= left as usize && x < (width - right as usize) {
+                let input_x = x - left as usize;
+                for y in 0..height {
+                    for z in 0..depth {
+                        if y >= top as usize && y < (height - bottom as usize) {
+                            let input_y = y - top as usize;
+                            output[x][y][z] = input[input_x][input_y][z].clone();
+                        }
+                    }
                 }
             }
-        } else {
-            for _ in 0..height {
-                output[x].push(None);
+        }
+
+        output
+    }
+
+    pub fn add_layer(grid: &mut Vec<Vec<Vec<Option<UtilityTile>>>>) {
+        let height = Self::get_height(grid);
+        for x in 0..Self::get_width(grid) {
+            for y in 0..height {
+                let depth = grid[x][y].len();
+                for _ in 0..depth {
+                    grid[x][y].push(None);
+                }
             }
         }
     }
-
-    output
 }

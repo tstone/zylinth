@@ -1,80 +1,273 @@
+use bevy::log::*;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::ops::Deref;
 
-pub trait Replaceable {
-    fn is_empty(self: Self) -> bool;
+use super::modifications::TileGrid;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TileContext<'a, T: Copy + PartialEq + Eq> {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+    tile: &'a Option<T>,
+    grid: &'a Vec<Vec<Vec<Option<T>>>>,
 }
 
-#[derive(Debug)]
-pub struct TileContext<T> {
-    #[allow(unused)]
-    pub x: usize,
-    #[allow(unused)]
-    pub y: usize,
-    pub above: Option<T>,
-    pub below: Option<T>,
-    pub left: Option<T>,
-    pub right: Option<T>,
-    pub top_left: Option<T>,
-    pub top_right: Option<T>,
-    pub bottom_left: Option<T>,
-    pub bottom_right: Option<T>,
+impl<'a, T> TileContext<'a, T>
+where
+    T: Copy + PartialEq + Eq,
+{
+    pub fn grid_width(&self) -> usize {
+        self.grid.len()
+    }
+
+    pub fn grid_height(&self) -> usize {
+        if self.grid_width() > 0 {
+            self.grid[0].len()
+        } else {
+            0
+        }
+    }
+
+    pub fn grid_depth(&self) -> usize {
+        if self.grid_height() > 0 {
+            self.grid[0][0].len()
+        } else {
+            0
+        }
+    }
+
+    fn is_valid(&self, x: i32, y: i32, z: i32) -> bool {
+        x >= 0
+            && y >= 0
+            && z >= 0
+            && (x as usize) < self.grid_width()
+            && (y as usize) < self.grid_height()
+            && (z as usize) < self.grid_depth()
+    }
+
+    /// If this tile is actually on the grid or not
+    pub fn is_in_bounds(&self) -> bool {
+        self.is_valid(self.x, self.y, self.z)
+    }
+
+    /// Get context from another position, e.g. 1,-1 returns the bottom right corner
+    pub fn get(&self, x_delta: i32, y_delta: i32, z_delta: i32) -> TileContext<'a, T> {
+        let new_x = self.x + x_delta;
+        let new_y = self.y + y_delta;
+        let new_z = self.z + z_delta;
+
+        TileContext {
+            x: new_x,
+            y: new_y,
+            z: new_z,
+            tile: if self.is_valid(new_x, new_y, new_z) {
+                &self.grid[new_x as usize][new_y as usize][new_z as usize]
+            } else {
+                &None
+            },
+            grid: self.grid,
+        }
+    }
+
+    pub fn up(&self) -> TileContext<'a, T> {
+        self.get(0, -1, 0)
+    }
+
+    pub fn down(&self) -> TileContext<'a, T> {
+        self.get(0, 1, 0)
+    }
+
+    pub fn left(&self) -> TileContext<'a, T> {
+        self.get(-1, 0, 0)
+    }
+
+    pub fn right(&self) -> TileContext<'a, T> {
+        self.get(1, 0, 0)
+    }
+
+    pub fn top_left(&self) -> TileContext<'a, T> {
+        self.get(-1, -1, 0)
+    }
+
+    pub fn top_right(&self) -> TileContext<'a, T> {
+        self.get(1, -1, 0)
+    }
+
+    pub fn bottom_left(&self) -> TileContext<'a, T> {
+        self.get(-1, 1, 0)
+    }
+
+    pub fn bottom_right(&self) -> TileContext<'a, T> {
+        self.get(1, 1, 0)
+    }
+
+    pub fn above(&self) -> TileContext<'a, T> {
+        self.get(0, 0, 1)
+    }
+
+    pub fn below(&self) -> TileContext<'a, T> {
+        self.get(0, 0, -1)
+    }
+
+    /// Get context at an absolute layer
+    pub fn layer(&self, layer: usize) -> TileContext<'a, T> {
+        let dist_to_zero = self.grid_depth() as i32 - self.z;
+        self.get(0, 0, dist_to_zero + layer as i32)
+    }
+}
+
+impl<'a, T> PartialEq<T> for TileContext<'a, T>
+where
+    T: Copy + PartialEq + Eq,
+{
+    fn eq(&self, other: &T) -> bool {
+        *self.tile == Some(*other)
+    }
+}
+
+impl<'a, T> PartialEq<Option<T>> for TileContext<'a, T>
+where
+    T: Copy + PartialEq + Eq,
+{
+    fn eq(&self, other: &Option<T>) -> bool {
+        self.tile == other
+    }
+}
+
+impl<'a, T> Deref for TileContext<'a, T>
+where
+    T: Copy + PartialEq + Eq,
+{
+    type Target = Option<T>;
+
+    fn deref(&self) -> &Self::Target {
+        self.tile
+    }
 }
 
 #[derive(Clone, Debug)]
-pub struct Replacement<S: Replaceable, D: Replaceable> {
-    pub target: S,
-    pub condition: fn(&TileContext<S>) -> bool,
+pub struct Replacement<T: Copy + PartialEq + Eq> {
+    delta_x: i32,
+    delta_y: i32,
+    delta_z: i32,
+    replacement: Option<T>,
+}
 
-    // replacements
-    pub replacement: D,
-    pub replacement_above: Option<D>,
-    pub replacement_below: Option<D>,
-    pub replacement_on_left: Option<D>,
-    pub replacement_on_right: Option<D>,
-    pub replacement_top_left: Option<D>,
-    pub replacement_top_right: Option<D>,
-    pub replacement_bottom_left: Option<D>,
-    pub replacement_bottom_right: Option<D>,
+impl<T> Replacement<T>
+where
+    T: Copy + PartialEq + Eq,
+{
+    pub fn new(delta_x: i32, delta_y: i32, delta_z: i32, replacement: Option<T>) -> Self {
+        Self {
+            delta_x,
+            delta_y,
+            delta_z,
+            replacement,
+        }
+    }
 
+    pub fn some(delta_x: i32, delta_y: i32, delta_z: i32, replacement: T) -> Self {
+        Self::new(delta_x, delta_y, delta_z, Some(replacement))
+    }
+
+    pub fn this(replacement: T) -> Self {
+        Self::new(0, 0, 0, Some(replacement))
+    }
+
+    pub fn left(replacement: T) -> Self {
+        Self::new(-1, 0, 0, Some(replacement))
+    }
+
+    pub fn right(replacement: T) -> Self {
+        Self::new(1, 0, 0, Some(replacement))
+    }
+
+    pub fn up(replacement: T) -> Self {
+        Self::new(0, -1, 0, Some(replacement))
+    }
+
+    pub fn down(replacement: T) -> Self {
+        Self::new(0, 1, 0, Some(replacement))
+    }
+
+    pub fn top_left(replacement: T) -> Self {
+        Self::new(-1, -1, 0, Some(replacement))
+    }
+
+    pub fn top_right(replacement: T) -> Self {
+        Self::new(1, -1, 0, Some(replacement))
+    }
+
+    pub fn bottom_left(replacement: T) -> Self {
+        Self::new(-1, 1, 0, Some(replacement))
+    }
+
+    pub fn bottom_right(replacement: T) -> Self {
+        Self::new(1, 1, 0, Some(replacement))
+    }
+
+    pub fn above(replacement: T) -> Self {
+        Self::new(0, 0, 1, Some(replacement))
+    }
+
+    pub fn below(replacement: T) -> Self {
+        Self::new(0, 0, 1, Some(replacement))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ReplacementRule<T: Copy + PartialEq + Eq> {
+    pub target: Option<T>,
+    pub condition: fn(&TileContext<T>) -> bool,
+    pub replacements: Vec<Replacement<T>>,
     pub chance: f64,
 }
 
-impl<S, D> Replacement<S, D>
+impl<T> ReplacementRule<T>
 where
-    S: Replaceable + Default,
-    D: Replaceable + Default,
+    T: Default + Copy + PartialEq + Eq,
 {
-    pub fn from_to(target: S, replacement: D, condition: fn(&TileContext<S>) -> bool) -> Self {
-        Replacement {
-            target,
-            replacement,
+    pub fn from_to(target: T, replacement: T, condition: fn(&TileContext<T>) -> bool) -> Self {
+        ReplacementRule {
+            target: Some(target),
+            replacements: vec![Replacement::some(0, 0, 0, replacement)],
+            condition,
+            ..Default::default()
+        }
+    }
+
+    pub fn none_to(replacement: T, condition: fn(&TileContext<T>) -> bool) -> Self {
+        ReplacementRule {
+            target: None,
+            replacements: vec![Replacement::some(0, 0, 0, replacement)],
+            condition,
+            ..Default::default()
+        }
+    }
+
+    pub fn from_to_none(target: T, condition: fn(&TileContext<T>) -> bool) -> Self {
+        ReplacementRule {
+            target: Some(target),
+            replacements: vec![Replacement::new(0, 0, 0, None)],
             condition,
             ..Default::default()
         }
     }
 }
 
-impl<S, D> Default for Replacement<S, D>
+impl<T> Default for ReplacementRule<T>
 where
-    S: Replaceable + Default,
-    D: Replaceable + Default,
+    T: Default + Copy + PartialEq + Eq,
 {
     fn default() -> Self {
         Self {
             target: Default::default(),
             condition: |_| false,
-            replacement: Default::default(),
-            replacement_above: Default::default(),
-            replacement_below: Default::default(),
-            replacement_on_left: Default::default(),
-            replacement_on_right: Default::default(),
-            replacement_top_left: Default::default(),
-            replacement_top_right: Default::default(),
-            replacement_bottom_left: Default::default(),
-            replacement_bottom_right: Default::default(),
+            replacements: Default::default(),
             chance: 1.0,
         }
     }
@@ -82,182 +275,71 @@ where
 
 /// Given a source grid, and a set of constraints, update the destination grid
 /// Note that source and destination grid MUST have the same size for this to work
-pub fn replace_tiles<
-    S: PartialEq + Eq + Copy + Hash + Replaceable + Debug,
-    D: PartialEq + Eq + Copy + Hash + Replaceable + Debug,
->(
-    source: &Vec<Vec<Option<S>>>,
-    replacements: Vec<Replacement<S, D>>,
-    mut dest: Vec<Vec<Option<D>>>,
+pub fn replace_tiles<T: PartialEq + Eq + Copy + Hash + Debug>(
+    grid: &mut Vec<Vec<Vec<Option<T>>>>,
+    layer: usize,
+    rules: Vec<ReplacementRule<T>>,
     rng: &mut ChaCha8Rng,
-) -> Vec<Vec<Option<D>>> {
-    let width = dest.len();
+) {
+    // create a copy so that comparisions aren't using the modified version
+    let source = grid.clone();
+    let width = TileGrid::get_width(&source);
+    let height = TileGrid::get_height(&source);
+
     for x in 0..width {
-        let height = dest[x].len();
         for y in 0..height {
-            for replacement in replacements.iter() {
-                if source[x][y] == Some(replacement.target)
-                    || (source[x][y] == None && replacement.target.is_empty())
-                {
+            for rule in rules.iter() {
+                if source[x][y][layer] == rule.target {
                     let tile_ctx = TileContext {
-                        x,
-                        y,
-                        above: get_tile_above(x, y, source),
-                        below: get_tile_below(x, y, source),
-                        left: get_tile_left_of(x, y, source),
-                        right: get_tile_right_of(x, y, source),
-                        top_left: get_top_left_tile(x, y, source),
-                        top_right: get_top_right_tile(x, y, source),
-                        bottom_left: get_bottom_left_tile(x, y, source),
-                        bottom_right: get_bottom_right_tile(x, y, source),
+                        x: x as i32,
+                        y: y as i32,
+                        z: layer as i32,
+                        grid: &source,
+                        tile: &source[x][y][layer],
                     };
 
-                    if (replacement.condition)(&tile_ctx) {
-                        if replacement.chance == 1.0 || rng.random_bool(replacement.chance) {
-                            // apply replacements
-                            dest[x][y] = Some(replacement.replacement);
+                    // check conditions
+                    if (rule.condition)(&tile_ctx) && rng.random_bool(rule.chance) {
+                        // apply replacements
+                        for replacement in rule.replacements.clone() {
+                            let rx = x as i32 + replacement.delta_x;
+                            let ry = y as i32 + replacement.delta_y;
+                            let rz = layer as i32 + replacement.delta_z;
 
-                            // replace above
-                            match (replacement.replacement_above, tile_ctx.above) {
-                                (Some(above), Some(_)) => dest[x][y - 1] = Some(above),
-                                _ => {}
+                            if rx >= 0
+                                && ry >= 0
+                                && rz >= 0
+                                && (rx as usize) < grid.len()
+                                && grid.len() > 0
+                                && (ry as usize) < grid[0].len()
+                                && grid[0].len() > 0
+                                && (rz as usize) < grid.len()
+                            {
+                                trace!(
+                                    "Applying replacement from {:?} to {:?} at {rx},{ry},{rz}",
+                                    grid[rx as usize][ry as usize][rz as usize],
+                                    replacement.replacement
+                                );
+                                grid[rx as usize][ry as usize][rz as usize] =
+                                    replacement.replacement;
+                            } else {
+                                warn!(
+                                    "Unable to apply replacement {:?} for {:?}",
+                                    replacement, rule
+                                );
                             }
-                            // replace below
-                            match (replacement.replacement_below, tile_ctx.below) {
-                                (Some(below), Some(_)) => dest[x][y + 1] = Some(below),
-                                _ => {}
-                            }
-                            // replace left
-                            match (replacement.replacement_on_left, tile_ctx.left) {
-                                (Some(left), Some(_)) => dest[x - 1][y] = Some(left),
-                                _ => {}
-                            }
-                            // replace right
-                            match (replacement.replacement_on_right, tile_ctx.right) {
-                                (Some(right), Some(_)) => dest[x + 1][y] = Some(right),
-                                _ => {}
-                            }
-                            // replace top-left
-                            match (replacement.replacement_top_left, tile_ctx.top_left) {
-                                (Some(tl), Some(_)) => dest[x - 1][y - 1] = Some(tl),
-                                _ => {}
-                            }
-                            // replace top-right
-                            match (replacement.replacement_top_right, tile_ctx.top_right) {
-                                (Some(tr), Some(_)) => dest[x + 1][y - 1] = Some(tr),
-                                _ => {}
-                            }
-                            // replace bottom-left
-                            match (replacement.replacement_bottom_left, tile_ctx.bottom_left) {
-                                (Some(bl), Some(_)) => dest[x - 1][y + 1] = Some(bl),
-                                _ => {}
-                            }
-                            // replace bottom-right
-                            match (replacement.replacement_bottom_right, tile_ctx.bottom_right) {
-                                (Some(br), Some(_)) => dest[x + 1][y + 1] = Some(br),
-                                _ => {}
-                            }
-
-                            // skip remaining constraints since this one matched
-                            break;
                         }
+
+                        // skip remaining constraints since this one matched
+                        break;
                     }
                 }
             }
         }
     }
-    dest
 }
 
 #[allow(unused)]
 pub(crate) fn is_edge(x: usize, y: usize, width: usize, height: usize) -> bool {
     x == 0 || y == 0 || x == (width - 1) || y == (height - 1)
-}
-
-pub(crate) fn get_tile_above<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if y > 0 { grid[x][y - 1] } else { None }
-}
-
-pub(crate) fn get_tile_below<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if y < (grid[x].len() - 1) {
-        grid[x][y + 1]
-    } else {
-        None
-    }
-}
-
-pub(crate) fn get_tile_left_of<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if x > 0 { grid[x - 1][y] } else { None }
-}
-
-pub(crate) fn get_tile_right_of<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if x < (grid.len() - 1) {
-        grid[x + 1][y]
-    } else {
-        None
-    }
-}
-
-pub(crate) fn get_top_left_tile<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if x > 0 && y > 0 {
-        grid[x - 1][y - 1]
-    } else {
-        None
-    }
-}
-
-pub(crate) fn get_top_right_tile<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if x < (grid.len() - 1) && y > 0 {
-        grid[x + 1][y - 1]
-    } else {
-        None
-    }
-}
-
-pub(crate) fn get_bottom_left_tile<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if x > 0 && y < (grid[x].len() - 1) {
-        grid[x - 1][y + 1]
-    } else {
-        None
-    }
-}
-
-pub(crate) fn get_bottom_right_tile<T: PartialEq + Eq + Copy + Replaceable>(
-    x: usize,
-    y: usize,
-    grid: &Vec<Vec<Option<T>>>,
-) -> Option<T> {
-    if x < (grid.len() - 1) && y < (grid[x].len() - 1) {
-        grid[x + 1][y + 1]
-    } else {
-        None
-    }
 }

@@ -16,6 +16,7 @@ bevy_lit = "0.6.0"
 bevy_pancam = "0.17.0"
 itertools = "0.14.0"
 lazy_static = "1.5.0"
+linked_hash_set = "0.1.5"
 noise = "0.9.0"
 rand = "0.9.0"
 rand_chacha = "0.9.0"
@@ -24,3 +25,22 @@ rand_chacha = "0.9.0"
 default = ["render"]
 atlas = []
 render = []
+
+# https://bevyengine.org/learn/book/getting-started/setup/#compile-with-performance-optimizations
+
+# Enable a small amount of optimization in the dev profile.
+[profile.dev]
+opt-level = 2
+
+# Enable a large amount of optimization in the dev profile for dependencies.
+[profile.dev.package."*"]
+opt-level = 3
+
+# Enable more optimization in the release profile at the cost of compile time.
+[profile.release]
+# Compile the entire crate as one unit.
+# Slows compile times, marginal improvements.
+codegen-units = 1
+# Do a second optimization pass over the entire program, including dependencies.
+# Slows compile times, marginal improvements.
+lto = "thin"
