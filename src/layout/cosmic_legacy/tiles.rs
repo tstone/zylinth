@@ -102,6 +102,7 @@ pub enum CosmicLegacyTile {
     // Row 6
     // Row 7
     // Row 8
+    #[default]
     DarkPink = 119,
     Pink = 120,
     LightPink = 121,
@@ -116,9 +117,6 @@ pub enum CosmicLegacyTile {
     DarkestBlue = 130,
     DarkTeal = 131,
     Teal = 132,
-
-    #[default]
-    Empty = -1,
 }
 
 const NAME: &'static str = "cosmic";

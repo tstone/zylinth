@@ -32,7 +32,7 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest())
                 .set(LogPlugin {
-                    filter: "info,wgpu_core=warn,wgpu_hal=warn,zylinth=trace".to_string(),
+                    filter: "info,wgpu_core=warn,wgpu_hal=warn,zylinth=debug".to_string(),
                     level: Level::TRACE,
                     ..Default::default()
                 }),
@@ -50,9 +50,10 @@ fn main() {
 
 fn startup(mut commands: Commands) {
     commands.queue(SpawnBuildingMap {
-        width: 100,
-        height: 50,
-        density: 0.1,
-        wander_factor: 0.25,
+        width: 600,
+        height: 40,
+        density: 0.125,
+        branch_factor: 0.25,
+        wander_factor: 0.5,
     });
 }

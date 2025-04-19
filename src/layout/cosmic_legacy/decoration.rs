@@ -30,8 +30,8 @@ lazy_static! {
             replacement: CosmicLegacyTile::LockerClosedTop,
             replacement_below: Some(CosmicLegacyTile::LockerClosedBottom),
             condition: |ctx| {
-                ctx.below == Some(Floor) && (
-                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
+                ctx.below() == Floor && (
+                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )
             },
             chance: 0.125,
@@ -43,8 +43,8 @@ lazy_static! {
             replacement: CosmicLegacyTile::LockerOpenTop,
             replacement_below: Some(CosmicLegacyTile::LockerOpenBottom),
             condition: |ctx| {
-                ctx.below == Some(Floor) && (
-                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
+                ctx.below() == Floor && (
+                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )
             },
             chance: 0.08,
@@ -56,8 +56,8 @@ lazy_static! {
             replacement: CosmicLegacyTile::AlienTop,
             replacement_below: Some(CosmicLegacyTile::AlienBottom),
             condition: |ctx| {
-                ctx.below == Some(Floor) && (
-                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
+                ctx.below() == Floor && (
+                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )
             },
             chance: 0.19,
@@ -69,8 +69,8 @@ lazy_static! {
             replacement: CosmicLegacyTile::BookcaseTop,
             replacement_below: Some(CosmicLegacyTile::BookcaseBottom),
             condition: |ctx| {
-                ctx.below == Some(Floor) && (
-                    ctx.left == Some(WallTopLower) || ctx.right == Some(WallTopLower)
+                ctx.below() == Floor && (
+                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
                 )
             },
             chance: 0.2,

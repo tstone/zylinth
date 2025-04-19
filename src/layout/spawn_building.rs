@@ -19,6 +19,8 @@ pub struct SpawnBuildingMap {
     pub density: f32,
     /// how much should this randomly go in a different direction
     pub wander_factor: f32,
+    /// how much often this should split off in a new direction
+    pub branch_factor: f32,
 }
 
 impl Command for SpawnBuildingMap {
@@ -30,6 +32,7 @@ impl Command for SpawnBuildingMap {
             self.width,
             self.height,
             self.density,
+            self.branch_factor,
             self.wander_factor,
             &mut rng,
         );
