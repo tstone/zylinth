@@ -219,8 +219,21 @@ impl Room {
         }
     }
 
-    pub fn copy_grid_into(&self, dest: &mut Vec<Vec<Option<UtilityTile>>>) {
-        copy_into_grid(&self.grid, self.rect.top_left(), dest);
+    /// Copy this room's tiles into a grid
+    pub fn copy_grid_into(&self, dest: &mut Vec<Vec<Vec<Option<UtilityTile>>>>, layer: usize) {
+        let top_left = self.rect.top_left();
+
+        for x in 0..self.grid.len() {
+            let dest_x = x + top_left.x;
+            if dest_x < dest.len() {
+                for y in 0..self.grid[x].len() {
+                    let dest_y = top_left.y + y;
+                    if dest_y < dest[x].len() {
+                        dest[dest_x][dest_y][layer] = self.grid[x][y];
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -287,33 +300,13 @@ impl TileDir {
     }
 }
 
-// TODO: just move this into Room
-/// A method to copy a smaller grid into a larger grid
-fn copy_into_grid(
-    source: &Vec<Vec<Option<UtilityTile>>>,
-    top_left: TilePoint,
-    dest: &mut Vec<Vec<Option<UtilityTile>>>,
-) {
-    for x in 0..source.len() {
-        let dest_x = x + top_left.x;
-        if dest_x < dest.len() {
-            for y in 0..source[x].len() {
-                let dest_y = top_left.y + y;
-                if dest_y < dest[x].len() {
-                    dest[dest_x][dest_y] = source[x][y];
-                }
-            }
-        }
-    }
-}
-
 /// Calculate what percent the grid is filled
-pub fn measure_density(grid: &Vec<Vec<Option<UtilityTile>>>) -> f32 {
+pub fn measure_density(grid: &Vec<Vec<Vec<Option<UtilityTile>>>>, layer: usize) -> f32 {
     let mut count: u32 = 0;
     let mut total: u32 = 0;
     for x in 0..grid.len() {
         for y in 0..grid[x].len() {
-            if grid[x][y].is_some() {
+            if grid[x][y][layer].is_some() {
                 count += 1;
             }
             total += 1;

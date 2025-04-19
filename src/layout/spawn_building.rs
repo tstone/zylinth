@@ -1,9 +1,11 @@
-use crate::layout::cosmic_legacy::{CosmicLegacyTile, decorate};
+use crate::layout::cosmic_legacy::CosmicLegacyTile;
 use crate::layout::shadowizer::shadowize;
 use crate::layout::wall_wrap::wrap_walls;
 use crate::seed::RngSeed;
 
-use super::fixer::floor_fixer;
+use super::decoration::decorate_layer;
+use super::fixer::fix_floor;
+use super::modifications::TileGrid;
 use super::starter::mark_player_start_tile;
 use super::walking_squares::walking_squares;
 use super::{NewMap, TileLayer, TileLayerRole};
@@ -28,7 +30,7 @@ impl Command for SpawnBuildingMap {
         let seed = world.get_resource::<RngSeed>().unwrap();
         let mut rng = ChaCha8Rng::seed_from_u64(seed.0);
 
-        let floor = walking_squares(
+        let mut floor = walking_squares(
             self.width,
             self.height,
             self.density,
@@ -36,15 +38,19 @@ impl Command for SpawnBuildingMap {
             self.wander_factor,
             &mut rng,
         );
-        let floor_fixed = floor_fixer(floor, &mut rng);
-        let walled = wrap_walls(floor_fixed, &mut rng);
-        let bg_decorations = decorate(&walled, &mut rng);
-        let mut shadow_walls = shadowize(walled, &mut rng);
-        mark_player_start_tile(&mut shadow_walls);
+        fix_floor(&mut floor, &mut rng);
+        let mut grid = wrap_walls(floor, &mut rng);
 
-        let base_layer = CosmicLegacyTile::from_utility_to_tile_sprite(shadow_walls, &mut rng);
-        let bg_layer = CosmicLegacyTile::to_tile_sprite(bg_decorations);
+        TileGrid::add_layer(&mut grid);
+        decorate_layer(&mut grid, 1, &mut rng);
+        shadowize(&mut grid, &mut rng);
+        mark_player_start_tile(&mut grid);
 
+        let base_layer = CosmicLegacyTile::from_utility_to_tile_sprite(&grid, 0, &mut rng);
+        // TODO: how to render different layers to different tile sets?
+        // let bg_layer = CosmicLegacyTile::to_tile_sprite(&grid, 1);
+
+        // TODO: change this to a custom command instead of spawning TileLayer
         world.spawn((
             TileLayer {
                 role: TileLayerRole::Base,
@@ -54,15 +60,15 @@ impl Command for SpawnBuildingMap {
             },
             Transform::default(),
         ));
-        world.spawn((
-            TileLayer {
-                role: TileLayerRole::BackgroundDecorations,
-                grid: bg_layer,
-                tileset_name: CosmicLegacyTile::name(),
-                z: 1.0,
-            },
-            Transform::default(),
-        ));
+        // world.spawn((
+        //     TileLayer {
+        //         role: TileLayerRole::BackgroundDecorations,
+        //         grid: bg_layer,
+        //         tileset_name: CosmicLegacyTile::name(),
+        //         z: 1.0,
+        //     },
+        //     Transform::default(),
+        // ));
 
         world.send_event(NewMap);
     }

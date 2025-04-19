@@ -41,10 +41,23 @@ pub fn utility_to_cosmic(utility: UtilityTile, rng: &mut ChaCha8Rng) -> CosmicLe
         UtilityTile::FloorShadowOuterCorner => CosmicLegacyTile::FloorShadowOuterCorner,
         UtilityTile::FloorShadowInnerCorner => CosmicLegacyTile::FloorShadowInnerCorner,
 
+        // decoration
+        UtilityTile::VertDecorationTop(1) => CosmicLegacyTile::LockerClosedTop,
+        UtilityTile::VertDecorationBottom(1) => CosmicLegacyTile::LockerClosedBottom,
+        UtilityTile::VertDecorationTop(2) => CosmicLegacyTile::LockerOpenTop,
+        UtilityTile::VertDecorationBottom(2) => CosmicLegacyTile::LockerOpenBottom,
+        UtilityTile::VertDecorationTop(3) => CosmicLegacyTile::AlienTop,
+        UtilityTile::VertDecorationBottom(3) => CosmicLegacyTile::AlienBottom,
+        UtilityTile::VertDecorationTop(4) => CosmicLegacyTile::BookcaseTop,
+        UtilityTile::VertDecorationBottom(4) => CosmicLegacyTile::BookcaseBottom,
+
+        // test & misc
         UtilityTile::Empty => CosmicLegacyTile::DarkestBlue,
         UtilityTile::Test1 => CosmicLegacyTile::Pink,
         UtilityTile::Test2 => CosmicLegacyTile::LightYellow,
         UtilityTile::Test3 => CosmicLegacyTile::DarkestBlue,
         UtilityTile::PlayerStart => CosmicLegacyTile::Floor,
+
+        _ => CosmicLegacyTile::DarkestBlue,
     }
 }

@@ -13,8 +13,9 @@ pub fn walking_squares(
     branch_factor: f32,
     wander_factor: f32,
     rng: &mut ChaCha8Rng,
-) -> Vec<Vec<Option<UtilityTile>>> {
-    let mut grid: Vec<Vec<Option<UtilityTile>>> = vec![vec![None; total_height]; total_width];
+) -> Vec<Vec<Vec<Option<UtilityTile>>>> {
+    let mut grid: Vec<Vec<Vec<Option<UtilityTile>>>> =
+        vec![vec![vec![None; 1]; total_height]; total_width];
     let bounding = TileRect::new(0, 0, total_width, total_height);
     let origin_region = bounding
         .get_inner_slice(9, 9)
@@ -61,9 +62,9 @@ pub fn walking_squares(
                 // Make sure the resulting room is actually large enough to be useful
                 if room_rect.width() >= 3 && room_rect.height() >= 3 {
                     trace!("Generated a room {:?}", room_rect);
-                    room.copy_grid_into(&mut grid);
+                    room.copy_grid_into(&mut grid, 0);
                     previous_region = room_rect.clone();
-                    density = measure_density(&grid);
+                    density = measure_density(&grid, 0);
                     steps_since_last_dir_change += 1;
 
                     // Wander about

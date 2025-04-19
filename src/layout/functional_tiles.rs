@@ -33,6 +33,13 @@ pub enum UtilityTile {
     FloorShadowTopTransition,
     FloorShadowOuterCorner,
     FloorShadowInnerCorner,
+    // Decoration
+    VertDecorationTop(u8),
+    VertDecorationMiddle(u8),
+    VertDecorationBottom(u8),
+    HorzDecorationLeft(u8),
+    HorzDecorationMiddle(u8),
+    HorzDecorationRight(u8),
 }
 
 impl Replaceable for UtilityTile {
