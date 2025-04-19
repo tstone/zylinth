@@ -4,6 +4,8 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
 
+use super::modifications::TileGrid;
+
 pub trait Replaceable {
     fn is_empty(self: Self) -> bool;
 }
@@ -258,21 +260,23 @@ pub fn replace_tiles<T: PartialEq + Eq + Copy + Hash + Replaceable + Debug>(
     rules: Vec<ReplacementRule<T>>,
     rng: &mut ChaCha8Rng,
 ) {
-    let width = grid.len();
+    // create a copy so that comparisions aren't using the modified version
+    let source = grid.clone();
+    let width = TileGrid::get_width(&source);
+    let height = TileGrid::get_height(&source);
+
     for x in 0..width {
-        let height = grid[x].len();
         for y in 0..height {
             for rule in rules.iter() {
-                if grid[x][y][layer] == Some(rule.target)
-                    || (grid[x][y][layer] == None && rule.target.is_empty())
+                if source[x][y][layer] == Some(rule.target)
+                    || (source[x][y][layer] == None && rule.target.is_empty())
                 {
-                    // TODO: pass rng in context?
                     let tile_ctx = TileContext {
                         x: x as i32,
                         y: y as i32,
                         z: layer as i32,
-                        grid: &grid,
-                        tile: &grid[x][y][layer],
+                        grid: &source,
+                        tile: &source[x][y][layer],
                     };
 
                     // check conditions

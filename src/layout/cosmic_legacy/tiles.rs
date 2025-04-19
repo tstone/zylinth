@@ -146,7 +146,7 @@ impl CosmicLegacyTile {
         ]
     }
 
-    pub fn from_utility_to_tile_sprite(
+    pub fn to_tile_sprite(
         grid: &Vec<Vec<Vec<Option<UtilityTile>>>>,
         layer: usize,
         rng: &mut ChaCha8Rng,
@@ -160,29 +160,6 @@ impl CosmicLegacyTile {
                         index: utility_to_cosmic(utility, rng).into(),
                         collider: UtilityTile::is_impassable(&utility),
                         role: Some(utility),
-                    }));
-                } else {
-                    tilesprites[x].push(None);
-                }
-            }
-        }
-
-        tilesprites
-    }
-
-    pub fn to_tile_sprite(
-        grid: &Vec<Vec<Vec<Option<CosmicLegacyTile>>>>,
-        layer: usize,
-    ) -> Vec<Vec<Option<TileSprite>>> {
-        let mut tilesprites: Vec<Vec<Option<TileSprite>>> = vec![vec![]; grid.len()];
-
-        for x in 0..grid.len() {
-            for y in 0..grid[x].len() {
-                if let Some(tile) = grid[x][y][layer] {
-                    tilesprites[x].push(Some(TileSprite {
-                        index: tile.into(),
-                        collider: CosmicLegacyTile::is_impassable(&tile),
-                        role: None,
                     }));
                 } else {
                     tilesprites[x].push(None);

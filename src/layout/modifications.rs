@@ -3,11 +3,11 @@ use super::functional_tiles::UtilityTile;
 pub struct TileGrid;
 
 impl TileGrid {
-    pub fn get_width(grid: &Vec<Vec<Vec<Option<UtilityTile>>>>) -> usize {
+    pub fn get_width<T>(grid: &Vec<Vec<Vec<Option<T>>>>) -> usize {
         grid.len()
     }
 
-    pub fn get_height(grid: &Vec<Vec<Vec<Option<UtilityTile>>>>) -> usize {
+    pub fn get_height<T>(grid: &Vec<Vec<Vec<Option<T>>>>) -> usize {
         if Self::get_width(grid) > 0 {
             grid[0].len()
         } else {
@@ -15,7 +15,7 @@ impl TileGrid {
         }
     }
 
-    pub fn get_depth(grid: &Vec<Vec<Vec<Option<UtilityTile>>>>) -> usize {
+    pub fn get_depth<T>(grid: &Vec<Vec<Vec<Option<T>>>>) -> usize {
         if Self::get_height(grid) > 0 {
             grid[0][0].len()
         } else {
@@ -24,13 +24,13 @@ impl TileGrid {
     }
 
     /// Wrap grid in padding
-    pub fn pad(
-        input: &Vec<Vec<Vec<Option<UtilityTile>>>>,
+    pub fn pad<T: Clone>(
+        input: &Vec<Vec<Vec<Option<T>>>>,
         top: u8,
         right: u8,
         bottom: u8,
         left: u8,
-    ) -> Vec<Vec<Vec<Option<UtilityTile>>>> {
+    ) -> Vec<Vec<Vec<Option<T>>>> {
         let width = Self::get_width(input) + left as usize + right as usize;
         let height = Self::get_height(input) + top as usize + bottom as usize;
         let depth = Self::get_depth(input);
@@ -43,7 +43,7 @@ impl TileGrid {
                     for z in 0..depth {
                         if y >= top as usize && y < (height - bottom as usize) {
                             let input_y = y - top as usize;
-                            output[x][y][z] = input[input_x][input_y][z];
+                            output[x][y][z] = input[input_x][input_y][z].clone();
                         }
                     }
                 }

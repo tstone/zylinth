@@ -9,8 +9,8 @@ pub fn wrap_walls(
 ) -> Vec<Vec<Vec<Option<UtilityTile>>>> {
     let mut padded = TileGrid::pad(&input, 3, 1, 1, 1);
     replace_tiles(&mut padded, 0, FIRST_PASS.to_vec(), rng);
-    replace_tiles(&mut padded, 0, SECOND_PASS.to_vec(), rng);
-    replace_tiles(&mut padded, 0, THIRD_PASS.to_vec(), rng);
+    // replace_tiles(&mut padded, 0, SECOND_PASS.to_vec(), rng);
+    // replace_tiles(&mut padded, 0, THIRD_PASS.to_vec(), rng);
     padded
 }
 
