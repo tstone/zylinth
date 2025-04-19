@@ -1,9 +1,9 @@
 use super::utility_to_cosmic;
+use crate::layout::IsImpassable;
 use crate::layout::functional_tiles::UtilityTile;
-use crate::layout::impassable::IsImpassable;
-use crate::layout::replacement::Replaceable;
-use crate::layout::tilemap::Tileset;
+use crate::layout::plugin::TileSprite;
 use bevy::prelude::*;
+use rand_chacha::ChaCha8Rng;
 
 #[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
@@ -21,7 +21,7 @@ pub enum CosmicLegacyTile {
     TopCapBottomSimple = 9,
     PlateGrill = 10,
     WallCircuits = 11,
-    WallSmall = 12,
+    PanelGreen = 12,
     RootsTopLeft = 13,
     RootsTopRight = 14,
     ShelfLeft = 15,
@@ -101,6 +101,7 @@ pub enum CosmicLegacyTile {
     // Row 6
     // Row 7
     // Row 8
+    #[default]
     DarkPink = 119,
     Pink = 120,
     LightPink = 121,
@@ -115,12 +116,16 @@ pub enum CosmicLegacyTile {
     DarkestBlue = 130,
     DarkTeal = 131,
     Teal = 132,
-
-    #[default]
-    Empty = -1,
 }
 
+const NAME: &'static str = "cosmic";
+
 impl CosmicLegacyTile {
+    #[inline]
+    pub fn name() -> &'static str {
+        NAME
+    }
+
     pub fn wall_tiles() -> Vec<CosmicLegacyTile> {
         vec![
             Self::Wall,
@@ -140,46 +145,28 @@ impl CosmicLegacyTile {
         ]
     }
 
-    pub fn to_utility_tileset(
-        asset_server: &Res<AssetServer>,
-        texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
-    ) -> Tileset<UtilityTile> {
-        let atlas_layout = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
-            UVec2::splat(16),
-            17,
-            8,
-            None,
-            None,
-        ));
+    pub fn to_tile_sprite(
+        grid: &Vec<Vec<Vec<Option<UtilityTile>>>>,
+        layer: usize,
+        rng: &mut ChaCha8Rng,
+    ) -> Vec<Vec<Option<TileSprite>>> {
+        let mut tilesprites: Vec<Vec<Option<TileSprite>>> = vec![vec![]; grid.len()];
 
-        Tileset {
-            tile_width: 16,
-            tile_height: 16,
-            image: asset_server.load("CosmicLegacy_PetricakeGames.png"),
-            layout: atlas_layout,
-            render: |utility, rng| utility_to_cosmic(utility, rng).into(),
+        for x in 0..grid.len() {
+            for y in 0..grid[x].len() {
+                if let Some(utility) = grid[x][y][layer] {
+                    tilesprites[x].push(Some(TileSprite {
+                        index: utility_to_cosmic(utility, rng).into(),
+                        collider: UtilityTile::is_impassable(&utility),
+                        role: Some(utility),
+                    }));
+                } else {
+                    tilesprites[x].push(None);
+                }
+            }
         }
-    }
 
-    pub fn to_cosmic_tileset(
-        asset_server: &Res<AssetServer>,
-        texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
-    ) -> Tileset<CosmicLegacyTile> {
-        let atlas_layout = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
-            UVec2::splat(16),
-            17,
-            8,
-            None,
-            None,
-        ));
-
-        Tileset {
-            tile_width: 16,
-            tile_height: 16,
-            image: asset_server.load("CosmicLegacy_PetricakeGames.png"),
-            layout: atlas_layout,
-            render: |t, _rng| t.into(),
-        }
+        tilesprites
     }
 }
 
@@ -192,12 +179,6 @@ impl Into<u32> for CosmicLegacyTile {
 impl Into<usize> for CosmicLegacyTile {
     fn into(self) -> usize {
         self as usize
-    }
-}
-
-impl Replaceable for CosmicLegacyTile {
-    fn is_empty(self: Self) -> bool {
-        false
     }
 }
 

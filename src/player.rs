@@ -1,15 +1,21 @@
 use avian2d::prelude::*;
 use bevy::prelude::*;
+use bevy::transform::TransformSystem;
 use bevy_lit::prelude::PointLight2d;
 
+use crate::layout::{NewMap, PlayerStartTile};
 use crate::sprite_animation::SpriteAnimConfig;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player);
+        app.add_systems(PreStartup, spawn_player);
         app.add_systems(Update, player_keyboard_input);
+        app.add_systems(
+            PostUpdate,
+            set_player_start.after(TransformSystem::TransformPropagate),
+        );
     }
 }
 
@@ -32,6 +38,7 @@ fn spawn_player(
                 layout: texture_atlas_layouts.add(layout),
                 index: anim_config.first_sprite_index,
             }),
+            custom_size: Some(Vec2::new(24.0, 24.0)),
             ..default()
         },
         anim_config,
@@ -42,10 +49,9 @@ fn spawn_player(
             falloff: 3.5,
             ..default()
         },
-        // starting position
-        Transform::from_xyz(120., -120., 20.),
+        Transform::default(),
         RigidBody::Dynamic,
-        Collider::circle(14.0),
+        Collider::circle(12.0),
         TranslationExtrapolation,
         LockedAxes::ROTATION_LOCKED,
         LinearDamping(2.75),
@@ -76,6 +82,27 @@ fn player_keyboard_input(
             sprite.flip_x = false;
         } else if direction.x < 0.0 {
             sprite.flip_x = true;
+        }
+    }
+}
+
+fn set_player_start(
+    mut ev_newmap: EventReader<NewMap>,
+    query: Query<(&GlobalTransform, &PlayerStartTile)>,
+    mut player: Query<&mut Transform, With<Player>>,
+) {
+    for _ in ev_newmap.read() {
+        for (transform, _) in query.iter() {
+            let mut player = player.single_mut();
+            // TODO: why is this 0,0
+            debug!(
+                "moving player {},{}",
+                transform.translation().x,
+                transform.translation().y
+            );
+            player.translation.x = transform.translation().x;
+            player.translation.y = transform.translation().y;
+            player.translation.z = 20.0;
         }
     }
 }
