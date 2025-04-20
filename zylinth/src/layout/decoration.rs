@@ -1,26 +1,21 @@
 use crate::layout::functional_tiles::UtilityTile;
 use crate::layout::functional_tiles::UtilityTile::*;
-use crate::layout::replacement::{Replacement, ReplacementRule, replace_tiles};
 use lazy_static::lazy_static;
 use rand_chacha::ChaCha8Rng;
+use tilegen::*;
 
-pub fn decorate_layer(
-    input: &mut Vec<Vec<Vec<Option<UtilityTile>>>>,
-    layer: usize,
-    rng: &mut ChaCha8Rng,
-) {
-    replace_tiles(input, layer, VERT_DECORATIONS.to_vec(), rng)
+pub fn decorate_layer(input: &mut TileGrid<UtilityTile>, layer: usize, rng: &mut ChaCha8Rng) {
+    input.apply_layer_replacements(layer, VERT_DECORATIONS.to_vec(), rng);
 }
 
 lazy_static! {
     static ref VERT_DECORATIONS: Vec<ReplacementRule<UtilityTile>> = vec![
         // locker
         ReplacementRule {
-            target: Some(UtilityTile::WallTopLower),
-            condition: |ctx| {
-                let ctx = ctx.layer(0);
-                ctx.down() == Floor && (
-                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
+            condition: |src, _| {
+                let base = src.layer(0);
+                *src == UtilityTile::WallTopLower && base.down() == Floor && (
+                    base.left() == WallTopLower || base.right() == WallTopLower
                 )
             },
             replacements: vec![
@@ -32,11 +27,10 @@ lazy_static! {
         },
         // locker open
         ReplacementRule {
-            target: Some(UtilityTile::WallTopLower),
-            condition: |ctx| {
-                let ctx = ctx.layer(0);
-                ctx.down() == Floor && (
-                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
+            condition: |src, _| {
+                let base = src.layer(0);
+                *src == UtilityTile::WallTopLower && base.down() == Floor && (
+                    base.left() == WallTopLower || base.right() == WallTopLower
                 )
             },
             replacements: vec![
@@ -48,11 +42,10 @@ lazy_static! {
         },
         // alien
         ReplacementRule {
-            target: Some(UtilityTile::WallTopLower),
-            condition: |ctx| {
-                let ctx = ctx.layer(0);
-                ctx.down() == Floor && (
-                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
+            condition: |src, _| {
+                let base = src.layer(0);
+                *src == UtilityTile::WallTopLower && base.down() == Floor && (
+                    base.left() == WallTopLower || base.right() == WallTopLower
                 )
             },
             replacements: vec![
@@ -64,11 +57,10 @@ lazy_static! {
         },
         // bookshelf
         ReplacementRule {
-            target: Some(UtilityTile::WallTopLower),
-            condition: |ctx| {
-                let ctx = ctx.layer(0);
-                ctx.down() == Floor && (
-                    ctx.left() == WallTopLower || ctx.right() == WallTopLower
+            condition: |src, _| {
+                let base = src.layer(0);
+                *src == UtilityTile::WallTopLower && base.down() == Floor && (
+                    base.left() == WallTopLower || base.right() == WallTopLower
                 )
             },
             replacements: vec![

@@ -1,7 +1,8 @@
 use super::functional_tiles::UtilityTile;
 use bevy::prelude::*;
+use tilegen::TileGrid;
 
-pub fn mark_player_start_tile(grid: &mut Vec<Vec<Vec<Option<UtilityTile>>>>) {
+pub fn mark_player_start_tile(grid: &mut TileGrid<UtilityTile>) {
     for x in 0..grid.len() {
         if x > 0 {
             for y in 0..grid[x].len() {

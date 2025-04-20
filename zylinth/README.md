@@ -5,7 +5,6 @@
 
 #### Major Changes
 
-- Rename "rooms" to "regions"
 - Probably should have a "regions" module separate from a "tiles" module separate from what is actually being generated
 - Gen: Regions => Tiles => Sprites
   - a "room" is just a region of a specific room type
@@ -23,6 +22,7 @@
 
 #### TODO
 
+- [] Replacement rule can compare source or dest
 - [] More border fixes
 - [] BG decorations aren't showing up
 - [] Make rendering a custom command instead of spawning a TileLayer

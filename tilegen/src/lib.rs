@@ -7,7 +7,7 @@ pub use regions::point::*;
 pub use regions::rect::*;
 pub use regions::region::*;
 
-pub use tiles::context::TileContext;
+pub use tiles::context::*;
 pub use tiles::grid::*;
 pub use tiles::replacement::*;
 pub use tiles::replacement_rule::*;

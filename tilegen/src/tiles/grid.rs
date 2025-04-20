@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 use rand::Rng;
 
@@ -15,6 +15,11 @@ impl<T> TileGrid<T>
 where
     T: Clone + PartialEq + Eq,
 {
+    pub fn empty(width: usize, height: usize, depth: usize) -> Self {
+        let mut grid: Vec<Vec<Vec<Option<T>>>> = vec![vec![vec![None; depth]; height]; width];
+        Self::new(grid)
+    }
+
     pub fn new(grid: Vec<Vec<Vec<Option<T>>>>) -> Self {
         TileGrid { tiles: grid }
     }
@@ -40,7 +45,7 @@ where
     }
 
     /// Wrap grid in padding
-    pub fn pad(&self, top: u8, right: u8, bottom: u8, left: u8) -> Vec<Vec<Vec<Option<T>>>> {
+    pub fn pad(&self, top: u8, right: u8, bottom: u8, left: u8) -> TileGrid<T> {
         let width = self.width() + left as usize + right as usize;
         let height = self.height() + top as usize + bottom as usize;
         let depth = self.depth();
@@ -60,15 +65,16 @@ where
             }
         }
 
-        output
+        TileGrid::new(output)
     }
 
     /// Append a blank layer
     pub fn add_layer(&mut self) {
         let height = self.height();
+        let depth = self.depth();
         for x in 0..self.width() {
             for y in 0..height {
-                for _ in 0..self.depth() {
+                for _ in 0..depth {
                     self.tiles[x][y].push(None);
                 }
             }
@@ -94,5 +100,14 @@ where
 
     fn deref(&self) -> &Self::Target {
         &self.tiles
+    }
+}
+
+impl<T> DerefMut for TileGrid<T>
+where
+    T: Clone + PartialEq + Eq,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.tiles
     }
 }
