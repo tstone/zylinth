@@ -10,32 +10,32 @@ pub fn shadowize(grid: &mut TileGrid<UtilityTile>, rng: &mut ChaCha8Rng) {
 lazy_static! {
     static ref FIRST_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
         // inner corner
-        ReplacementRule::to(FloorShadowInnerCorner, |src, _dest| {
+        ReplacementRule::to(FloorShadowInnerCorner, |src, _| {
             *src == Floor && src.up() == WallTopLower && (
                 src.left() == WallLeft || (src.left() == WallTopUpper || src.left() == WallTopLower) || src.left() == WallInnerCornerTopLeft
             )
         }),
         // outer corner
-        ReplacementRule::to(FloorShadowOuterCorner, |src, _dest| {
+        ReplacementRule::to(FloorShadowOuterCorner, |src, _| {
             *src == Floor && src.up() == Floor && src.left() == Floor
             && (src.top_left() == WallTopUpper || src.top_left() == WallTopLower)
         }),
         // top transition
-        ReplacementRule::to(FloorShadowTopTransition, |src, _dest| {
+        ReplacementRule::to(FloorShadowTopTransition, |src, _| {
             *src == Floor &&  src.up() == WallTopLower && src.left() == Floor && src.top_left() == Floor
         }),
         // left transition
-        ReplacementRule::to(FloorShadowLeftTransition, |src, _dest| {
+        ReplacementRule::to(FloorShadowLeftTransition, |src, _| {
             *src == Floor && src.up() == Floor && src.top_left() == Floor && (
                 src.left() == WallLeft || src.left() == WallInnerCornerTopRight
             )
         }),
         // top
-        ReplacementRule::to(FloorShadowTop, |src, _dest| {
+        ReplacementRule::to(FloorShadowTop, |src, _| {
             *src == Floor && src.up() == WallTopLower
         }),
         // left
-        ReplacementRule::to(FloorShadowLeft, |src, _dest| {
+        ReplacementRule::to(FloorShadowLeft, |src, _| {
             *src == Floor && (
                 src.left() == WallLeft
                 || src.left() == WallTopUpper

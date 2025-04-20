@@ -23,17 +23,6 @@ where
         }
     }
 
-    pub fn none_to(
-        replacement: T,
-        condition: fn(&TileContext<T>, &TileContext<T>) -> bool,
-    ) -> Self {
-        ReplacementRule {
-            replacements: vec![Replacement::none(0, 0, 0)],
-            condition,
-            ..Default::default()
-        }
-    }
-
     pub fn to_none(target: T, condition: fn(&TileContext<T>, &TileContext<T>) -> bool) -> Self {
         ReplacementRule {
             replacements: vec![Replacement::new(0, 0, 0, None)],

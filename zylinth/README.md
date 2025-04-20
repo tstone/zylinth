@@ -22,7 +22,6 @@
 
 #### TODO
 
-- [] Replacement rule can compare source or dest
 - [] More border fixes
 - [] BG decorations aren't showing up
 - [] Make rendering a custom command instead of spawning a TileLayer

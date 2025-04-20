@@ -15,7 +15,7 @@ lazy_static! {
     static ref FIRST_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
         // force at least 4 tiles distance horizontally between rooms
         ReplacementRule {
-            condition: |src, _dest| {
+            condition: |src, _| {
                 *src == Floor && src.down() == None && src.down().down().down().down() == Floor
             },
             replacements: vec![
@@ -28,7 +28,7 @@ lazy_static! {
         },
         // eliminate one square corners (top left/bottom right)
         ReplacementRule {
-            condition: |src, _dest| {
+            condition: |src, _| {
                 *src == Floor && (
                     (src.bottom_left() == None && src.top_right() == None && src.left() == Floor && src.right() == Floor) ||
                     (src.bottom_right() == None && src.top_left() == None && src.left() == Floor && src.right() == Floor)
@@ -48,7 +48,7 @@ lazy_static! {
         // TODO: see if this can be moved to first pass:
         // space out bottom corners
         ReplacementRule {
-            condition: |src, _dest| {
+            condition: |src, _| {
                 *src == Floor && src.down() == None && (
                     (src.left() == None && src.get(-1, 4, 0) == Floor) ||
                     (src.left() == None && src.get(-2, 3, 0) == Floor) ||
@@ -62,7 +62,7 @@ lazy_static! {
 
         // eliminate one column hallways corners
         ReplacementRule {
-            condition: |src, _dest| {
+            condition: |src, _| {
                 *src == Floor && src.down() == Floor && (
                     (src.right() == None && src.bottom_left() == None) ||
                     (src.left() == None && src.bottom_right() == None)
@@ -80,19 +80,25 @@ lazy_static! {
         },
 
         // one tile cut
-        ReplacementRule::none_to(Floor, |src, _dest| {
-            // bottom
-            (src.up() == Floor && src.left() == Floor && src.right() == Floor) ||
-            // left
-            (src.up() == Floor && src.right() == Floor && src.down() == Floor) ||
-            // top
-            (src.left() == Floor && src.right() == Floor && src.down() == Floor) ||
-            // right
-            (src.left() == Floor && src.up() == Floor && src.down() == Floor)
-        }),
+        ReplacementRule {
+            condition: |src, _| {
+                *src == None && (
+                    // bottom
+                    (src.up() == Floor && src.left() == Floor && src.right() == Floor) ||
+                    // left
+                    (src.up() == Floor && src.right() == Floor && src.down() == Floor) ||
+                    // top
+                    (src.left() == Floor && src.right() == Floor && src.down() == Floor) ||
+                    // right
+                    (src.left() == Floor && src.up() == Floor && src.down() == Floor)
+                )
+            },
+            replacements: vec![Replacement::this(Floor)],
+            ..Default::default()
+        },
 
         // one tile wart
-        ReplacementRule::to_none(Floor, |src, _dest| {
+        ReplacementRule::to_none(Floor, |src, _| {
             *src == Floor && (
                 // top
                 (src.left() == None && src.up() == None && src.right() == None) ||
