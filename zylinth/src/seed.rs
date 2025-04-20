@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+#[allow(unused)]
 use rand::random_range;
 
 pub struct SeedPlugin;
