@@ -5,7 +5,6 @@
 
 #### Major Changes
 
-- Rename "rooms" to "regions"
 - Probably should have a "regions" module separate from a "tiles" module separate from what is actually being generated
 - Gen: Regions => Tiles => Sprites
   - a "room" is just a region of a specific room type

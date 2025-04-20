@@ -5,6 +5,7 @@ use super::room::*;
 use bevy::prelude::*;
 use rand::Rng;
 use rand_chacha::ChaCha8Rng;
+use tilegen::*;
 
 pub fn walking_squares(
     total_width: usize,
@@ -13,15 +14,10 @@ pub fn walking_squares(
     branch_factor: f32,
     wander_factor: f32,
     rng: &mut ChaCha8Rng,
-) -> Vec<Vec<Vec<Option<UtilityTile>>>> {
-    let mut grid: Vec<Vec<Vec<Option<UtilityTile>>>> =
-        vec![vec![vec![None; 1]; total_height]; total_width];
+) -> TileGrid<UtilityTile> {
+    let mut grid = TileGrid::empty(total_width, total_height, 1);
     let bounding = TileRect::new(0, 0, total_width, total_height);
-    let origin_region = bounding
-        .get_inner_slice(9, 9)
-        .unwrap()
-        .rnd_bounded_slice(6, 6, rng)
-        .unwrap();
+    let origin_region = bounding.inner_slice(9, 9).unwrap();
 
     // starting region is in the top left-ish of the grid
     let mut previous_region = origin_region.clone();
@@ -36,7 +32,7 @@ pub fn walking_squares(
     let mut steps_since_last_dir_change = 0;
 
     while density < target_density && attempts < 5000 {
-        let starting_region = previous_region.get_inner_slice(3, 3);
+        let starting_region = previous_region.inner_slice(3, 3);
 
         // if the starting region is unrealistic for placement, just return to origin
         if starting_region.is_none() {

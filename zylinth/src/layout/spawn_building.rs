@@ -5,7 +5,6 @@ use crate::seed::RngSeed;
 
 use super::decoration::decorate_layer;
 use super::fixer::fix_floor;
-use super::modifications::TileGrid;
 use super::starter::mark_player_start_tile;
 use super::walking_squares::walking_squares;
 use super::{NewMap, TileLayer, TileLayerRole};
@@ -41,9 +40,9 @@ impl Command for SpawnBuildingMap {
         fix_floor(&mut grid, &mut rng);
         let mut grid = wrap_walls(grid, &mut rng);
 
-        TileGrid::add_layer(&mut grid);
-        decorate_layer(&mut grid, 1, &mut rng);
-        shadowize(&mut grid, &mut rng);
+        grid.add_layer();
+        // decorate_layer(&mut grid, 1, &mut rng);
+        // shadowize(&mut grid, &mut rng);
         mark_player_start_tile(&mut grid);
 
         let base_layer = CosmicLegacyTile::to_tile_sprite(&grid, 0, &mut rng);
