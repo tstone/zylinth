@@ -2,7 +2,7 @@ use super::point::TilePoint;
 use rand::Rng;
 use rand::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct TileRect {
     pub min: TilePoint,
     pub max: TilePoint,

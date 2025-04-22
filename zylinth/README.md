@@ -1,6 +1,6 @@
 # Bevy Maze Gen Test
 
-- Map tileset: https://petricakegames.itch.io/cosmic-legacy-scifi-tileset
+- Tileset: https://toosday.itch.io/sci-fi-rougelike
 - Drone character: https://papoycore.itch.io/free-drone
 
 #### Major Changes
@@ -12,8 +12,7 @@
   - would be nice to have something like .connect_right to join rooms
   - also maybe a .intersect
 - Each region has it's own type T
-- Update ctx to be regions+src+dest so that either can be referenced
-- Layer 0 is always ground, layer 1 is buildings
+
 - It should be possible to render regions with different tilesets
   - This means each tile needs to know: function, tileset, collidable
 - Prefabs

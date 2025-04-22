@@ -11,6 +11,7 @@ mod spawn_building;
 mod starter;
 mod tilemap;
 mod tileset;
+mod tuesday;
 mod walking_squares;
 mod wall_wrap;
 

@@ -1,12 +1,11 @@
 use rand::prelude::*;
-use rand_chacha::ChaCha8Rng;
 
 use crate::layout::functional_tiles::UtilityTile;
 
 use super::CosmicLegacyTile;
 
 /// Translate the generic utility tiles into Cosmic Legacy tiles
-pub fn utility_to_cosmic(utility: UtilityTile, rng: &mut ChaCha8Rng) -> CosmicLegacyTile {
+pub fn utility_to_cosmic(utility: UtilityTile, rng: &mut impl Rng) -> CosmicLegacyTile {
     match utility {
         UtilityTile::WallTopLower | UtilityTile::WallTopUpper => {
             if rand::random_bool(0.9) {

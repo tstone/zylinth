@@ -6,6 +6,7 @@ use crate::seed::RngSeed;
 use super::decoration::decorate_layer;
 use super::fixer::fix_floor;
 use super::starter::mark_player_start_tile;
+use super::tuesday::TuesdayTile;
 use super::walking_squares::walking_squares;
 use super::{NewMap, TileLayer, TileLayerRole};
 use bevy::prelude::*;
@@ -45,25 +46,15 @@ impl Command for SpawnBuildingMap {
         // shadowize(&mut grid, &mut rng);
         mark_player_start_tile(&mut grid);
 
-        let base_layer = CosmicLegacyTile::to_tile_sprite(&grid, 0, &mut rng);
-        let bg_layer = CosmicLegacyTile::to_tile_sprite(&grid, 1, &mut rng);
+        let base_layer = TuesdayTile::layer_to_tile_sprite(&grid, 0, &mut rng);
 
         // TODO: change this to a custom command instead of spawning TileLayer
         world.spawn((
             TileLayer {
                 role: TileLayerRole::Base,
                 grid: base_layer,
-                tileset_name: CosmicLegacyTile::name(),
+                tileset_name: TuesdayTile::name(),
                 z: 0.0,
-            },
-            Transform::default(),
-        ));
-        world.spawn((
-            TileLayer {
-                role: TileLayerRole::BackgroundDecorations,
-                grid: bg_layer,
-                tileset_name: CosmicLegacyTile::name(),
-                z: 1.0,
             },
             Transform::default(),
         ));

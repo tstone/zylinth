@@ -1,6 +1,6 @@
 use crate::layout::lighting::spot_lights;
 use crate::layout::tilemap::{RenderedTileLayer, render_tilemap};
-use crate::layout::tileset::init_cosmic_tileset;
+use crate::layout::tileset::*;
 
 use super::functional_tiles::UtilityTile;
 use super::tileset::Tileset;
@@ -16,13 +16,14 @@ impl Plugin for TileLayoutPlugin {
         app.init_asset::<Tileset>();
 
         app.add_systems(PreStartup, init_cosmic_tileset);
+        app.add_systems(PreStartup, init_tuesday_tileset);
 
         app.add_observer(render_tilemap);
         app.add_observer(spot_lights);
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TileSprite {
     pub index: usize,
     pub collider: bool,

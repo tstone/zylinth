@@ -51,3 +51,7 @@ impl TileDir {
         return TileDir::default();
     }
 }
+
+// pub enum RoomShape {
+//     ┐
+// }
