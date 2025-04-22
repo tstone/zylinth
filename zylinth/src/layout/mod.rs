@@ -1,4 +1,3 @@
-mod cosmic_legacy;
 mod decoration;
 mod fixer;
 pub mod functional_tiles;

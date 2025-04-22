@@ -15,7 +15,6 @@ impl Plugin for TileLayoutPlugin {
 
         app.init_asset::<Tileset>();
 
-        app.add_systems(PreStartup, init_cosmic_tileset);
         app.add_systems(PreStartup, init_tuesday_tileset);
 
         app.add_observer(render_tilemap);
