@@ -1,14 +1,9 @@
-use crate::layout::cosmic_legacy::CosmicLegacyTile;
-use crate::layout::shadowizer::shadowize;
+use super::starter::mark_player_start_tile;
+use super::test_room::test_room;
+use super::tuesday::TuesdayTile;
+use super::{NewMap, TileLayer, TileLayerRole};
 use crate::layout::wall_wrap::wrap_walls;
 use crate::seed::RngSeed;
-
-use super::decoration::decorate_layer;
-use super::fixer::fix_floor;
-use super::starter::mark_player_start_tile;
-use super::tuesday::TuesdayTile;
-use super::walking_squares::walking_squares;
-use super::{NewMap, TileLayer, TileLayerRole};
 use bevy::prelude::*;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
@@ -30,35 +25,30 @@ impl Command for SpawnBuildingMap {
         let seed = world.get_resource::<RngSeed>().unwrap();
         let mut rng = ChaCha8Rng::seed_from_u64(seed.0);
 
-        let mut grid = walking_squares(
-            self.width,
-            self.height,
-            self.density,
-            self.branch_factor,
-            self.wander_factor,
-            &mut rng,
-        );
-        fix_floor(&mut grid, &mut rng);
+        // let mut grid = walking_squares(
+        //     self.width,
+        //     self.height,
+        //     self.density,
+        //     self.branch_factor,
+        //     self.wander_factor,
+        //     &mut rng,
+        // );
+        let mut grid = test_room();
+        // fix_floor(&mut grid, &mut rng);
         let mut grid = wrap_walls(grid, &mut rng);
-
-        grid.add_layer();
-        // decorate_layer(&mut grid, 1, &mut rng);
-        // shadowize(&mut grid, &mut rng);
         mark_player_start_tile(&mut grid);
 
-        let base_layer = TuesdayTile::layer_to_tile_sprite(&grid, 0, &mut rng);
-
+        // TODO: it seems like having Grid with layers of different types is a problem
         // TODO: change this to a custom command instead of spawning TileLayer
         world.spawn((
             TileLayer {
                 role: TileLayerRole::Base,
-                grid: base_layer,
+                grid: TuesdayTile::layer_to_tile_sprites(&grid, 0),
                 tileset_name: TuesdayTile::name(),
                 z: 0.0,
             },
             Transform::default(),
         ));
-
         world.send_event(NewMap);
     }
 }

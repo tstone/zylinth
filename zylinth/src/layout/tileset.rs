@@ -54,7 +54,7 @@ pub fn init_tuesday_tileset(
     let layout = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
         UVec2::splat(32),
         11,
-        4,
+        5,
         None,
         None,
     ));

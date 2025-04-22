@@ -6,7 +6,7 @@ pub struct TileContext<'a, T: Clone + PartialEq + Eq> {
     pub x: i32,
     pub y: i32,
     pub z: i32,
-    pub(crate) tile: &'a Option<T>,
+    pub tile: &'a Option<T>,
     pub(crate) grid: &'a TileGrid<T>,
 }
 

@@ -6,23 +6,27 @@ use super::IsImpassable;
 #[allow(dead_code)]
 pub enum UtilityTile {
     #[default]
-    Test1,
-    Test2,
-    Test3,
-    WallTopmost,
-    WallInnerCornerTopLeft,
-    WallInnerCornerTopRight,
-    WallInnerCornerBottomLeft,
-    WallInnerCornerBottomRight,
-    WallTopUpper,
-    WallTopLower,
+    Test,
+    Wall,
     WallLeft,
     WallRight,
-    WallBottom,
-    WallTopLeft,
-    WallTopRight,
-    WallBottomRight,
-    WallBottomLeft,
+    WallBorderInnerCornerTopLeft,
+    WallBorderInnerCornerTopRight,
+    WallBorderInnerCornerBottomLeft,
+    WallBorderInnerCornerBottomRight,
+    WallBorderTop,
+    WallBorderLeft,
+    WallBorderRight,
+    WallBorderBottom,
+    WallBorderTopLeft,
+    WallBorderTopRight,
+    WallBorderBottomRight,
+    WallBorderBottomLeft,
+    WallBorderDoubleLeftCorner,
+    WallBorderDoubleRightCorner,
+    WallBorderDoubleHorizontal,
+    WallBorderDoubleVertical,
+    WallBorderAllCorner,
     PlayerStart,
     Floor,
     FloorShadowLeft,
@@ -31,6 +35,7 @@ pub enum UtilityTile {
     FloorShadowTopTransition,
     FloorShadowOuterCorner,
     FloorShadowInnerCorner,
+
     // Decoration
     VertDecorationTop(u8),
     VertDecorationMiddle(u8),
@@ -42,18 +47,19 @@ pub enum UtilityTile {
 
 impl IsImpassable for UtilityTile {
     fn is_impassable(&self) -> bool {
-        *self == Self::WallTopmost
-            || *self == Self::WallInnerCornerTopLeft
-            || *self == Self::WallInnerCornerTopRight
-            || *self == Self::WallInnerCornerBottomLeft
-            || *self == Self::WallInnerCornerBottomRight
-            || *self == Self::WallTopUpper
+        *self == Self::WallBorderInnerCornerTopLeft
+            || *self == Self::WallBorderInnerCornerTopRight
+            || *self == Self::WallBorderInnerCornerBottomLeft
+            || *self == Self::WallBorderInnerCornerBottomRight
+            || *self == Self::Wall
             || *self == Self::WallLeft
             || *self == Self::WallRight
-            || *self == Self::WallBottom
-            || *self == Self::WallTopLeft
-            || *self == Self::WallTopRight
-            || *self == Self::WallBottomRight
-            || *self == Self::WallBottomLeft
+            || *self == Self::WallBorderLeft
+            || *self == Self::WallBorderRight
+            || *self == Self::WallBorderBottom
+            || *self == Self::WallBorderTopLeft
+            || *self == Self::WallBorderTopRight
+            || *self == Self::WallBorderBottomRight
+            || *self == Self::WallBorderBottomLeft
     }
 }

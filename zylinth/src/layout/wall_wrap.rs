@@ -1,181 +1,152 @@
-use super::{functional_tiles::UtilityTile, functional_tiles::UtilityTile::*};
+use bevy::log::*;
 use lazy_static::lazy_static;
-use rand_chacha::ChaCha8Rng;
+use rand::Rng;
 use tilegen::*;
 
-pub fn wrap_walls(input: TileGrid<UtilityTile>, rng: &mut ChaCha8Rng) -> TileGrid<UtilityTile> {
-    let mut padded = TileGrid::pad(&input, 3, 1, 1, 1);
-    padded.apply_layer_replacements(0, FIRST_PASS.to_vec(), rng);
-    padded.apply_layer_replacements(0, SECOND_PASS.to_vec(), rng);
-    padded.apply_layer_replacements(0, THIRD_PASS.to_vec(), rng);
+use super::tuesday::{TuesdayTile, TuesdayTile::*};
+
+pub fn wrap_walls(input: TileGrid<TuesdayTile>, rng: &mut impl Rng) -> TileGrid<TuesdayTile> {
+    let mut padded = TileGrid::pad(&input, 2, 1, 1, 1);
+    padded.apply_layer_replacements(0, LOWER.to_vec(), rng);
+    padded.apply_layer_replacements(0, UPPER.to_vec(), rng);
     padded
 }
 
 lazy_static! {
-    // first pass establishes walls all the way around floors
-    static ref FIRST_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
-        // top-left outer corner (small)
-        ReplacementRule::to(WallTopLeft, |src, _| {
-            *src == None && src.up() == None && src.down() == None && src.right() == None && src.bottom_right() == Floor
+    static ref LOWER: Vec<ReplacementRule<TuesdayTile>> = vec![
+        // u
+        ReplacementRule::to(WallPanelSingle, |src, _| {
+            *src == None && src.down() == Floor && src.left() == Floor && src.right() == Floor
         }),
-        // top-right outer corner (small)
-        ReplacementRule::to(WallTopRight, |src, _| {
-            *src == None && src.up() == None && src.down() == None && src.left() == None && src.bottom_left() == Floor
+        // n
+        ReplacementRule::to(WallDoubleCornerTop, |src, _| {
+            *src == None && src.up() == Floor && src.left() == Floor && src.right() == Floor
         }),
-        // bottom-left outer corner (small)
+        // c
+        ReplacementRule::to(WallPanelLeft, |src, _| {
+            *src == None && src.up() == Floor && src.left() == Floor && src.down() == Floor
+        }),
+        // inverse c
+        ReplacementRule::to(WallPanelRight, |src, _| {
+            *src == None && src.up() == Floor && src.right() == Floor && src.down() == Floor
+        }),
+
+        // double bottom corner
+        ReplacementRule::to(WallDoubleLower, |src, _| {
+            *src == None && src.up() == None && src.left() == None && src.right() == None
+                && src.top_left() == Floor && src.top_right() == Floor
+        }),
+        // double top corner
+        ReplacementRule::to(WallDoubleUpper, |src, _| {
+            *src == None && src.down() == None && src.left() == None && src.right() == None
+                && src.bottom_left() == Floor && src.bottom_right() == Floor
+        }),
+
+        // top left corner
+        ReplacementRule {
+            condition: |src, _| {
+                *src == None && src.down() == None && src.right() == None && src.up() == None && src.bottom_right() == Floor
+            },
+            replacements: vec![
+                Replacement::this(WallLeft),
+                Replacement::up(WallTopLeft),
+            ],
+            ..Default::default()
+        },
+        // top right corner
+        ReplacementRule {
+            condition: |src, _| {
+                *src == None && src.down() == None && src.left() == None && src.up() == None && src.bottom_left() == Floor
+            },
+            replacements: vec![
+                Replacement::this(WallRight),
+                Replacement::up(WallTopRight),
+            ],
+            ..Default::default()
+        },
+        // bottom left corner
+        ReplacementRule::to(WallPanelSingle, |src, dest| {
+            *src == None && src.up() == None && src.right() == None && src.top_right() == Floor && dest.left() == WallLeft
+        }),
+        ReplacementRule::to(WallBottomLeft, |src, dest| {
+            *src == None && src.up() == None && dest.right() == WallPanelRight && src.top_right() == Floor
+        }),
         ReplacementRule::to(WallBottomLeft, |src, _| {
-            *src == None && src.up() == None && src.down() == None && src.right() == None && src.top_right() == Floor
+            *src == None && src.up() == None && src.right() == None && src.top_right() == Floor
         }),
-        // bottom-right outer corner (small)
+        // bottom right corner
+        ReplacementRule::to(WallPanelSingle, |src, _| {
+            *src == None && src.up() == None && src.left() == None && src.top_left() == Floor && src.down() == Floor
+        }),
+        ReplacementRule::to(WallPanelRight, |src, dest| {
+            *src == None && src.up() == None && dest.left() == WallPanelLeft && src.top_left() == Floor
+        }),
         ReplacementRule::to(WallBottomRight, |src, _| {
-            *src == None && src.up() == None && src.down() == None && src.left() == None && src.top_left() == Floor
+            *src == None && src.up() == None && src.left() == None && src.top_left() == Floor
         }),
 
-        // └ - inner corner top right
-        ReplacementRule::to(WallTopLower, |src, _| {
-            *src == None && src.up() == None && src.left() == Floor && src.down() == Floor
+        // └
+        ReplacementRule::to(WallInnerCornerBottomLeft, |src, _| {
+            *src == None && src.left() == Floor && src.down() == Floor
         }),
-        // ┘ - inner corner top left
-        ReplacementRule::to(WallTopLower, |src, _| {
-            *src == None && src.up() == None && src.right() == Floor && src.down() == Floor
+        // ┘
+        ReplacementRule::to(WallInnerCornerBottomRight, |src, _| {
+            *src == None && src.right() == Floor && src.down() == Floor
         }),
-        // ┐ - inner corner bottom left
+        // ┐
         ReplacementRule::to(WallInnerCornerTopRight, |src, _| {
-            *src == None && src.up() == Floor && src.right() == Floor && src.top_right() == Floor
+            *src == None && src.right() == Floor && src.up() == Floor
         }),
-        // ┌ - inner corner bottom right
+        // ┌
         ReplacementRule::to(WallInnerCornerTopLeft, |src, _| {
-            *src == None && src.up() == Floor && src.left() == Floor && src.top_left() == Floor
+            *src == None && src.left() == Floor && src.up() == Floor
         }),
 
-        // top wall
-        ReplacementRule::to(WallTopLower, |src, _| {
-            *src == None && src.up() == None && src.down() == Floor
-        }),
-        // left
+        // upper walls
+        ReplacementRule {
+            condition: |src, _| {
+                *src == None && src.up() == None && src.down() == Floor
+            },
+            replacements: vec![
+                Replacement::this(WallPanelMiddle),
+                Replacement::up(WallTop),
+            ],
+            ..Default::default()
+        },
+        // left walls
         ReplacementRule::to(WallLeft, |src, _| {
-            *src == None && src.left() == None && src.right() == Floor
+            *src == None && src.right() == Floor
         }),
-        // right
+        // right walls
         ReplacementRule::to(WallRight, |src, _| {
-            *src == None && src.right() == None && src.left() == Floor
+            *src == None && src.left() == Floor
         }),
-        // bottom
+        // bottom walls
         ReplacementRule::to(WallBottom, |src, _| {
-            *src == None && src.down() == None && src.up() == Floor
-        }),
+            *src == None && src.up() == Floor
+        })
     ];
 
-    // second pass makes the top wall aler double height
-    static ref SECOND_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
-        // move top-left outer corner up
-        ReplacementRule::to(WallTopLeft, |src, _| {
-            *src == None && src.down() == Some(WallTopLeft)
-        }),
-        // move top-right outer corner up
-        ReplacementRule::to(WallTopRight, |src, _| {
-            *src == None && src.down() == Some(WallTopRight)
-        }),
-        // ┘ - inner corner top left
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallTopLeft && src.down() == WallTopLower && src.right() == WallTopLower
-        }),
-        // └ - inner corner top right
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallTopRight && src.down() == WallTopLower && src.left() == WallTopLower
-        }),
-        // swap top-left & top-right to wall left since it was moved up
-        ReplacementRule::to(WallLeft, |src, _| { *src == WallTopLeft }),
-        ReplacementRule::to(WallRight, |src, _| { *src == WallTopRight }),
-
-        // double top wall
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == None && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src ==WallInnerCornerTopLeft && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallInnerCornerTopRight && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallLeft && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallRight && src.down() == WallTopLower
-        }),
-        // when rooms are close together make double walls come up to room above
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallBottom && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallBottomLeft && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallBottomRight && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallInnerCornerTopLeft && src.down() == WallTopLower
-        }),
-        ReplacementRule::to(WallTopUpper, |src, _| {
-            *src == WallInnerCornerTopRight && src.down() == WallTopLower
-        }),
-    ];
-
-    // third pass wraps the wall in the top most layer
-    static ref THIRD_PASS: Vec<ReplacementRule<UtilityTile>> = vec![
-        // move top-left outer corner up
-        ReplacementRule::to(WallTopLeft, |src, _| {
-            *src == None && src.down() == Some(WallTopLeft)
-        }),
-        // move top-right outer corner up
-        ReplacementRule::to(WallTopRight, |src, _| {
-            *src == None && src.down() == Some(WallTopRight)
-        }),
-        // ┘ - inner corner top left
+    static ref UPPER: Vec<ReplacementRule<TuesdayTile>> = vec![
+        // ┘
         ReplacementRule::to(WallInnerCornerBottomRight, |src, _| {
-            *src == WallTopLeft &&  src.down() == WallTopUpper && src.right() == WallTopUpper
+            *src == WallLeft && src.left() == WallTopLeft
         }),
-        ReplacementRule::to(WallInnerCornerBottomRight, |src, _| {
-            *src == WallBottomLeft && src.down() == WallTopUpper && src.right() == WallTopUpper
-        }),
-        // └ - inner corner top right
+        // └
         ReplacementRule::to(WallInnerCornerBottomLeft, |src, _| {
-            *src == WallTopRight && src.down() == WallTopUpper && src.left() == WallTopUpper
+            *src == WallRight && src.right() == WallTopRight
         }),
-        ReplacementRule::to(WallInnerCornerBottomLeft, |src, _| {
-            *src == WallBottomRight && src.down() == WallTopUpper && src.left() == WallTopUpper
-        }),
-        // swap top-left & top-right to wall left since it was moved up
-        ReplacementRule::to(WallLeft, |src, _| { *src == WallTopLeft && src.up() == None }),
-        ReplacementRule::to(WallRight, |src, _| { *src == WallTopRight && src.up() == None }),
-
-        // after the second round of wall tops, some outlines will need to be turned
-        // to inner corners
-        // ┘ - inner corner top left
-        ReplacementRule::to(WallInnerCornerBottomRight, |src, _| {
-            *src == WallLeft && src.down() == WallTopUpper
-                && (src.bottom_left() == Some(WallTopLeft) || src.bottom_left() == WallTopUpper)
-        }),
-        // └ - inner corner top right
-        ReplacementRule::to(WallInnerCornerBottomLeft, |src, _| {
-            *src == WallRight && src.down() == WallTopUpper
-                && (src.bottom_right() == Some(WallTopRight) || src.bottom_right() == WallTopUpper)
-        }),
-        // ┐ - inner corner bottom left
-        ReplacementRule::to(WallInnerCornerTopRight, |src, _| {
-            *src == WallBottom && src.up() == Floor
-                && (src.right() == WallTopUpper || src.right() == WallTopLower) && src.top_right() == Floor
-        }),
-        // ┌ - inner corner bottom right
-        ReplacementRule::to(WallInnerCornerTopLeft, |src, _| {
-            *src == WallBottom && src.up() == Floor
-                && (src.right() == WallTopUpper || src.right() == WallTopLower) && src.top_left() == Floor
-        }),
-
-        // top most
-        ReplacementRule::to(WallTopmost, |src, _| {
-            *src == None && src.down() == WallTopUpper
-        }),
+        // box
+        ReplacementRule {
+            condition: |src, _| {
+                (*src == WallInnerCornerBottomLeft || *src == WallInnerCornerBottomRight || *src == WallInnerCornerTopLeft || *src == WallInnerCornerTopRight) &&
+                (src.up() == Floor || src.up() == WallPanelLeft && src.up() == WallPanelRight || src.up() == WallPanelMiddle || src.up() == WallPanelSingle) &&
+                (src.down() == Floor || src.down() == WallPanelLeft && src.down() == WallPanelRight || src.down() == WallPanelMiddle || src.down() == WallPanelSingle) &&
+                (src.left() == Floor || src.left() == WallPanelLeft && src.left() == WallPanelRight || src.left() == WallPanelMiddle || src.left() == WallPanelSingle) &&
+                (src.right() == Floor || src.right() == WallPanelLeft && src.right() == WallPanelRight || src.right() == WallPanelMiddle || src.right() == WallPanelSingle)
+            },
+            replacements: vec![Replacement::this(WallAllCorner)],
+            ..Default::default()
+        },
     ];
 }

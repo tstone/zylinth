@@ -14,8 +14,8 @@ lazy_static! {
         ReplacementRule {
             condition: |src, _| {
                 let base = src.layer(0);
-                *src == UtilityTile::WallTopLower && base.down() == Floor && (
-                    base.left() == WallTopLower || base.right() == WallTopLower
+                *src == UtilityTile::Wall && base.down() == Floor && (
+                    base.left() == Wall || base.right() == Wall
                 )
             },
             replacements: vec![
@@ -29,8 +29,8 @@ lazy_static! {
         ReplacementRule {
             condition: |src, _| {
                 let base = src.layer(0);
-                *src == UtilityTile::WallTopLower && base.down() == Floor && (
-                    base.left() == WallTopLower || base.right() == WallTopLower
+                *src == UtilityTile::Wall && base.down() == Floor && (
+                    base.left() == Wall || base.right() == Wall
                 )
             },
             replacements: vec![
@@ -44,8 +44,8 @@ lazy_static! {
         ReplacementRule {
             condition: |src, _| {
                 let base = src.layer(0);
-                *src == UtilityTile::WallTopLower && base.down() == Floor && (
-                    base.left() == WallTopLower || base.right() == WallTopLower
+                *src == UtilityTile::Wall && base.down() == Floor && (
+                    base.left() == Wall || base.right() == Wall
                 )
             },
             replacements: vec![
@@ -59,8 +59,8 @@ lazy_static! {
         ReplacementRule {
             condition: |src, _| {
                 let base = src.layer(0);
-                *src == UtilityTile::WallTopLower && base.down() == Floor && (
-                    base.left() == WallTopLower || base.right() == WallTopLower
+                *src == UtilityTile::Wall && base.down() == Floor && (
+                    base.left() == Wall || base.right() == Wall
                 )
             },
             replacements: vec![

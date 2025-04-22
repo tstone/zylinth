@@ -1,6 +1,6 @@
 # Bevy Maze Gen Test
 
-- Tileset: https://toosday.itch.io/sci-fi-rougelike
+- Tileset based on https://toosday.itch.io/sci-fi-rougelike
 - Drone character: https://papoycore.itch.io/free-drone
 
 #### Major Changes

@@ -5,13 +5,9 @@ use tilegen::TileGrid;
 use crate::layout::functional_tiles::UtilityTile;
 use crate::layout::{IsImpassable, TileSprite};
 
-use super::utility_to_tuesday;
-
 #[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(unused)]
 pub enum TuesdayTile {
-    // 4 x 11, 32x
-
     // row 1
     WallTopLeftCaution = 0,
     WallTopCaution = 1,
@@ -23,7 +19,6 @@ pub enum TuesdayTile {
     FloorAlt2 = 7,
     WallInnerCornerBottomRight = 8,
     WallInnerCornerBottomLeft = 9,
-    WallDoubleLower = 10,
 
     // row 2
     WallLeftCaution = 11,
@@ -36,7 +31,6 @@ pub enum TuesdayTile {
     WallPanelMiddleALt2 = 18,
     WallInnerCornerTopLeft = 19,
     WallInnerCornerTopRight = 20,
-    WallDoubleUpper = 21,
 
     // row 3
     WallBottomLeftCaution = 22,
@@ -49,7 +43,6 @@ pub enum TuesdayTile {
     WallInnerCornerBottomLeftCaution = 29,
     WallInnerCornerTopLeftCaution = 30,
     WallInnerCornerTopRightCaution = 31,
-    WallDouble = 32,
 
     // row 4
     EmptyDecoration1 = 33,
@@ -62,7 +55,19 @@ pub enum TuesdayTile {
     WallPanelRight = 40,
     SwitchLeft = 41,
     SwitchRight = 42,
-    Empty = 43,
+    Test = 43,
+
+    // row 5
+    WallDoubleLeftCorner = 44,
+    WallDoubleRightCorner = 45,
+    WallAllCorner = 46,
+    WallDoubleHorizontal = 47,
+    WallDoubleVertical = 48,
+    WallPanelSingle = 49,
+    WallDoubleCornerTop = 50,
+    WallDoubleCornerBottom = 51,
+    WallDoubleLower = 52,
+    WallDoubleUpper = 53,
 
     // TODO: this doesn't make sense
     #[default]
@@ -83,7 +88,33 @@ impl Into<usize> for TuesdayTile {
 
 impl IsImpassable for TuesdayTile {
     fn is_impassable(&self) -> bool {
-        *self == Self::WallBottom || *self == Self::WallBottomLeft
+        *self == Self::WallBottom
+            || *self == Self::WallBottomLeft
+            || *self == Self::WallBottomRight
+            || *self == Self::WallDoubleHorizontal
+            || *self == Self::WallDoubleVertical
+            || *self == Self::WallAllCorner
+            || *self == Self::WallDoubleRightCorner
+            || *self == Self::WallDoubleLeftCorner
+            || *self == Self::WallDoubleLower
+            || *self == Self::WallDoubleUpper
+            || *self == Self::WallDoubleVertical
+            || *self == Self::WallDoubleHorizontal
+            || *self == Self::WallInnerCornerBottomLeft
+            || *self == Self::WallInnerCornerBottomRight
+            || *self == Self::WallInnerCornerTopLeft
+            || *self == Self::WallInnerCornerTopRight
+            || *self == Self::WallLeft
+            || *self == Self::WallPanelLeft
+            || *self == Self::WallPanelMiddle
+            || *self == Self::WallPanelMiddleALt2
+            || *self == Self::WallPanelMiddleAlt1
+            || *self == Self::WallPanelRight
+            || *self == Self::WallPanelSingle
+            || *self == Self::WallRight
+            || *self == Self::WallTop
+            || *self == Self::WallTopLeft
+            || *self == Self::WallTopRight
     }
 }
 
@@ -93,20 +124,19 @@ impl TuesdayTile {
         NAME
     }
 
-    pub fn layer_to_tile_sprite(
-        grid: &TileGrid<UtilityTile>,
+    pub fn layer_to_tile_sprites(
+        grid: &TileGrid<Self>,
         layer: usize,
-        rng: &mut impl Rng,
     ) -> Vec<Vec<Option<TileSprite>>> {
         let mut tilesprites: Vec<Vec<Option<TileSprite>>> = vec![vec![]; grid.len()];
 
         for x in 0..grid.len() {
             for y in 0..grid[x].len() {
-                if let Some(utility) = grid[x][y][layer] {
+                if let Some(tile) = grid[x][y][layer] {
                     tilesprites[x].push(Some(TileSprite {
-                        index: utility_to_tuesday(utility, rng).into(),
-                        collider: UtilityTile::is_impassable(&utility),
-                        role: Some(utility),
+                        index: tile.into(),
+                        collider: Self::is_impassable(&tile),
+                        role: None,
                     }));
                 } else {
                     tilesprites[x].push(None);

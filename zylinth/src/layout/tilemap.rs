@@ -4,6 +4,8 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::cmp;
 
+use crate::layout::tuesday::TuesdayTile;
+
 use super::functional_tiles::UtilityTile;
 use super::plugin::{PlayerStartTile, TileLayer, TileSprite};
 use super::tileset::{Tileset, TilesetId};
@@ -17,7 +19,6 @@ pub struct Tile {
     pub height: u8,
     pub tile_index: usize,
     pub tileset_name: &'static str,
-    pub role: Option<UtilityTile>,
 }
 
 #[allow(unused)]
@@ -65,15 +66,8 @@ pub fn render_tilemap(
                 let offset_y = y as f32 * tileset.tile_height as f32;
                 // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
                 let flipped_y = width as f32 - offset_y - 1.0;
-
-                let player_start = t.role == Some(UtilityTile::PlayerStart);
-                let role = t.role.map(|r| {
-                    if r == UtilityTile::PlayerStart {
-                        UtilityTile::Floor
-                    } else {
-                        r
-                    }
-                });
+                // TODO: make this a layer above everything that's rendered
+                let player_start = t.index == 999;
 
                 let mut tile_entity = commands.spawn((
                     Tile {
@@ -83,17 +77,22 @@ pub fn render_tilemap(
                         height: tileset.tile_height,
                         tile_index: t.index,
                         tileset_name: layer.tileset_name,
-                        role,
                     },
                     Sprite {
                         image: tileset.image.clone(),
                         texture_atlas: Some(TextureAtlas {
                             layout: tileset.layout.clone(),
-                            index: t.index,
+                            // hacky:
+                            index: if t.index == 999 { 12 } else { t.index },
                         }),
                         ..default()
                     },
                     Transform::from_xyz(offset_x, flipped_y, layer.z),
+                    // TextFont {
+                    //     font_size: 8.0,
+                    //     ..Default::default()
+                    // },
+                    // Text2d::new(format!("({},{})", x, y)),
                 ));
 
                 if player_start {

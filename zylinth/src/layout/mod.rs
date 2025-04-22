@@ -9,6 +9,7 @@ mod room;
 mod shadowizer;
 mod spawn_building;
 mod starter;
+mod test_room;
 mod tilemap;
 mod tileset;
 mod tuesday;

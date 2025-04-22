@@ -36,15 +36,15 @@ pub fn replace_tiles<T: PartialEq + Eq + Clone>(
                     x: x as i32,
                     y: y as i32,
                     z: layer as i32,
-                    grid: &grid,
+                    grid: &source,
                     tile: &source[x][y][layer],
                 };
                 let dest = TileContext {
                     x: x as i32,
                     y: y as i32,
                     z: layer as i32,
-                    grid: &source,
-                    tile: &source[x][y][layer],
+                    grid: &grid,
+                    tile: &grid[x][y][layer],
                 };
 
                 // check conditions
