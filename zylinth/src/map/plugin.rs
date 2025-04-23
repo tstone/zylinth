@@ -2,7 +2,6 @@ use crate::map::lighting::spot_lights;
 use crate::map::tilemap::{RenderedTileLayer, render_tilemap};
 use crate::map::tileset::*;
 
-use super::functional_tiles::UtilityTile;
 use super::tileset::Tileset;
 use bevy::prelude::*;
 
@@ -25,19 +24,23 @@ impl Plugin for TileLayoutPlugin {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TileSprite {
     pub index: usize,
     pub collider: bool,
-    pub role: Option<UtilityTile>,
+    pub role: Option<TileRole>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TileRole {
+    Switch(u8, bool),
+    Door(u8),
+    PlayerStart(u8),
 }
 
 pub trait IsImpassable {
     fn is_impassable(&self) -> bool;
 }
-
-#[derive(Component)]
-pub struct PlayerStartTile;
 
 #[allow(unused)]
 #[derive(Debug, PartialEq, Eq)]

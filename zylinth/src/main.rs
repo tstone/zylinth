@@ -44,7 +44,7 @@ fn main() {
         .add_plugins(FpsOverlayPlugin { ..default() })
         .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
         .add_plugins(PhysicsPlugins::default())
-        // .add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins((
             SeedPlugin,
             PlayerPlugin,

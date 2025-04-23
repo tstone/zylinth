@@ -16,10 +16,18 @@ pub fn spot_lights(
                 .as_ref()
                 .map(|atlas| atlas.index)
                 .unwrap_or(usize::MAX);
-            if index == PanelDisabled as usize {
+            if PanelDisabled == index {
                 commands.entity(entity).insert((PointLight2d {
                     color: Color::srgb(1., 0., 0.),
                     radius: 30.0,
+                    intensity: 4.0,
+                    falloff: 8.0,
+                    ..default()
+                },));
+            } else if Resoursce1 == index {
+                commands.entity(entity).insert((PointLight2d {
+                    color: Color::srgb(21. / 255., 137. / 255., 104. / 255.),
+                    radius: 60.0,
                     intensity: 4.0,
                     falloff: 8.0,
                     ..default()

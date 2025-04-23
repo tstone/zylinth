@@ -1,10 +1,11 @@
-use bevy::ecs::component::Component;
+use bevy::prelude::*;
 use tilegen::TileGrid;
 
-use crate::map::{IsImpassable, TileSprite};
+use crate::map::{IsImpassable, TileRole, TileSprite};
 
 #[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(unused)]
+#[repr(u32)]
 pub enum TuesdayTile {
     // row 1
     WallTopLeftCaution = 0,
@@ -46,14 +47,15 @@ pub enum TuesdayTile {
     // row 4
     EmptyDecoration1 = 33,
     EmptyDecoration2 = 34,
-    DoorFrame = 35,
+    DoorFrame(u8) = 35,
     PanelDisabled = 36,
     PanelEnabled = 37,
     WallPanelLeft = 38,
     WallPanelMiddle = 39,
     WallPanelRight = 40,
-    SwitchLeft = 41,
-    SwitchRight = 42,
+    SwitchLeft(u8) = 41,
+    SwitchRight(u8) = 42,
+    #[default]
     Test = 43,
 
     // row 5
@@ -67,21 +69,29 @@ pub enum TuesdayTile {
     WallDoubleCornerBottom = 51,
     WallDoubleLower = 52,
     WallDoubleUpper = 53,
+    Transparent = 54,
 
-    // TODO: this doesn't make sense
-    #[default]
-    PlayerStart = 999,
+    PlayerStart(u8) = 999,
 }
 
 impl Into<u32> for TuesdayTile {
     fn into(self) -> u32 {
-        self as u32
+        // https://doc.rust-lang.org/reference/items/enumerations.html#casting
+        unsafe { *(&self as *const Self as *const u32) }
     }
 }
 
 impl Into<usize> for TuesdayTile {
     fn into(self) -> usize {
-        self as usize
+        let you32: u32 = self.into();
+        you32 as usize
+    }
+}
+
+impl PartialEq<usize> for TuesdayTile {
+    fn eq(&self, other: &usize) -> bool {
+        let tile_index: usize = (*self).into();
+        &tile_index == other
     }
 }
 
@@ -114,7 +124,6 @@ impl IsImpassable for TuesdayTile {
             || *self == Self::WallTop
             || *self == Self::WallTopLeft
             || *self == Self::WallTopRight
-            || *self == Self::DoorFrame
     }
 }
 
@@ -133,10 +142,23 @@ impl TuesdayTile {
         for x in 0..grid.len() {
             for y in 0..grid[x].len() {
                 if let Some(tile) = grid[x][y][layer] {
+                    let role = match tile {
+                        Self::DoorFrame(id) => Some(TileRole::Door(id)),
+                        Self::SwitchLeft(id) => Some(TileRole::Switch(id, false)),
+                        Self::SwitchRight(id) => Some(TileRole::Switch(id, true)),
+                        Self::PlayerStart(id) => Some(TileRole::PlayerStart(id)),
+                        _ => None,
+                    };
+                    let index: usize = match tile {
+                        Self::PlayerStart(_) => Self::Transparent.into(),
+                        Self::SwitchLeft(_) => 12,
+                        t => t.into(),
+                    };
+
                     tilesprites[x].push(Some(TileSprite {
-                        index: tile.into(),
+                        index,
                         collider: Self::is_impassable(&tile),
-                        role: None,
+                        role,
                     }));
                 } else {
                     tilesprites[x].push(None);

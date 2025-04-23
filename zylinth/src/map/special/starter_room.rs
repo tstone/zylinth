@@ -1,8 +1,9 @@
 use tilegen::TileGrid;
 
+use crate::map::puzzle::{DoorControl, Puzzle};
 use crate::map::tuesday::{TuesdayTile, TuesdayTile::*};
 
-pub fn starter_room() -> TileGrid<TuesdayTile> {
+pub fn starter_room() -> Puzzle<TuesdayTile> {
     let mut grid = TileGrid::empty(11, 6, 1);
     grid.add_layer();
 
@@ -37,7 +38,7 @@ pub fn starter_room() -> TileGrid<TuesdayTile> {
     grid[3][2][0] = None;
     grid[4][2][0] = None;
     grid[5][2][0] = Some(Floor);
-    grid[5][2][1] = Some(DoorFrame);
+    grid[5][2][1] = Some(DoorFrame(1));
     grid[6][2][1] = Some(PanelDisabled);
     grid[6][2][0] = None;
     grid[7][2][0] = None;
@@ -61,7 +62,7 @@ pub fn starter_room() -> TileGrid<TuesdayTile> {
     grid[1][4][0] = Some(Floor);
     grid[2][4][0] = Some(Floor);
     grid[3][4][0] = Some(Floor);
-    grid[3][4][1] = Some(SwitchLeft);
+    grid[3][4][1] = Some(SwitchLeft(1));
     grid[4][4][0] = Some(Floor);
     grid[5][4][0] = Some(Floor);
     grid[6][4][0] = Some(Floor);
@@ -82,5 +83,11 @@ pub fn starter_room() -> TileGrid<TuesdayTile> {
     grid[9][5][0] = Some(Floor);
     grid[10][5][0] = Some(Floor);
 
-    grid
+    Puzzle {
+        grid,
+        door_controls: vec![DoorControl {
+            doors: vec![1],
+            switches: vec![1],
+        }],
+    }
 }

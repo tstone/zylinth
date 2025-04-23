@@ -1,11 +1,10 @@
 mod decoration;
-mod fixer;
 pub mod functional_tiles;
 mod lighting;
 mod maze;
 mod plugin;
+mod puzzle;
 mod room;
-mod shadowizer;
 mod spawn_building;
 mod special;
 mod starter;
@@ -16,6 +15,7 @@ mod walking_squares;
 mod wall_wrap;
 
 pub use plugin::*;
+pub use puzzle::DoorControl;
 pub use spawn_building::SpawnBuildingMap;
 pub use tuesday::TuesdayTile;
 

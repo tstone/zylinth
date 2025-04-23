@@ -1,20 +1,22 @@
-use bevy::log::tracing_subscriber::field::debug;
+use avian2d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
 
-use crate::map::{Tile, TuesdayTile, TuesdayTile::*};
+use crate::map::{
+    Tile, TileRole,
+    TuesdayTile::{self, *},
+};
 use crate::player::Player;
 
 #[derive(Component)]
 pub struct Switch {
+    id: u8,
     on: bool,
-    // TODO: this needs
-    // target: Entity
 }
 
 #[derive(Event)]
 pub struct SwitchStateChanged {
-    entity: Entity,
-    on: bool,
+    pub switch_entity: Entity,
+    pub on: bool,
 }
 
 pub struct SwitchPlugin;
@@ -33,24 +35,28 @@ impl Plugin for SwitchPlugin {
 
 pub fn configure_switch(
     trigger: Trigger<OnAdd, Tile>,
-    tiles: Query<(&Tile, &Sprite, Entity), Changed<Sprite>>,
+    tiles: Query<(&Tile, Entity)>,
     mut commands: Commands,
     mut ev_switchstate: EventWriter<SwitchStateChanged>,
 ) {
-    let (tile, sprite, entity) = tiles.get(trigger.entity()).unwrap();
-    if tile.tileset_name == TuesdayTile::name() {
-        let index = sprite
-            .texture_atlas
-            .as_ref()
-            .map(|atlas| atlas.index)
-            .unwrap_or(usize::MAX);
-        if index == SwitchLeft as usize {
-            commands.entity(entity).insert(Switch { on: false });
-            ev_switchstate.send(SwitchStateChanged { entity, on: false });
-        } else if index == SwitchRight as usize {
-            commands.entity(entity).insert(Switch { on: true });
-            ev_switchstate.send(SwitchStateChanged { entity, on: true });
-        }
+    let (tile, entity) = tiles.get(trigger.entity()).unwrap();
+    if let Some(TileRole::Switch(id, on)) = tile.role {
+        debug!("Setting up switch {id}");
+        commands.entity(entity).insert(Switch { id, on });
+        ev_switchstate.send(SwitchStateChanged {
+            switch_entity: entity,
+            on,
+        });
+
+        // add collider
+        let collider = commands
+            .spawn((
+                RigidBody::Static,
+                Collider::ellipse(10.0, 8.0),
+                Transform::from_xyz(0.0, 5.0, 0.1),
+            ))
+            .id();
+        commands.entity(entity).add_child(collider);
     }
 }
 
@@ -64,15 +70,16 @@ pub fn press_switch(
         if let Ok(player) = player.get_single() {
             let player_translation = player.translation();
             for (transform, mut switch, entity) in tiles.iter_mut() {
+                // does Parry/Avian have a more efficient way to do this?
                 let translation = transform.translation();
                 let a = (translation.x - player_translation.x).powf(2.);
                 let b = (translation.y - player_translation.y).powf(2.);
                 let distance = (a + b).sqrt();
                 if distance < 27.50 {
                     switch.on = !switch.on;
-                    debug!("switch state changed to: {}", switch.on);
+                    debug!("switch {} changed to: {}", switch.id, switch.on);
                     ev_switchstate.send(SwitchStateChanged {
-                        entity,
+                        switch_entity: entity,
                         on: switch.on,
                     });
                 }
@@ -85,9 +92,9 @@ pub fn update_switch_sprite(mut switch: Query<(&Switch, &mut Sprite), Changed<Sw
     for (switch, mut sprite) in switch.iter_mut() {
         if let Some(atlas) = &mut sprite.texture_atlas {
             if switch.on {
-                atlas.index = TuesdayTile::SwitchRight as usize;
+                atlas.index = TuesdayTile::SwitchRight(1).into();
             } else {
-                atlas.index = TuesdayTile::SwitchLeft as usize;
+                atlas.index = TuesdayTile::SwitchLeft(1).into();
             }
         }
     }

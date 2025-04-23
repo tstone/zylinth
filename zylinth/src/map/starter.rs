@@ -14,8 +14,9 @@ pub fn mark_player_start_tile(grid: &mut TileGrid<TuesdayTile>) {
                         && grid[x as usize - 1][y][0] == Some(TuesdayTile::Floor)
                         && grid[x as usize - 1][y as usize - 1][0] == Some(TuesdayTile::Floor)
                     {
-                        debug!("Identified player start {x},{y}");
-                        grid[x][y][0] = Some(TuesdayTile::PlayerStart);
+                        // TODO: find more potential starts
+                        let z = grid.depth() - 1;
+                        grid[x][y][z] = Some(TuesdayTile::PlayerStart(1));
                         return;
                     }
                 }

@@ -4,7 +4,8 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::cmp;
 
-use super::plugin::{PlayerStartTile, TileLayer, TileSprite};
+use super::TileRole;
+use super::plugin::{TileLayer, TileSprite};
 use super::tileset::{Tileset, TilesetId};
 
 #[allow(unused)]
@@ -15,6 +16,7 @@ pub struct Tile {
     pub width: u8,
     pub height: u8,
     pub tileset_name: &'static str,
+    pub role: Option<TileRole>,
 }
 
 #[allow(unused)]
@@ -57,13 +59,17 @@ pub fn render_tilemap(
 
     for x in 0..width {
         for y in 0..height {
-            if let Some(t) = layer.grid[x as usize][y as usize] {
+            if let Some(t) = &layer.grid[x as usize][y as usize] {
                 let offset_x = x as f32 * tileset.tile_width as f32;
                 let offset_y = y as f32 * tileset.tile_height as f32;
                 // sprite maps are rendered with 0,0 in the bottom left so flip the Y coord
                 let flipped_y = width as f32 - offset_y - 1.0;
-                // TODO: make this a layer above everything that's rendered
-                let player_start = t.index == 999;
+
+                if let Some(role) = &t.role {
+                    debug!("Inserting a {:?} at {x},{y}", role);
+                }
+
+                debug!("Inserting tile {}", t.index);
 
                 let mut tile_entity = commands.spawn((
                     Tile {
@@ -72,27 +78,24 @@ pub fn render_tilemap(
                         width: tileset.tile_width,
                         height: tileset.tile_height,
                         tileset_name: layer.tileset_name,
+                        role: t.role.clone(),
                     },
                     Sprite {
                         image: tileset.image.clone(),
                         texture_atlas: Some(TextureAtlas {
                             layout: tileset.layout.clone(),
-                            // hacky:
-                            index: if t.index == 999 { 12 } else { t.index },
+                            index: t.index,
                         }),
                         ..default()
                     },
                     Transform::from_xyz(offset_x, flipped_y, layer.z),
+                    // TODO: make this a nice debug plugin or something
                     // TextFont {
                     //     font_size: 8.0,
                     //     ..Default::default()
                     // },
                     // Text2d::new(format!("({},{})", x, y)),
                 ));
-
-                if player_start {
-                    tile_entity.insert(PlayerStartTile);
-                }
 
                 // attach collider to top-left tile
                 if let Some(collider) = &collisions[x as usize][y as usize] {
@@ -130,19 +133,19 @@ fn spawn_collisions(
     for y in 0..height {
         let mut start_x: Option<u32> = None;
         for x in 0..width {
-            let tile = grid[x as usize][y as usize];
+            let tile = &grid[x as usize][y as usize];
+            let has_collider = tile.clone().map_or(false, |t| t.collider);
 
-            if tile.map_or(false, |t| t.collider) {
+            if has_collider {
                 count += 1;
             }
 
-            if start_x.is_none() && tile.map_or(false, |t| t.collider) {
+            if start_x.is_none() && has_collider {
                 // if there is no start x and the current tile is impassible
                 start_x = Some(x);
 
                 // if there is a start x AND this tile is not impassable or not defined or it's the last tile
-            } else if start_x.is_some() && (tile.map_or(true, |t| !t.collider) || x == (width - 1))
-            {
+            } else if start_x.is_some() && (!has_collider || x == (width - 1)) {
                 if let Some(start) = start_x {
                     // only save regions more than 1
                     if x - start > 2 {
@@ -162,15 +165,15 @@ fn spawn_collisions(
     for x in 0..width {
         let mut start_y: Option<u32> = None;
         for y in 0..height {
-            let tile = grid[x as usize][y as usize];
+            let tile = &grid[x as usize][y as usize];
+            let has_collider = tile.clone().map_or(false, |t| t.collider);
 
-            if start_y.is_none() && tile.map_or(false, |t| t.collider) {
+            if start_y.is_none() && has_collider {
                 // if there is no start x and the current tile is impassible
                 start_y = Some(y);
 
                 // if there is a start x AND this tile is not impassable or not defined or it's the last tile
-            } else if start_y.is_some() && (tile.map_or(true, |t| !t.collider) || y == (height - 1))
-            {
+            } else if start_y.is_some() && (!has_collider || y == (height - 1)) {
                 if let Some(start) = start_y {
                     contiguous_impassables.push((x, start, x, y));
                     start_y = None;

@@ -33,12 +33,11 @@ impl Command for SpawnBuildingMap {
         //     self.wander_factor,
         //     &mut rng,
         // );
-        let mut grid = starter_room();
+        let mut puzzle = starter_room();
         // fix_floor(&mut grid, &mut rng);
-        let mut grid = wrap_walls(grid, &mut rng);
+        let mut grid = wrap_walls(puzzle.grid, &mut rng);
         mark_player_start_tile(&mut grid);
 
-        // TODO: it seems like having Grid with layers of different types is a problem
         // TODO: change this to a custom command instead of spawning TileLayer
         world.spawn((
             TileLayer {
@@ -58,6 +57,11 @@ impl Command for SpawnBuildingMap {
             },
             Transform::default(),
         ));
+
+        for door_control in puzzle.door_controls {
+            world.spawn(door_control);
+        }
+
         world.send_event(NewMap);
     }
 }
