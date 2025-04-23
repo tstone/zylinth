@@ -48,8 +48,8 @@ pub enum TuesdayTile {
     EmptyDecoration1 = 33,
     EmptyDecoration2 = 34,
     DoorFrame(u8) = 35,
-    PanelDisabled = 36,
-    PanelEnabled = 37,
+    PanelDisabled(u8) = 36,
+    PanelEnabled(u8) = 37,
     WallPanelLeft = 38,
     WallPanelMiddle = 39,
     WallPanelRight = 40,
@@ -147,11 +147,12 @@ impl TuesdayTile {
                         Self::SwitchLeft(id) => Some(TileRole::Switch(id, false)),
                         Self::SwitchRight(id) => Some(TileRole::Switch(id, true)),
                         Self::PlayerStart(id) => Some(TileRole::PlayerStart(id)),
+                        Self::PanelDisabled(id) => Some(TileRole::DoorPanel(id)),
+                        Self::PanelEnabled(id) => Some(TileRole::DoorPanel(id)),
                         _ => None,
                     };
                     let index: usize = match tile {
                         Self::PlayerStart(_) => Self::Transparent.into(),
-                        Self::SwitchLeft(_) => 12,
                         t => t.into(),
                     };
 

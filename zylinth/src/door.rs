@@ -6,8 +6,8 @@ use crate::switch::{Switch, SwitchStateChanged};
 
 #[derive(Component)]
 pub struct Door {
-    id: u8,
-    open: bool,
+    pub id: u8,
+    pub open: bool,
 }
 
 pub struct DoorPlugin;

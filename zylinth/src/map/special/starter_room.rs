@@ -39,7 +39,7 @@ pub fn starter_room() -> Puzzle<TuesdayTile> {
     grid[4][2][0] = None;
     grid[5][2][0] = Some(Floor);
     grid[5][2][1] = Some(DoorFrame(1));
-    grid[6][2][1] = Some(PanelDisabled);
+    grid[6][2][1] = Some(PanelDisabled(1));
     grid[6][2][0] = None;
     grid[7][2][0] = None;
     grid[8][2][0] = None;

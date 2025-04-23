@@ -6,6 +6,7 @@ use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
 use door::DoorPlugin;
 use map::{SpawnBuildingMap, TileLayoutPlugin};
+use panel::DoorPanelPlugin;
 use player::PlayerPlugin;
 use seed::SeedPlugin;
 use sprite_animation::SpriteAnimationPlugin;
@@ -14,6 +15,7 @@ use switch::SwitchPlugin;
 mod camera;
 mod door;
 mod map;
+mod panel;
 mod player;
 mod seed;
 mod sprite_animation;
@@ -44,13 +46,14 @@ fn main() {
         .add_plugins(FpsOverlayPlugin { ..default() })
         .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
         .add_plugins(PhysicsPlugins::default())
-        .add_plugins(PhysicsDebugPlugin::default())
+        // .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins((
             SeedPlugin,
             PlayerPlugin,
             TileLayoutPlugin,
             DoorPlugin,
             SwitchPlugin,
+            DoorPanelPlugin,
         ))
         .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_COLOR))

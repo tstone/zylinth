@@ -35,6 +35,7 @@ pub struct TileSprite {
 pub enum TileRole {
     Switch(u8, bool),
     Door(u8),
+    DoorPanel(u8),
     PlayerStart(u8),
 }
 
