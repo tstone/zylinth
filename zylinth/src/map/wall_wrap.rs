@@ -32,12 +32,12 @@ lazy_static! {
         }),
 
         // double bottom corner
-        ReplacementRule::to(WallDoubleLower, |src, _| {
+        ReplacementRule::to(WallDoubleUpper, |src, _| {
             *src == None && src.up() == None && src.left() == None && src.right() == None
                 && src.top_left() == Floor && src.top_right() == Floor
         }),
         // double top corner
-        ReplacementRule::to(WallDoubleUpper, |src, _| {
+        ReplacementRule::to(WallDoubleLower, |src, _| {
             *src == None && src.down() == None && src.left() == None && src.right() == None
                 && src.bottom_left() == Floor && src.bottom_right() == Floor
         }),
@@ -150,6 +150,30 @@ lazy_static! {
         ReplacementRule::to(WallInnerCornerBottomLeft, |src, _| {
             *src == WallRight && src.right() == WallTopRight
         }),
+        // double bump up
+        ReplacementRule {
+            condition: |src, _ | {
+                *src == WallDoubleLower && src.left() == WallPanelMiddle && src.right() == WallPanelMiddle && src.up() == None
+            },
+            replacements: vec![
+                Replacement::this(WallPanelMiddle),
+                Replacement::up(WallTop),
+                Replacement::down(WallDoubleCornerTop)
+            ],
+            ..Default::default()
+        },
+        // double vert to u
+        ReplacementRule {
+            condition: |src, _ | {
+                *src == WallDoubleVertical && (
+                    src.down() == WallPanelLeft || src.down() == WallPanelRight || src.down() == WallPanelSingle
+                )
+            },
+            replacements: vec![
+                Replacement::this(WallDoubleCornerBottom),
+            ],
+            ..Default::default()
+        },
         // box
         ReplacementRule {
             condition: |src, _| {

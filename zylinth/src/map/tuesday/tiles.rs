@@ -67,8 +67,8 @@ pub enum TuesdayTile {
     WallPanelSingle = 49,
     WallDoubleCornerTop = 50,
     WallDoubleCornerBottom = 51,
-    WallDoubleLower = 52,
-    WallDoubleUpper = 53,
+    WallDoubleUpper = 52,
+    WallDoubleLower = 53,
     Transparent = 54,
 
     PlayerStart(u8) = 999,
@@ -105,8 +105,8 @@ impl IsImpassable for TuesdayTile {
             || *self == Self::WallAllCorner
             || *self == Self::WallDoubleRightCorner
             || *self == Self::WallDoubleLeftCorner
-            || *self == Self::WallDoubleLower
             || *self == Self::WallDoubleUpper
+            || *self == Self::WallDoubleLower
             || *self == Self::WallDoubleVertical
             || *self == Self::WallDoubleHorizontal
             || *self == Self::WallInnerCornerBottomLeft
