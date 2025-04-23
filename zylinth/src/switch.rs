@@ -61,17 +61,14 @@ pub fn press_switch(
     mut ev_switchstate: EventWriter<SwitchStateChanged>,
 ) {
     if input.any_just_released([KeyCode::Enter, KeyCode::KeyF]) {
-        debug!("pressed activate");
         if let Ok(player) = player.get_single() {
             let player_translation = player.translation();
-            debug!("got player");
             for (transform, mut switch, entity) in tiles.iter_mut() {
                 let translation = transform.translation();
                 let a = (translation.x - player_translation.x).powf(2.);
                 let b = (translation.y - player_translation.y).powf(2.);
                 let distance = (a + b).sqrt();
-                debug!("distance: {distance}");
-                if distance < 30.0 {
+                if distance < 27.50 {
                     switch.on = !switch.on;
                     debug!("switch state changed to: {}", switch.on);
                     ev_switchstate.send(SwitchStateChanged {
