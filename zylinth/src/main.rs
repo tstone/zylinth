@@ -4,16 +4,20 @@ use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
+use door::DoorPlugin;
 use map::{SpawnBuildingMap, TileLayoutPlugin};
 use player::PlayerPlugin;
 use seed::SeedPlugin;
 use sprite_animation::SpriteAnimationPlugin;
+use switch::SwitchPlugin;
 
 mod camera;
+mod door;
 mod map;
 mod player;
 mod seed;
 mod sprite_animation;
+mod switch;
 
 const BASE_COLOR: Color = Color::hsl(231., 0.39, 0.13);
 
@@ -41,7 +45,13 @@ fn main() {
         .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
         .add_plugins(PhysicsPlugins::default())
         // .add_plugins(PhysicsDebugPlugin::default())
-        .add_plugins((SeedPlugin, PlayerPlugin, TileLayoutPlugin))
+        .add_plugins((
+            SeedPlugin,
+            PlayerPlugin,
+            TileLayoutPlugin,
+            DoorPlugin,
+            SwitchPlugin,
+        ))
         .insert_resource(Gravity::ZERO)
         .insert_resource(ClearColor(BASE_COLOR))
         .add_systems(Startup, startup)

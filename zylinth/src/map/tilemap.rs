@@ -4,9 +4,6 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::cmp;
 
-use crate::map::tuesday::TuesdayTile;
-
-use super::functional_tiles::UtilityTile;
 use super::plugin::{PlayerStartTile, TileLayer, TileSprite};
 use super::tileset::{Tileset, TilesetId};
 
@@ -17,7 +14,6 @@ pub struct Tile {
     pub grid_y: u32,
     pub width: u8,
     pub height: u8,
-    pub tile_index: usize,
     pub tileset_name: &'static str,
 }
 
@@ -75,7 +71,6 @@ pub fn render_tilemap(
                         grid_y: y,
                         width: tileset.tile_width,
                         height: tileset.tile_height,
-                        tile_index: t.index,
                         tileset_name: layer.tileset_name,
                     },
                     Sprite {

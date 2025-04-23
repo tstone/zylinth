@@ -1,5 +1,4 @@
 mod decoration;
-mod door;
 mod fixer;
 pub mod functional_tiles;
 mod lighting;
@@ -18,6 +17,7 @@ mod wall_wrap;
 
 pub use plugin::*;
 pub use spawn_building::SpawnBuildingMap;
+pub use tuesday::TuesdayTile;
 
 #[allow(unused)]
 pub use tilemap::*;

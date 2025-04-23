@@ -54,7 +54,7 @@ impl Command for SpawnBuildingMap {
                 role: TileLayerRole::Base,
                 grid: TuesdayTile::layer_to_tile_sprites(&grid, 1),
                 tileset_name: TuesdayTile::name(),
-                z: 1.0,
+                z: 5.0,
             },
             Transform::default(),
         ));

@@ -114,6 +114,7 @@ impl IsImpassable for TuesdayTile {
             || *self == Self::WallTop
             || *self == Self::WallTopLeft
             || *self == Self::WallTopRight
+            || *self == Self::DoorFrame
     }
 }
 
