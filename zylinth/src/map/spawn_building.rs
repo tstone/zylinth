@@ -1,3 +1,4 @@
+use super::decoration::decorate_empty;
 use super::special::starter_room::starter_room;
 use super::starter::mark_player_start_tile;
 use super::tuesday::TuesdayTile;
@@ -25,23 +26,15 @@ impl Command for SpawnBuildingMap {
         let seed = world.get_resource::<RngSeed>().unwrap();
         let mut rng = ChaCha8Rng::seed_from_u64(seed.0);
 
-        // let mut grid = walking_squares(
-        //     self.width,
-        //     self.height,
-        //     self.density,
-        //     self.branch_factor,
-        //     self.wander_factor,
-        //     &mut rng,
-        // );
         let mut puzzle = starter_room();
-        // fix_floor(&mut grid, &mut rng);
         let mut grid = wrap_walls(puzzle.grid, &mut rng);
-        mark_player_start_tile(&mut grid);
+        decorate_empty(&mut grid, &mut rng);
+        mark_player_start_tile(&mut grid, 1, &mut rng);
 
         // TODO: change this to a custom command instead of spawning TileLayer
         world.spawn((
             TileLayer {
-                role: TileLayerRole::Base,
+                role: TileLayerRole::BackgroundDecorations,
                 grid: TuesdayTile::layer_to_tile_sprites(&grid, 0),
                 tileset_name: TuesdayTile::name(),
                 z: 0.0,
@@ -52,6 +45,15 @@ impl Command for SpawnBuildingMap {
             TileLayer {
                 role: TileLayerRole::Base,
                 grid: TuesdayTile::layer_to_tile_sprites(&grid, 1),
+                tileset_name: TuesdayTile::name(),
+                z: 1.0,
+            },
+            Transform::default(),
+        ));
+        world.spawn((
+            TileLayer {
+                role: TileLayerRole::Interactables,
+                grid: TuesdayTile::layer_to_tile_sprites(&grid, 2),
                 tileset_name: TuesdayTile::name(),
                 z: 5.0,
             },

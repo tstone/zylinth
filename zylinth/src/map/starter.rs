@@ -1,26 +1,28 @@
-use super::tuesday::TuesdayTile;
+use super::tuesday::{TuesdayTile, TuesdayTile::*};
 use bevy::prelude::*;
-use tilegen::TileGrid;
+use rand::Rng;
+use tilegen::{Replacement, ReplacementRule, TileGrid};
 
-pub fn mark_player_start_tile(grid: &mut TileGrid<TuesdayTile>) {
-    for x in 0..grid.len() {
-        if x > 0 {
-            for y in 0..grid[x].len() {
-                if y > 0 {
-                    // TODO: this should use the replacer system somehow
-                    let tile = grid[x as usize][y as usize][0];
-                    if tile == Some(TuesdayTile::Floor)
-                        && grid[x][y as usize - 1][0] == Some(TuesdayTile::Floor)
-                        && grid[x as usize - 1][y][0] == Some(TuesdayTile::Floor)
-                        && grid[x as usize - 1][y as usize - 1][0] == Some(TuesdayTile::Floor)
-                    {
-                        // TODO: find more potential starts
-                        let z = grid.depth() - 1;
-                        grid[x][y][z] = Some(TuesdayTile::PlayerStart(1));
-                        return;
-                    }
-                }
-            }
-        }
-    }
+pub fn mark_player_start_tile(
+    grid: &mut TileGrid<TuesdayTile>,
+    start_position_count: u8,
+    rng: &mut impl Rng,
+) {
+    let z = grid.depth() - 1;
+    grid.apply_layer_replacements(
+        z,
+        vec![ReplacementRule {
+            condition: |src, _| {
+                debug!("{},{} - {:?}", src.x, src.y, src.below().tile);
+                src.below() == Floor
+                    && src.right().below() == Floor
+                    && src.down().below() == Floor
+                    && src.bottom_right().below() == Floor
+            },
+            replacements: vec![Replacement::this(TuesdayTile::PlayerStart(1))],
+            apply_count: Some(start_position_count as u16),
+            ..Default::default()
+        }],
+        rng,
+    );
 }

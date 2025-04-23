@@ -100,8 +100,6 @@ impl IsImpassable for TuesdayTile {
         *self == Self::WallBottom
             || *self == Self::WallBottomLeft
             || *self == Self::WallBottomRight
-            || *self == Self::WallDoubleHorizontal
-            || *self == Self::WallDoubleVertical
             || *self == Self::WallAllCorner
             || *self == Self::WallDoubleRightCorner
             || *self == Self::WallDoubleLeftCorner
@@ -124,6 +122,8 @@ impl IsImpassable for TuesdayTile {
             || *self == Self::WallTop
             || *self == Self::WallTopLeft
             || *self == Self::WallTopRight
+            || *self == Self::WallDoubleCornerBottom
+            || *self == Self::WallDoubleCornerTop
     }
 }
 
@@ -137,10 +137,12 @@ impl TuesdayTile {
         grid: &TileGrid<Self>,
         layer: usize,
     ) -> Vec<Vec<Option<TileSprite>>> {
-        let mut tilesprites: Vec<Vec<Option<TileSprite>>> = vec![vec![]; grid.len()];
+        let width = grid.width();
+        let height = grid.height();
+        let mut tilesprites: Vec<Vec<Option<TileSprite>>> = vec![vec![]; width];
 
-        for x in 0..grid.len() {
-            for y in 0..grid[x].len() {
+        for x in 0..width {
+            for y in 0..height {
                 if let Some(tile) = grid[x][y][layer] {
                     let role = match tile {
                         Self::DoorFrame(id) => Some(TileRole::Door(id)),

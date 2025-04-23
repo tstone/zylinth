@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy_lit::prelude::PointLight2d;
 use rand::prelude::*;
-use rand_chacha::{ChaCha8Rng, ChaCha20Rng};
+use rand_chacha::ChaCha8Rng;
 
 use crate::map::{NewMap, Tile, TileRole};
 use crate::seed::RngSeed;

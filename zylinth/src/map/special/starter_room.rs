@@ -5,7 +5,7 @@ use crate::map::tuesday::{TuesdayTile, TuesdayTile::*};
 
 pub fn starter_room() -> Puzzle<TuesdayTile> {
     let mut grid = TileGrid::empty(11, 6, 1);
-    grid.add_layer();
+    grid.push_layer();
 
     grid[0][0][0] = Some(Floor);
     grid[1][0][0] = Some(Floor);

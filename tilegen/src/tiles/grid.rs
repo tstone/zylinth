@@ -68,8 +68,8 @@ where
         TileGrid::new(output)
     }
 
-    /// Append a blank layer
-    pub fn add_layer(&mut self) {
+    /// Append a blank layer to end
+    pub fn push_layer(&mut self) {
         let height = self.height();
         let depth = self.depth();
         for x in 0..self.width() {
@@ -77,6 +77,17 @@ where
                 for _ in 0..depth {
                     self.tiles[x][y].push(None);
                 }
+            }
+        }
+    }
+
+    /// Append a blank layer to beginning
+    pub fn insert_layer(&mut self) {
+        let height = self.height();
+        let depth = self.depth();
+        for x in 0..self.width() {
+            for y in 0..height {
+                self.tiles[x][y].insert(0, None);
             }
         }
     }

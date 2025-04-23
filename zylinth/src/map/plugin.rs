@@ -49,6 +49,7 @@ pub enum TileLayerRole {
     Base,
     BackgroundDecorations,
     ForegroundDecorations,
+    Interactables,
 }
 
 #[allow(unused)]
