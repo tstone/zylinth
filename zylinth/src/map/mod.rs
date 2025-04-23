@@ -1,4 +1,5 @@
 mod decoration;
+mod door;
 mod fixer;
 pub mod functional_tiles;
 mod lighting;
@@ -7,8 +8,8 @@ mod plugin;
 mod room;
 mod shadowizer;
 mod spawn_building;
+mod special;
 mod starter;
-mod test_room;
 mod tilemap;
 mod tileset;
 mod tuesday;

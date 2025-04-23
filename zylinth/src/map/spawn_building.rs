@@ -1,8 +1,8 @@
+use super::special::starter_room::starter_room;
 use super::starter::mark_player_start_tile;
-use super::test_room::test_room;
 use super::tuesday::TuesdayTile;
 use super::{NewMap, TileLayer, TileLayerRole};
-use crate::layout::wall_wrap::wrap_walls;
+use crate::map::wall_wrap::wrap_walls;
 use crate::seed::RngSeed;
 use bevy::prelude::*;
 use rand::prelude::*;
@@ -33,7 +33,7 @@ impl Command for SpawnBuildingMap {
         //     self.wander_factor,
         //     &mut rng,
         // );
-        let mut grid = test_room();
+        let mut grid = starter_room();
         // fix_floor(&mut grid, &mut rng);
         let mut grid = wrap_walls(grid, &mut rng);
         mark_player_start_tile(&mut grid);
@@ -46,6 +46,15 @@ impl Command for SpawnBuildingMap {
                 grid: TuesdayTile::layer_to_tile_sprites(&grid, 0),
                 tileset_name: TuesdayTile::name(),
                 z: 0.0,
+            },
+            Transform::default(),
+        ));
+        world.spawn((
+            TileLayer {
+                role: TileLayerRole::Base,
+                grid: TuesdayTile::layer_to_tile_sprites(&grid, 1),
+                tileset_name: TuesdayTile::name(),
+                z: 1.0,
             },
             Transform::default(),
         ));

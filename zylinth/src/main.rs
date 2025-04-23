@@ -4,13 +4,13 @@ use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
-use layout::{SpawnBuildingMap, TileLayoutPlugin};
+use map::{SpawnBuildingMap, TileLayoutPlugin};
 use player::PlayerPlugin;
 use seed::SeedPlugin;
 use sprite_animation::SpriteAnimationPlugin;
 
 mod camera;
-mod layout;
+mod map;
 mod player;
 mod seed;
 mod sprite_animation;

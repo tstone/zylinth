@@ -1,5 +1,5 @@
-use crate::layout::functional_tiles::UtilityTile;
-use crate::layout::functional_tiles::UtilityTile::*;
+use crate::map::functional_tiles::UtilityTile;
+use crate::map::functional_tiles::UtilityTile::*;
 use lazy_static::lazy_static;
 use rand_chacha::ChaCha8Rng;
 use tilegen::*;

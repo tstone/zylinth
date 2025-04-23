@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy_lit::prelude::PointLight2d;
 
-use crate::layout::{NewMap, PlayerStartTile};
+use crate::map::{NewMap, PlayerStartTile};
 use crate::sprite_animation::SpriteAnimConfig;
 
 pub struct PlayerPlugin;
@@ -51,7 +51,7 @@ fn spawn_player(
         },
         Transform::default(),
         RigidBody::Dynamic,
-        Collider::circle(12.0),
+        Collider::ellipse(10.0, 7.0),
         TranslationExtrapolation,
         LockedAxes::ROTATION_LOCKED,
         LinearDamping(2.75),

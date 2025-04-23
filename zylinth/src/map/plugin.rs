@@ -1,6 +1,6 @@
-use crate::layout::lighting::spot_lights;
-use crate::layout::tilemap::{RenderedTileLayer, render_tilemap};
-use crate::layout::tileset::*;
+use crate::map::lighting::spot_lights;
+use crate::map::tilemap::{RenderedTileLayer, render_tilemap};
+use crate::map::tileset::*;
 
 use super::functional_tiles::UtilityTile;
 use super::tileset::Tileset;
@@ -16,9 +16,12 @@ impl Plugin for TileLayoutPlugin {
         app.init_asset::<Tileset>();
 
         app.add_systems(PreStartup, init_tuesday_tileset);
+        app.add_systems(
+            PostUpdate,
+            spot_lights.after(TransformSystem::TransformPropagate),
+        );
 
         app.add_observer(render_tilemap);
-        app.add_observer(spot_lights);
     }
 }
 

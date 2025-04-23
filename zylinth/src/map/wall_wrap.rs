@@ -65,8 +65,11 @@ lazy_static! {
             ..Default::default()
         },
         // bottom left corner
-        ReplacementRule::to(WallPanelSingle, |src, dest| {
-            *src == None && src.up() == None && src.right() == None && src.top_right() == Floor && dest.left() == WallLeft
+        ReplacementRule::to(WallPanelLeft, |src, _| {
+            *src == None && src.up() == None && src.right() == None && src.top_right() == Floor && src.down() == Floor && src.bottom_right() == Floor
+        }),
+        ReplacementRule::to(WallPanelSingle, |src, _| {
+            *src == None && src.up() == None && src.right() == None && src.top_right() == Floor && src.down() == Floor
         }),
         ReplacementRule::to(WallBottomLeft, |src, dest| {
             *src == None && src.up() == None && dest.right() == WallPanelRight && src.top_right() == Floor
@@ -75,6 +78,9 @@ lazy_static! {
             *src == None && src.up() == None && src.right() == None && src.top_right() == Floor
         }),
         // bottom right corner
+        ReplacementRule::to(WallPanelRight, |src, _| {
+            *src == None && src.up() == None && src.left() == None && src.top_left() == Floor && src.down() == Floor && src.bottom_left() == Floor
+        }),
         ReplacementRule::to(WallPanelSingle, |src, _| {
             *src == None && src.up() == None && src.left() == None && src.top_left() == Floor && src.down() == Floor
         }),
@@ -113,6 +119,14 @@ lazy_static! {
             ],
             ..Default::default()
         },
+        // double wall vertical
+        ReplacementRule::to(WallDoubleVertical, |src, _| {
+            *src == None && src.left() == Floor && src.right() == Floor
+        }),
+        // double wall horizontal
+        ReplacementRule::to(WallPanelMiddle, |src, _| {
+            *src == None && src.up() == Floor && src.down() == Floor
+        }),
         // left walls
         ReplacementRule::to(WallLeft, |src, _| {
             *src == None && src.right() == Floor

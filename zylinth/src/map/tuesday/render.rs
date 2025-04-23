@@ -1,6 +1,6 @@
 use rand::prelude::*;
 
-use crate::layout::functional_tiles::UtilityTile;
+use crate::map::functional_tiles::UtilityTile;
 
 use super::TuesdayTile;
 

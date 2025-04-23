@@ -1,6 +1,6 @@
 use tilegen::TileGrid;
 
-use super::tuesday::{TuesdayTile, TuesdayTile::*};
+use crate::map::tuesday::{TuesdayTile, TuesdayTile::*};
 
 pub fn test_room() -> TileGrid<TuesdayTile> {
     let mut grid = TileGrid::empty(6, 6, 1);

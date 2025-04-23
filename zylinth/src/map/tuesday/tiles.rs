@@ -1,9 +1,7 @@
 use bevy::ecs::component::Component;
-use rand::Rng;
 use tilegen::TileGrid;
 
-use crate::layout::functional_tiles::UtilityTile;
-use crate::layout::{IsImpassable, TileSprite};
+use crate::map::{IsImpassable, TileSprite};
 
 #[derive(Component, Copy, Clone, Default, Debug, PartialEq, Eq, Hash)]
 #[allow(unused)]
@@ -19,6 +17,7 @@ pub enum TuesdayTile {
     FloorAlt2 = 7,
     WallInnerCornerBottomRight = 8,
     WallInnerCornerBottomLeft = 9,
+    Resoursce1 = 10,
 
     // row 2
     WallLeftCaution = 11,

@@ -4,7 +4,7 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::cmp;
 
-use crate::layout::tuesday::TuesdayTile;
+use crate::map::tuesday::TuesdayTile;
 
 use super::functional_tiles::UtilityTile;
 use super::plugin::{PlayerStartTile, TileLayer, TileSprite};
