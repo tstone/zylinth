@@ -1,8 +1,7 @@
-use crate::layout::lighting::spot_lights;
-use crate::layout::tilemap::{RenderedTileLayer, render_tilemap};
-use crate::layout::tileset::init_cosmic_tileset;
+use crate::map::lighting::spot_lights;
+use crate::map::tilemap::{RenderedTileLayer, render_tilemap};
+use crate::map::tileset::*;
 
-use super::functional_tiles::UtilityTile;
 use super::tileset::Tileset;
 use bevy::prelude::*;
 
@@ -15,26 +14,34 @@ impl Plugin for TileLayoutPlugin {
 
         app.init_asset::<Tileset>();
 
-        app.add_systems(PreStartup, init_cosmic_tileset);
+        app.add_systems(PreStartup, init_tuesday_tileset);
+        app.add_systems(
+            PostUpdate,
+            spot_lights.after(TransformSystem::TransformPropagate),
+        );
 
         app.add_observer(render_tilemap);
-        app.add_observer(spot_lights);
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TileSprite {
     pub index: usize,
     pub collider: bool,
-    pub role: Option<UtilityTile>,
+    pub role: Option<TileRole>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TileRole {
+    Switch(u8, bool),
+    Door(u8),
+    DoorPanel(u8),
+    PlayerStart(u8),
 }
 
 pub trait IsImpassable {
     fn is_impassable(&self) -> bool;
 }
-
-#[derive(Component)]
-pub struct PlayerStartTile;
 
 #[allow(unused)]
 #[derive(Debug, PartialEq, Eq)]
@@ -42,6 +49,7 @@ pub enum TileLayerRole {
     Base,
     BackgroundDecorations,
     ForegroundDecorations,
+    Interactables,
 }
 
 #[allow(unused)]

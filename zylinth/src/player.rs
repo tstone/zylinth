@@ -2,8 +2,11 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy_lit::prelude::PointLight2d;
+use rand::prelude::*;
+use rand_chacha::ChaCha8Rng;
 
-use crate::layout::{NewMap, PlayerStartTile};
+use crate::map::{NewMap, Tile, TileRole};
+use crate::seed::RngSeed;
 use crate::sprite_animation::SpriteAnimConfig;
 
 pub struct PlayerPlugin;
@@ -38,7 +41,7 @@ fn spawn_player(
                 layout: texture_atlas_layouts.add(layout),
                 index: anim_config.first_sprite_index,
             }),
-            custom_size: Some(Vec2::new(24.0, 24.0)),
+            // custom_size: Some(Vec2::new(28.0, 28.0)),
             ..default()
         },
         anim_config,
@@ -51,7 +54,7 @@ fn spawn_player(
         },
         Transform::default(),
         RigidBody::Dynamic,
-        Collider::circle(12.0),
+        Collider::ellipse(12.0, 9.0),
         TranslationExtrapolation,
         LockedAxes::ROTATION_LOCKED,
         LinearDamping(2.75),
@@ -88,21 +91,35 @@ fn player_keyboard_input(
 
 fn set_player_start(
     mut ev_newmap: EventReader<NewMap>,
-    query: Query<(&GlobalTransform, &PlayerStartTile)>,
+    query: Query<(&GlobalTransform, &Tile)>,
     mut player: Query<&mut Transform, With<Player>>,
+    seed: Res<RngSeed>,
 ) {
     for _ in ev_newmap.read() {
-        for (transform, _) in query.iter() {
-            let mut player = player.single_mut();
-            // TODO: why is this 0,0
-            debug!(
-                "moving player {},{}",
-                transform.translation().x,
-                transform.translation().y
-            );
-            player.translation.x = transform.translation().x;
-            player.translation.y = transform.translation().y;
-            player.translation.z = 20.0;
-        }
+        let starting_points = query
+            .iter()
+            .filter(|(_, tile)| match tile.role {
+                Some(TileRole::PlayerStart(_)) => true,
+                _ => false,
+            })
+            .collect::<Vec<_>>();
+
+        let (transform, _) = if starting_points.len() == 1 {
+            starting_points[0]
+        } else {
+            let mut rng = ChaCha8Rng::seed_from_u64(seed.0);
+            *starting_points.choose(&mut rng).unwrap()
+        };
+
+        let mut player = player.single_mut();
+
+        debug!(
+            "moving player to {},{}",
+            transform.translation().x,
+            transform.translation().y
+        );
+        player.translation.x = transform.translation().x;
+        player.translation.y = transform.translation().y;
+        player.translation.z = 20.0;
     }
 }
