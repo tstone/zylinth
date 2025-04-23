@@ -4,18 +4,24 @@ use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
-use layout::{SpawnBuildingMap, TileLayoutPlugin};
+use door::DoorPlugin;
+use map::{SpawnBuildingMap, TileLayoutPlugin};
+use panel::DoorPanelPlugin;
 use player::PlayerPlugin;
 use seed::SeedPlugin;
 use sprite_animation::SpriteAnimationPlugin;
+use switch::SwitchPlugin;
 
 mod camera;
-mod layout;
+mod door;
+mod map;
+mod panel;
 mod player;
 mod seed;
 mod sprite_animation;
+mod switch;
 
-const BASE_MAROON: Color = Color::hsl(281., 0.51, 0.17);
+const BASE_COLOR: Color = Color::hsl(231., 0.39, 0.13);
 
 fn main() {
     App::new()
@@ -40,18 +46,25 @@ fn main() {
         .add_plugins(FpsOverlayPlugin { ..default() })
         .add_plugins((Lighting2dPlugin, SpriteAnimationPlugin, CameraSetup))
         .add_plugins(PhysicsPlugins::default())
-        .add_plugins(PhysicsDebugPlugin::default())
-        .add_plugins((SeedPlugin, PlayerPlugin, TileLayoutPlugin))
+        // .add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins((
+            SeedPlugin,
+            PlayerPlugin,
+            TileLayoutPlugin,
+            DoorPlugin,
+            SwitchPlugin,
+            DoorPanelPlugin,
+        ))
         .insert_resource(Gravity::ZERO)
-        .insert_resource(ClearColor(BASE_MAROON))
+        .insert_resource(ClearColor(BASE_COLOR))
         .add_systems(Startup, startup)
         .run();
 }
 
 fn startup(mut commands: Commands) {
     commands.queue(SpawnBuildingMap {
-        width: 600,
-        height: 40,
+        width: 50,
+        height: 22,
         density: 0.125,
         branch_factor: 0.25,
         wander_factor: 0.5,

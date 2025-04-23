@@ -6,14 +6,14 @@ pub struct TileContext<'a, T: Clone + PartialEq + Eq> {
     pub x: i32,
     pub y: i32,
     pub z: i32,
-    pub(crate) tile: &'a Option<T>,
+    pub tile: &'a Option<T>,
     pub(crate) grid: &'a TileGrid<T>,
 }
 
 #[allow(unused)]
 impl<'a, T> TileContext<'a, T>
 where
-    T: Copy + PartialEq + Eq,
+    T: Clone + PartialEq + Eq,
 {
     pub fn grid_width(&self) -> usize {
         self.grid.width()
@@ -109,16 +109,16 @@ where
 
 impl<'a, T> PartialEq<T> for TileContext<'a, T>
 where
-    T: Copy + PartialEq + Eq,
+    T: Clone + PartialEq + Eq,
 {
     fn eq(&self, other: &T) -> bool {
-        *self.tile == Some(*other)
+        *self.tile == Some(other.clone())
     }
 }
 
 impl<'a, T> PartialEq<Option<T>> for TileContext<'a, T>
 where
-    T: Copy + PartialEq + Eq,
+    T: Clone + PartialEq + Eq,
 {
     fn eq(&self, other: &Option<T>) -> bool {
         self.tile == other
