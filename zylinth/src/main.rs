@@ -9,15 +9,18 @@ use map::{SpawnBuildingMap, TileLayoutPlugin};
 use panel::DoorPanelPlugin;
 use player::PlayerPlugin;
 use seed::SeedPlugin;
+use selection::SelectionPlugion;
 use sprite_animation::SpriteAnimationPlugin;
 use switch::SwitchPlugin;
 
 mod camera;
+mod defs;
 mod door;
 mod map;
 mod panel;
 mod player;
 mod seed;
+mod selection;
 mod sprite_animation;
 mod switch;
 
@@ -52,6 +55,7 @@ fn main() {
             PlayerPlugin,
             TileLayoutPlugin,
             DoorPlugin,
+            SelectionPlugion,
             SwitchPlugin,
             DoorPanelPlugin,
         ))

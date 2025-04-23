@@ -5,6 +5,7 @@ use bevy_lit::prelude::PointLight2d;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
+use crate::defs::GameLayer;
 use crate::map::{NewMap, Tile, TileRole};
 use crate::seed::RngSeed;
 use crate::sprite_animation::SpriteAnimConfig;
@@ -55,6 +56,10 @@ fn spawn_player(
         Transform::default(),
         RigidBody::Dynamic,
         Collider::ellipse(12.0, 9.0),
+        CollisionLayers::new(
+            GameLayer::Player,
+            [GameLayer::Default, GameLayer::Interactables],
+        ),
         TranslationExtrapolation,
         LockedAxes::ROTATION_LOCKED,
         LinearDamping(2.75),
