@@ -69,8 +69,6 @@ pub fn render_tilemap(
                     debug!("Inserting a {:?} at {x},{y}", role);
                 }
 
-                debug!("Inserting tile {}", t.index);
-
                 let mut tile_entity = commands.spawn((
                     Tile {
                         grid_x: x,
