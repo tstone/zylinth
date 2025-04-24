@@ -61,7 +61,7 @@ impl Command for SpawnBuildingMap {
             Transform::default(),
         ));
 
-        for door_control in puzzle.door_controls {
+        for door_control in puzzle.starting_links {
             world.spawn(door_control);
         }
 

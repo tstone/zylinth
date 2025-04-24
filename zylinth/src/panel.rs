@@ -1,37 +1,35 @@
-use std::collections::HashMap;
-
 use avian2d::prelude::{Collider, CollisionLayers, RigidBody, Sensor};
 use bevy::prelude::*;
 
-use crate::defs::GameLayer;
-use crate::door::Door;
+use crate::connections::SourceStateChanged;
+use crate::defs::{ControlSource, ControlTarget, GameLayer};
 use crate::map::{Tile, TileRole, TuesdayTile};
 use crate::selection::Selectable;
 
 #[derive(Component)]
-pub struct DoorPanel {
-    pub id: u8,
-}
+pub struct DoorPanel;
 
 pub struct DoorPanelPlugin;
 
 impl Plugin for DoorPanelPlugin {
     fn build(&self, app: &mut App) {
-        app.add_observer(door_added);
-        app.add_systems(Update, door_changed);
-        app.add_systems(Update, update_panel_selection);
+        app.add_observer(panel_added);
+        app.add_systems(Update, activation_changed);
     }
 }
 
-fn door_added(
+fn panel_added(
     trigger: Trigger<OnAdd, Tile>,
     tiles: Query<(Entity, &Tile)>,
     mut commands: Commands,
 ) {
     let (entity, tile) = tiles.get(trigger.entity()).unwrap();
     if let Some(TileRole::DoorPanel(id)) = tile.role {
+        // panels are both sources and targets
         commands.entity(entity).insert((
-            DoorPanel { id },
+            DoorPanel,
+            ControlSource::off(id),
+            ControlTarget::off(id),
             Selectable::default(),
             RigidBody::Static,
             Sensor,
@@ -41,42 +39,34 @@ fn door_added(
     }
 }
 
-fn door_changed(
-    doors: Query<&Door, Changed<Door>>,
-    mut panels: Query<(&DoorPanel, &Selectable, &mut Sprite)>,
+fn activation_changed(
+    mut panels: Query<
+        (&ControlTarget, &mut ControlSource, &mut Sprite, &Selectable),
+        (Changed<ControlTarget>, With<DoorPanel>),
+    >,
+    mut ev_sourcestate: EventWriter<SourceStateChanged>,
 ) {
-    for door in doors.iter() {
-        for (panel, selectable, mut sprite) in panels.iter_mut() {
-            if panel.id == door.id {
-                if let Some(atlas) = &mut sprite.texture_atlas {
-                    atlas.index = panel_sprite_index(door, selectable);
-                }
-            }
+    for (target, mut source, mut sprite, selectable) in panels.iter_mut() {
+        debug!("panel {} changed to {}", target.id, target.activated);
+        // propagation activation to source
+        source.on = target.activated;
+        // update sprite
+        if let Some(atlas) = &mut sprite.texture_atlas {
+            atlas.index = panel_sprite_index(target.activated, selectable);
         }
+        ev_sourcestate.send(SourceStateChanged {
+            source_id: source.id,
+            on: target.activated,
+        });
     }
 }
 
-fn update_panel_selection(
-    doors: Query<&Door>,
-    mut panels: Query<(&DoorPanel, &Selectable, &mut Sprite), Changed<Selectable>>,
-) {
-    for (panel, selectable, mut sprite) in panels.iter_mut() {
-        for door in doors.iter() {
-            if door.id == panel.id {
-                if let Some(atlas) = &mut sprite.texture_atlas {
-                    atlas.index = panel_sprite_index(door, selectable);
-                }
-            }
-        }
-    }
-}
-
-fn panel_sprite_index(door: &Door, selectable: &Selectable) -> usize {
-    if door.open && selectable.selected {
+fn panel_sprite_index(activated: bool, selectable: &Selectable) -> usize {
+    if activated && selectable.selected {
         TuesdayTile::PanelEnabledSelected.into()
-    } else if door.open && !selectable.selected {
+    } else if activated && !selectable.selected {
         TuesdayTile::PanelEnabled(1).into()
-    } else if !door.open && selectable.selected {
+    } else if !activated && selectable.selected {
         TuesdayTile::PanelDisabledSelected.into()
     } else {
         TuesdayTile::PanelDisabled(1).into()

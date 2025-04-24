@@ -1,6 +1,7 @@
 use tilegen::TileGrid;
 
-use crate::map::puzzle::{DoorControl, Puzzle};
+use crate::defs::ControlLink;
+use crate::map::puzzle::Puzzle;
 use crate::map::tuesday::{TuesdayTile, TuesdayTile::*};
 
 pub fn starter_room() -> Puzzle<TuesdayTile> {
@@ -39,7 +40,7 @@ pub fn starter_room() -> Puzzle<TuesdayTile> {
     grid[4][2][0] = None;
     grid[5][2][0] = Some(Floor);
     grid[5][2][1] = Some(DoorFrame(1));
-    grid[6][2][1] = Some(PanelDisabled(1));
+    grid[6][2][1] = Some(PanelDisabled(2));
     grid[6][2][0] = None;
     grid[7][2][0] = None;
     grid[8][2][0] = None;
@@ -62,7 +63,7 @@ pub fn starter_room() -> Puzzle<TuesdayTile> {
     grid[1][4][0] = Some(Floor);
     grid[2][4][0] = Some(Floor);
     grid[3][4][0] = Some(Floor);
-    grid[3][4][1] = Some(SwitchLeft(1));
+    grid[3][4][1] = Some(SwitchLeft(3));
     grid[4][4][0] = Some(Floor);
     grid[5][4][0] = Some(Floor);
     grid[6][4][0] = Some(Floor);
@@ -85,9 +86,6 @@ pub fn starter_room() -> Puzzle<TuesdayTile> {
 
     Puzzle {
         grid,
-        door_controls: vec![DoorControl {
-            doors: vec![1],
-            switches: vec![1],
-        }],
+        starting_links: vec![ControlLink::new(2, 1), ControlLink::new(3, 2)],
     }
 }
