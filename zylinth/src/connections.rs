@@ -1,6 +1,5 @@
-use bevy::color::palettes::tailwind::{
-    GRAY_50, GRAY_300, GRAY_500, GRAY_700, SLATE_700, SLATE_900, YELLOW_300,
-};
+use bevy::color::palettes::css::REBECCA_PURPLE;
+use bevy::color::palettes::tailwind::{INDIGO_400, INDIGO_600, SLATE_500};
 use bevy::prelude::*;
 
 use crate::defs::{ControlLink, ControlSource, ControlTarget};
@@ -116,10 +115,12 @@ fn render_temp_connection(
         );
         let to = Vec2::new(
             player_transform.translation().x,
-            player_transform.translation().y,
+            player_transform.translation().y + 10.0,
         );
 
-        gizmos.line_gradient_2d(from, to, GRAY_500, SLATE_900);
+        // TODO: maybe the player animatino should have some cool buzzing "holding" animation
+        // TODO: animate this to look cooler
+        gizmos.line_gradient_2d(from, to, INDIGO_600, REBECCA_PURPLE);
     }
 }
 
