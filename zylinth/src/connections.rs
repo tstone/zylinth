@@ -1,6 +1,10 @@
+use bevy::color::palettes::tailwind::{
+    GRAY_50, GRAY_300, GRAY_500, GRAY_700, SLATE_700, SLATE_900, YELLOW_300,
+};
 use bevy::prelude::*;
 
 use crate::defs::{ControlLink, ControlSource, ControlTarget};
+use crate::player::Player;
 use crate::selection::Selectable;
 
 #[derive(Resource, Default, Debug)]
@@ -25,6 +29,9 @@ pub struct SourceStateChanged {
     pub on: bool,
 }
 
+#[derive(Default, Reflect, GizmoConfigGroup)]
+struct TempConnectionLine;
+
 pub struct ConnectionsPlugin;
 
 impl Plugin for ConnectionsPlugin {
@@ -32,6 +39,9 @@ impl Plugin for ConnectionsPlugin {
         app.add_event::<SourceStateChanged>();
         app.insert_state(ConnectionMode::Default);
         app.insert_resource(ConnectionState::default());
+        app.init_gizmo_group::<TempConnectionLine>();
+
+        app.add_systems(Startup, temp_line_setup);
         app.add_systems(Update, propagate_source_to_target);
         app.add_systems(
             Update,
@@ -39,7 +49,8 @@ impl Plugin for ConnectionsPlugin {
         );
         app.add_systems(
             Update,
-            end_connection.run_if(in_state(ConnectionMode::MakingConnection)),
+            (render_temp_connection, end_connection)
+                .run_if(in_state(ConnectionMode::MakingConnection)),
         );
     }
 }
@@ -54,6 +65,7 @@ fn start_connection(
     input: Res<ButtonInput<KeyCode>>,
     mut connection_state: ResMut<ConnectionState>,
     mut next_mode: ResMut<NextState<ConnectionMode>>,
+    player: Query<&GlobalTransform, With<Player>>,
 ) {
     if input.any_just_pressed([KeyCode::KeyV, KeyCode::ControlRight]) {
         for (selectable, entity, source, target) in selectables.iter() {
@@ -70,6 +82,7 @@ fn start_connection(
                 if connection_state.source_entity.is_some()
                     || connection_state.target_entity.is_some()
                 {
+                    // change state to connection active
                     next_mode.set(ConnectionMode::MakingConnection);
                 } else {
                     debug!("Connection not started as no source or target found");
@@ -79,8 +92,36 @@ fn start_connection(
     }
 }
 
-// TODO
-fn draw_temp_connection() {}
+fn temp_line_setup(mut config_store: ResMut<GizmoConfigStore>) {
+    let (config, _) = config_store.config_mut::<TempConnectionLine>();
+    config.line_style = GizmoLineStyle::Dotted;
+    config.line_width = 3.0;
+}
+
+fn render_temp_connection(
+    player: Query<&GlobalTransform, With<Player>>,
+    mut gizmos: Gizmos<TempConnectionLine>,
+    connection_state: Res<ConnectionState>,
+    entities: Query<&GlobalTransform, Without<Player>>,
+) {
+    let from_entity = connection_state
+        .source_entity
+        .or(connection_state.target_entity);
+    if let Some(from_entity) = from_entity {
+        let from_transform = entities.get(from_entity).unwrap();
+        let player_transform = player.get_single().unwrap();
+        let from = Vec2::new(
+            from_transform.translation().x,
+            from_transform.translation().y,
+        );
+        let to = Vec2::new(
+            player_transform.translation().x,
+            player_transform.translation().y,
+        );
+
+        gizmos.line_gradient_2d(from, to, GRAY_500, SLATE_900);
+    }
+}
 
 fn end_connection(
     selectables: Query<(
@@ -136,6 +177,8 @@ fn end_connection(
                 }
             }
         }
+
+        // TODO: turn off temp
 
         connection_state.source_entity = None;
         connection_state.source_id = None;

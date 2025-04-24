@@ -7,22 +7,20 @@
 #### TODO
 
 - [] Fix the render to not have a solid wall when above double vertical
-- [] Implement crude "connection" process
-- [] Implement selectable "power source" where panels have to be powered to work
-
+- [] Implement ability to unconnect something
 - [] Draw a "wire" from the panel to the switch(es)
   - [] Pathfind from panel to switches
-- [] Make rendering a custom command instead of spawning a TileLayer
-- [] Support multiple switches per door panel (boolean AND)
+- [] Implement selectable "power source" where panels have to be powered to work
+- [] Maybe some kind of "multiplexer" that takes mutliple sources then AND/ORs them together
 - [] Support door states starting open
-- [] Support multiple doors on the same door control circuit
 - [] Generate a map based on door/switch input
+- [] Make rendering a custom command instead of spawning a TileLayer
 - [] Implement map switching/progression
 - [] Figure out "pickup" mechanics for item
 
 #### Mechanic Ideas
 
-- Panels have to be powered before they can be used
+- Panels have to be powered before they can be used?
 - Switches can be "painted" as a memory marker for users
 - Switches don't come pre-connected. That connection has to be made by the user
 - Switches can be connected to the door or panel. The panel will remember the state when the switch is disconnected. Doors will not.
