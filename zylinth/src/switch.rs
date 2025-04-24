@@ -1,10 +1,8 @@
 use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
 use bevy::prelude::*;
-use noise::Select;
 
 use crate::defs::GameLayer;
 use crate::map::{Tile, TileRole, TuesdayTile};
-use crate::player::Player;
 use crate::selection::Selectable;
 
 #[derive(Component)]
@@ -57,27 +55,18 @@ fn configure_switch(
 
 fn press_switch(
     input: Res<ButtonInput<KeyCode>>,
-    player: Query<&GlobalTransform, With<Player>>,
-    mut tiles: Query<(&GlobalTransform, &mut Switch)>,
+    mut switches: Query<(&mut Switch, &Selectable)>,
     mut ev_switchstate: EventWriter<SwitchStateChanged>,
 ) {
     if input.any_just_released([KeyCode::Enter, KeyCode::KeyF]) {
-        if let Ok(player) = player.get_single() {
-            let player_translation = player.translation();
-            for (transform, mut switch) in tiles.iter_mut() {
-                // TODO: does Parry/Avian have a more efficient way to do this?
-                let translation = transform.translation();
-                let a = (translation.x - player_translation.x).powf(2.);
-                let b = (translation.y - player_translation.y).powf(2.);
-                let distance = (a + b).sqrt();
-                if distance < 27.50 {
-                    switch.on = !switch.on;
-                    debug!("switch {} changed to: {}", switch.id, switch.on);
-                    ev_switchstate.send(SwitchStateChanged {
-                        switch_id: switch.id,
-                        on: switch.on,
-                    });
-                }
+        for (mut switch, selectable) in switches.iter_mut() {
+            if selectable.selected {
+                switch.on = !switch.on;
+                debug!("switch {} changed to: {}", switch.id, switch.on);
+                ev_switchstate.send(SwitchStateChanged {
+                    switch_id: switch.id,
+                    on: switch.on,
+                });
             }
         }
     }
