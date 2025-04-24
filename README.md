@@ -16,7 +16,6 @@
 - [] Generate a map based on door/switch input
 - [] Make rendering a custom command instead of spawning a TileLayer
 - [] Implement map switching/progression
-- [] Figure out "pickup" mechanics for item
 
 #### Mechanic Ideas
 

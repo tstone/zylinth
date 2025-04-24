@@ -1,8 +1,7 @@
 use avian2d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
 
-use crate::connections::SourceStateChanged;
-use crate::defs::{ControlLink, ControlTarget};
+use crate::defs::{ControlLink, ControlSource, ControlTarget};
 use crate::map::{Tile, TileRole};
 
 #[derive(Component)]
@@ -21,15 +20,27 @@ impl Plugin for DoorPlugin {
 pub fn init_door(
     trigger: Trigger<OnAdd, Tile>,
     tiles: Query<(&Tile, Entity)>,
+    links: Query<&ControlLink>,
+    sources: Query<&ControlSource>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let (tile, entity) = tiles.get(trigger.entity()).unwrap();
     if let Some(TileRole::Door(id)) = tile.role {
+        let existing_links = links.iter().filter(|l| l.target == id).collect::<Vec<_>>();
+        let connected = existing_links.len() > 0;
+        let mut on = false;
+        if connected {
+            let source = sources
+                .iter()
+                .find(|s| s.id == existing_links[0].source)
+                .unwrap();
+            on = source.on;
+        }
         commands
             .entity(entity)
-            .insert((Door, ControlTarget::off(id)));
+            .insert((Door, ControlTarget::new(id, on, connected)));
         close_door(entity, tile, &mut commands, &mut meshes, &mut materials);
     }
 }

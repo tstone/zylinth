@@ -1,5 +1,5 @@
 use bevy::color::palettes::css::REBECCA_PURPLE;
-use bevy::color::palettes::tailwind::{INDIGO_400, INDIGO_600, SLATE_500};
+use bevy::color::palettes::tailwind::INDIGO_600;
 use bevy::prelude::*;
 
 use crate::defs::{ControlLink, ControlSource, ControlTarget};
@@ -29,18 +29,26 @@ pub struct SourceStateChanged {
 }
 
 #[derive(Default, Reflect, GizmoConfigGroup)]
+struct ConnectionLine;
+
+#[derive(Default, Reflect, GizmoConfigGroup)]
 struct TempConnectionLine;
 
 pub struct ConnectionsPlugin;
 
 impl Plugin for ConnectionsPlugin {
     fn build(&self, app: &mut App) {
+        app.add_observer(link_added);
+        app.add_observer(link_removed);
         app.add_event::<SourceStateChanged>();
+
         app.insert_state(ConnectionMode::Default);
         app.insert_resource(ConnectionState::default());
+
+        app.init_gizmo_group::<ConnectionLine>();
         app.init_gizmo_group::<TempConnectionLine>();
 
-        app.add_systems(Startup, temp_line_setup);
+        app.add_systems(Startup, line_setup);
         app.add_systems(Update, propagate_source_to_target);
         app.add_systems(
             Update,
@@ -91,9 +99,12 @@ fn start_connection(
     }
 }
 
-fn temp_line_setup(mut config_store: ResMut<GizmoConfigStore>) {
+fn line_setup(mut config_store: ResMut<GizmoConfigStore>) {
     let (config, _) = config_store.config_mut::<TempConnectionLine>();
     config.line_style = GizmoLineStyle::Dotted;
+    config.line_width = 3.0;
+
+    let (config, _) = config_store.config_mut::<ConnectionLine>();
     config.line_width = 3.0;
 }
 
@@ -118,8 +129,8 @@ fn render_temp_connection(
             player_transform.translation().y + 10.0,
         );
 
-        // TODO: maybe the player animatino should have some cool buzzing "holding" animation
-        // TODO: animate this to look cooler
+        // TODO: maybe the player animation should have some cool buzzing "holding" animation (or gizmos circling around it)
+        // TODO: animate this to look cooler, or apply a shader or something
         gizmos.line_gradient_2d(from, to, INDIGO_600, REBECCA_PURPLE);
     }
 }
@@ -149,24 +160,28 @@ fn end_connection(
                     (Some(source_id), _, None, Some(target))
                         if connection_state.source_entity != Some(entity) =>
                     {
+                        debug!("Created connection from {source_id} to {}", target.id);
                         commands.spawn(ControlLink::new(source_id, target.id));
                     }
                     // there is at least a from target, and only a to source
                     (_, Some(target_id), Some(source), None)
                         if connection_state.target_entity != Some(entity) =>
                     {
+                        debug!("Created connection from {} to {target_id}", source.id);
                         commands.spawn(ControlLink::new(source.id, target_id));
                     }
                     // there is only a from source, and at least a to target
                     (Some(source_id), None, _, Some(target))
                         if connection_state.source_entity != Some(entity) =>
                     {
+                        debug!("Created connection from {source_id} to {}", target.id);
                         commands.spawn(ControlLink::new(source_id, target.id));
                     }
                     // there is only a from target, and at least a to source
                     (None, Some(target_id), Some(source), _)
                         if connection_state.target_entity != Some(entity) =>
                     {
+                        debug!("Created connection from {} to {target_id}", source.id);
                         commands.spawn(ControlLink::new(source.id, target_id));
                     }
                     _ => {
@@ -208,6 +223,70 @@ pub fn propagate_source_to_target(
                     target.activated = false;
                 }
             }
+        }
+    }
+}
+
+fn link_added(
+    trigger: Trigger<OnAdd, ControlLink>,
+    links: Query<(&ControlLink, Entity)>,
+    mut sources: Query<&mut ControlSource>,
+    mut targets: Query<&mut ControlTarget>,
+    mut commands: Commands,
+) {
+    let (link, new_link_entity) = links.get(trigger.entity()).unwrap();
+    let mut new_target = targets.iter_mut().find(|t| t.id == link.target).unwrap();
+
+    // despawn other link if present
+    for (other_link, other_link_entity) in links.iter() {
+        if other_link.target == new_target.id && other_link_entity != new_link_entity {
+            // despawning the link will trigger `link_removed` and should take care of
+            // updating the old source/targets
+            debug!(
+                "Despawning old link from {} to {}",
+                other_link.source, other_link.target
+            );
+            commands.entity(other_link_entity).despawn();
+            break;
+        }
+    }
+
+    // update new source state
+    let mut source = sources.iter_mut().find(|s| s.id == link.source).unwrap();
+    source.connected = true;
+
+    // update new target state
+    new_target.connected = true;
+    new_target.activated = source.on; // propagate activation    
+}
+
+fn link_removed(
+    trigger: Trigger<OnAdd, ControlLink>,
+    links: Query<&ControlLink>,
+    mut sources: Query<&mut ControlSource>,
+    mut targets: Query<&mut ControlTarget>,
+) {
+    let old_link = links.get(trigger.entity()).unwrap();
+
+    // it could be the case that a prior connection was severed but one still exists
+    // make sure there are no more remaining links for this target before marking it as disconnected
+    if let Some(mut old_source) = sources.iter_mut().find(|s| s.id == old_link.source) {
+        let remaining_links = links
+            .iter()
+            .filter(|l| l.source == old_source.id)
+            .collect::<Vec<_>>();
+        if remaining_links.len() == 0 {
+            old_source.connected = false;
+        }
+    }
+
+    if let Some(mut old_target) = targets.iter_mut().find(|t| t.id == old_link.target) {
+        let remaining_links = links
+            .iter()
+            .filter(|l| l.target == old_target.id)
+            .collect::<Vec<_>>();
+        if remaining_links.len() == 0 {
+            old_target.connected = false;
         }
     }
 }

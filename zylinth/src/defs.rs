@@ -13,21 +13,22 @@ pub enum GameLayer {
 pub struct ControlSource {
     pub id: u8,
     pub on: bool,
+    pub connected: bool,
 }
 
 impl ControlSource {
-    pub fn new(id: u8, on: bool) -> Self {
-        Self { id, on }
+    pub fn new(id: u8, on: bool, connected: bool) -> Self {
+        Self { id, on, connected }
     }
 
     /// Create a new control target that starts in the 'on' state
-    pub fn on(id: u8) -> Self {
-        Self::new(id, true)
+    pub fn on(id: u8, connected: bool) -> Self {
+        Self::new(id, true, connected)
     }
 
     /// Create a new control target that starts in the 'off' state
-    pub fn off(id: u8) -> Self {
-        Self::new(id, false)
+    pub fn off(id: u8, connected: bool) -> Self {
+        Self::new(id, false, connected)
     }
 }
 
@@ -35,21 +36,26 @@ impl ControlSource {
 pub struct ControlTarget {
     pub id: u8,
     pub activated: bool,
+    pub connected: bool,
 }
 
 impl ControlTarget {
-    pub fn new(id: u8, activated: bool) -> Self {
-        Self { id, activated }
+    pub fn new(id: u8, activated: bool, connected: bool) -> Self {
+        Self {
+            id,
+            activated,
+            connected,
+        }
     }
 
     /// Create a new control target that starts in the 'activated' state
-    pub fn on(id: u8) -> Self {
-        Self::new(id, true)
+    pub fn on(id: u8, connected: bool) -> Self {
+        Self::new(id, true, connected)
     }
 
     /// Create a new control target that starts in the 'deactivated' state
-    pub fn off(id: u8) -> Self {
-        Self::new(id, false)
+    pub fn off(id: u8, connected: bool) -> Self {
+        Self::new(id, false, connected)
     }
 }
 
