@@ -4,6 +4,8 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::cmp;
 
+use crate::defs::GameLayer;
+
 use super::TileRole;
 use super::plugin::{TileLayer, TileSprite};
 use super::tileset::{Tileset, TilesetId};
@@ -55,7 +57,14 @@ pub fn render_tilemap(
         .id();
 
     let mut tile_entities: Vec<Entity> = Vec::new();
-    let collisions = spawn_collisions(width, height, tileset, &layer.grid, &mut commands);
+    let collisions = spawn_collisions(
+        width,
+        height,
+        tileset,
+        &layer.grid,
+        layer.layer,
+        &mut commands,
+    );
 
     for x in 0..width {
         for y in 0..height {
@@ -121,9 +130,9 @@ fn spawn_collisions(
     height: u32,
     tileset: &Tileset,
     grid: &Vec<Vec<Option<TileSprite>>>,
+    layer: GameLayer,
     commands: &mut Commands,
 ) -> Vec<Vec<Option<Entity>>> {
-    let mut count = 0;
     let mut grid = grid.clone();
 
     // group all horizontal neighbors
@@ -133,10 +142,6 @@ fn spawn_collisions(
         for x in 0..width {
             let tile = &grid[x as usize][y as usize];
             let has_collider = tile.clone().map_or(false, |t| t.collider);
-
-            if has_collider {
-                count += 1;
-            }
 
             if start_x.is_none() && has_collider {
                 // if there is no start x and the current tile is impassible
@@ -180,13 +185,9 @@ fn spawn_collisions(
         }
     }
 
-    let mut coll_count = 0;
-
     // turn the list of collision neighbors into collider regions
     let mut colliders = vec![vec![None; height as usize]; width as usize];
     for (x0, y0, x1, y1) in contiguous_impassables {
-        coll_count += 1;
-
         // x/y here are grid coordinates so they need to be scaled into
         // since they will be added to the parent the transform can be relative to the parent tilemap's position
         let width = cmp::max(x1 - x0, 1) * tileset.tile_width as u32;
@@ -195,6 +196,7 @@ fn spawn_collisions(
         let collider = commands.spawn((
             RigidBody::Static,
             Collider::rectangle(width as f32, height as f32),
+            CollisionLayers::new(layer, [GameLayer::Interactables, GameLayer::Player]),
             Transform::from_xyz(
                 (width as f32 / 2.0) - (tileset.tile_width as f32 / 2.0),
                 (height as f32 / -2.0) + (tileset.tile_height as f32 / 2.0),
@@ -203,8 +205,6 @@ fn spawn_collisions(
         ));
         colliders[x0 as usize][y0 as usize] = Some(collider.id());
     }
-
-    debug!("collisable tiles: {count}, colliders: {coll_count}");
 
     colliders
 }

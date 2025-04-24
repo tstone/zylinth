@@ -31,6 +31,7 @@ pub enum TuesdayTile {
     WallPanelMiddleALt2 = 18,
     WallInnerCornerTopLeft = 19,
     WallInnerCornerTopRight = 20,
+    SwitchSelectedLeft = 21,
 
     // row 3
     WallBottomLeftCaution = 22,
@@ -43,6 +44,7 @@ pub enum TuesdayTile {
     WallInnerCornerBottomLeftCaution = 29,
     WallInnerCornerTopLeftCaution = 30,
     WallInnerCornerTopRightCaution = 31,
+    SwitchSelectedRight = 32,
 
     // row 4
     EmptyDecoration1 = 33,
@@ -70,6 +72,12 @@ pub enum TuesdayTile {
     WallDoubleUpper = 52,
     WallDoubleLower = 53,
     Transparent = 54,
+
+    // row 6
+    PanelDisabledSelected = 55,
+    PanelEnabledSelected = 56,
+    Power = 57,
+    PowerSelected = 58,
 
     PlayerStart(u8) = 999,
 }
