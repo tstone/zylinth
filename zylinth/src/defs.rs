@@ -9,7 +9,7 @@ pub enum GameLayer {
     Interactables,
 }
 
-#[derive(Component)]
+#[derive(Component, Debug, Clone)]
 pub struct ControlSource {
     pub id: u8,
     pub on: bool,
@@ -31,7 +31,7 @@ impl ControlSource {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Debug, Clone)]
 pub struct ControlTarget {
     pub id: u8,
     pub activated: bool,

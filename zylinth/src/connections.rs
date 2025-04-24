@@ -66,7 +66,14 @@ fn start_connection(
                     connection_state.target_entity = Some(entity);
                     connection_state.target_id = Some(target.id);
                 }
-                next_mode.set(ConnectionMode::MakingConnection);
+
+                if connection_state.source_entity.is_some()
+                    || connection_state.target_entity.is_some()
+                {
+                    next_mode.set(ConnectionMode::MakingConnection);
+                } else {
+                    debug!("Connection not started as no source or target found");
+                }
             }
         }
     }
@@ -96,18 +103,35 @@ fn end_connection(
                     source,
                     target,
                 ) {
+                    // there is at least a from source and only a to target
                     (Some(source_id), _, None, Some(target))
                         if connection_state.source_entity != Some(entity) =>
                     {
                         commands.spawn(ControlLink::new(source_id, target.id));
                     }
+                    // there is at least a from target, and only a to source
                     (_, Some(target_id), Some(source), None)
                         if connection_state.target_entity != Some(entity) =>
                     {
                         commands.spawn(ControlLink::new(source.id, target_id));
                     }
+                    // there is only a from source, and at least a to target
+                    (Some(source_id), None, _, Some(target))
+                        if connection_state.source_entity != Some(entity) =>
+                    {
+                        commands.spawn(ControlLink::new(source_id, target.id));
+                    }
+                    // there is only a from target, and at least a to source
+                    (None, Some(target_id), Some(source), _)
+                        if connection_state.target_entity != Some(entity) =>
+                    {
+                        commands.spawn(ControlLink::new(source.id, target_id));
+                    }
                     _ => {
-                        warn!("Found ambiguous or disallowed case for connection");
+                        warn!(
+                            "Found ambiguous or disallowed case for connection: {:?} {:?} {:?} {:?}",
+                            connection_state.source_id, connection_state.target_id, source, target,
+                        );
                     }
                 }
             }

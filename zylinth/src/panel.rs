@@ -15,6 +15,7 @@ impl Plugin for DoorPanelPlugin {
     fn build(&self, app: &mut App) {
         app.add_observer(panel_added);
         app.add_systems(Update, activation_changed);
+        app.add_systems(Update, selection_changed);
     }
 }
 
@@ -58,6 +59,19 @@ fn activation_changed(
             source_id: source.id,
             on: target.activated,
         });
+    }
+}
+
+fn selection_changed(
+    mut panels: Query<
+        (&mut Sprite, &Selectable, &ControlTarget),
+        (Changed<Selectable>, With<DoorPanel>),
+    >,
+) {
+    for (mut sprite, selectable, target) in panels.iter_mut() {
+        if let Some(atlas) = &mut sprite.texture_atlas {
+            atlas.index = panel_sprite_index(target.activated, selectable);
+        }
     }
 }
 

@@ -86,6 +86,7 @@ pub fn starter_room() -> Puzzle<TuesdayTile> {
 
     Puzzle {
         grid,
-        starting_links: vec![ControlLink::new(2, 1), ControlLink::new(3, 2)],
+        // panel to door
+        starting_links: vec![ControlLink::new(2, 1)],
     }
 }

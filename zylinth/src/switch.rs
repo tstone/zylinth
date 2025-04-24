@@ -2,7 +2,7 @@ use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
 use bevy::prelude::*;
 
 use crate::connections::SourceStateChanged;
-use crate::defs::GameLayer;
+use crate::defs::{ControlSource, GameLayer};
 use crate::map::{Tile, TileRole, TuesdayTile};
 use crate::selection::Selectable;
 
@@ -38,6 +38,7 @@ fn configure_switch(
         commands.entity(entity).insert((
             Switch { id, on },
             Selectable::default(),
+            ControlSource::new(id, on),
             RigidBody::Static,
             Collider::ellipse(10.0, 8.0),
             CollisionLayers::new(GameLayer::Interactables, [GameLayer::Player]),
