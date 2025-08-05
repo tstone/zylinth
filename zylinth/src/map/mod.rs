@@ -15,7 +15,6 @@ mod walking_squares;
 mod wall_wrap;
 
 pub use plugin::*;
-pub use puzzle::DoorControl;
 pub use spawn_building::SpawnBuildingMap;
 pub use tuesday::TuesdayTile;
 

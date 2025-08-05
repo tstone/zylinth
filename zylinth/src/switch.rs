@@ -1,96 +1,108 @@
-use avian2d::prelude::{Collider, RigidBody};
+use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
 use bevy::prelude::*;
 
+use crate::connections::SourceStateChanged;
+use crate::defs::{ControlLink, ControlSource, GameLayer};
 use crate::map::{Tile, TileRole, TuesdayTile};
-use crate::player::Player;
+use crate::selection::Selectable;
 
 #[derive(Component)]
-pub struct Switch {
-    pub id: u8,
-    pub on: bool,
-}
-
-#[derive(Event)]
-#[allow(unused)]
-pub struct SwitchStateChanged {
-    pub switch_id: u8,
-    pub on: bool,
-}
+pub struct Switch;
 
 pub struct SwitchPlugin;
 
 impl Plugin for SwitchPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<SwitchStateChanged>();
-        app.add_observer(configure_switch);
+        app.add_observer(switch_added);
         app.add_systems(
             PostUpdate,
             press_switch.after(TransformSystem::TransformPropagate),
         );
-        app.add_systems(Update, update_switch_sprite);
+        app.add_systems(Update, source_changed);
+        app.add_systems(Update, selection_changed);
     }
 }
 
-pub fn configure_switch(
+fn switch_added(
     trigger: Trigger<OnAdd, Tile>,
     tiles: Query<(&Tile, Entity)>,
+    links: Query<&ControlLink>,
     mut commands: Commands,
-    mut ev_switchstate: EventWriter<SwitchStateChanged>,
+    mut ev_switchstate: EventWriter<SourceStateChanged>,
 ) {
     let (tile, entity) = tiles.get(trigger.entity()).unwrap();
     if let Some(TileRole::Switch(id, on)) = tile.role {
         debug!("Setting up switch {id}");
-        commands.entity(entity).insert(Switch { id, on });
-        ev_switchstate.send(SwitchStateChanged { switch_id: id, on });
-
-        // add collider
-        let collider = commands
-            .spawn((
-                RigidBody::Static,
-                Collider::ellipse(10.0, 8.0),
-                Transform::from_xyz(0.0, 5.0, 0.1),
-            ))
-            .id();
-        commands.entity(entity).add_child(collider);
+        let existing_links = links.iter().filter(|l| l.source == id).collect::<Vec<_>>();
+        commands.entity(entity).insert((
+            Switch,
+            Selectable::default(),
+            ControlSource::new(id, on, existing_links.len() > 0),
+            RigidBody::Static,
+            Collider::ellipse(10.0, 8.0),
+            CollisionLayers::new(GameLayer::Interactables, [GameLayer::Player]),
+        ));
+        ev_switchstate.send(SourceStateChanged { source_id: id, on });
     }
 }
 
-pub fn press_switch(
+fn press_switch(
     input: Res<ButtonInput<KeyCode>>,
-    player: Query<&GlobalTransform, With<Player>>,
-    mut tiles: Query<(&GlobalTransform, &mut Switch)>,
-    mut ev_switchstate: EventWriter<SwitchStateChanged>,
+    mut switches: Query<(&mut ControlSource, &Selectable), With<Switch>>,
+    mut ev_sourcestate: EventWriter<SourceStateChanged>,
 ) {
     if input.any_just_released([KeyCode::Enter, KeyCode::KeyF]) {
-        if let Ok(player) = player.get_single() {
-            let player_translation = player.translation();
-            for (transform, mut switch) in tiles.iter_mut() {
-                // TODO: does Parry/Avian have a more efficient way to do this?
-                let translation = transform.translation();
-                let a = (translation.x - player_translation.x).powf(2.);
-                let b = (translation.y - player_translation.y).powf(2.);
-                let distance = (a + b).sqrt();
-                if distance < 27.50 {
-                    switch.on = !switch.on;
-                    debug!("switch {} changed to: {}", switch.id, switch.on);
-                    ev_switchstate.send(SwitchStateChanged {
-                        switch_id: switch.id,
-                        on: switch.on,
-                    });
-                }
+        for (mut source, selectable) in switches.iter_mut() {
+            if selectable.selected {
+                source.on = !source.on;
+                debug!(
+                    "switch {} changed to: {}",
+                    source.id,
+                    if source.on { "on" } else { "off" }
+                );
+                ev_sourcestate.send(SourceStateChanged {
+                    source_id: source.id,
+                    on: source.on,
+                });
             }
         }
     }
 }
 
-pub fn update_switch_sprite(mut switch: Query<(&Switch, &mut Sprite), Changed<Switch>>) {
-    for (switch, mut sprite) in switch.iter_mut() {
+fn source_changed(
+    mut switch: Query<
+        (&ControlSource, &Selectable, &mut Sprite),
+        (Changed<ControlSource>, With<Switch>),
+    >,
+) {
+    for (source, selectable, mut sprite) in switch.iter_mut() {
         if let Some(atlas) = &mut sprite.texture_atlas {
-            if switch.on {
-                atlas.index = TuesdayTile::SwitchRight(1).into();
-            } else {
-                atlas.index = TuesdayTile::SwitchLeft(1).into();
-            }
+            atlas.index = sprite_index(source, selectable);
         }
+    }
+}
+
+fn selection_changed(
+    mut switch: Query<
+        (&ControlSource, &Selectable, &mut Sprite),
+        (Changed<Selectable>, With<Switch>),
+    >,
+) {
+    for (source, selectable, mut sprite) in switch.iter_mut() {
+        if let Some(atlas) = &mut sprite.texture_atlas {
+            atlas.index = sprite_index(source, selectable);
+        }
+    }
+}
+
+fn sprite_index(source: &ControlSource, selectable: &Selectable) -> usize {
+    if source.on && selectable.selected {
+        TuesdayTile::SwitchSelectedRight.into()
+    } else if source.on && !selectable.selected {
+        TuesdayTile::SwitchRight(1).into()
+    } else if !source.on && !selectable.selected {
+        TuesdayTile::SwitchLeft(1).into()
+    } else {
+        TuesdayTile::SwitchSelectedLeft.into()
     }
 }

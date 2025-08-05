@@ -1,3 +1,4 @@
+use crate::defs::GameLayer;
 use crate::map::lighting::spot_lights;
 use crate::map::tilemap::{RenderedTileLayer, render_tilemap};
 use crate::map::tileset::*;
@@ -53,9 +54,9 @@ pub enum TileLayerRole {
 }
 
 #[allow(unused)]
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct TileLayer {
-    pub role: TileLayerRole,
+    pub layer: GameLayer,
     pub grid: Vec<Vec<Option<TileSprite>>>,
     pub tileset_name: &'static str,
     pub z: f32,

@@ -3,6 +3,7 @@ use super::special::starter_room::starter_room;
 use super::starter::mark_player_start_tile;
 use super::tuesday::TuesdayTile;
 use super::{NewMap, TileLayer, TileLayerRole};
+use crate::defs::GameLayer;
 use crate::map::wall_wrap::wrap_walls;
 use crate::seed::RngSeed;
 use bevy::prelude::*;
@@ -34,33 +35,33 @@ impl Command for SpawnBuildingMap {
         // TODO: change this to a custom command instead of spawning TileLayer
         world.spawn((
             TileLayer {
-                role: TileLayerRole::BackgroundDecorations,
                 grid: TuesdayTile::layer_to_tile_sprites(&grid, 0),
                 tileset_name: TuesdayTile::name(),
                 z: 0.0,
+                ..Default::default()
             },
             Transform::default(),
         ));
         world.spawn((
             TileLayer {
-                role: TileLayerRole::Base,
                 grid: TuesdayTile::layer_to_tile_sprites(&grid, 1),
                 tileset_name: TuesdayTile::name(),
                 z: 1.0,
+                ..Default::default()
             },
             Transform::default(),
         ));
         world.spawn((
             TileLayer {
-                role: TileLayerRole::Interactables,
                 grid: TuesdayTile::layer_to_tile_sprites(&grid, 2),
                 tileset_name: TuesdayTile::name(),
                 z: 5.0,
+                layer: GameLayer::Interactables,
             },
             Transform::default(),
         ));
 
-        for door_control in puzzle.door_controls {
+        for door_control in puzzle.starting_links {
             world.spawn(door_control);
         }
 

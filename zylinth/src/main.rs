@@ -4,20 +4,25 @@ use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use bevy_lit::prelude::Lighting2dPlugin;
 use camera::CameraSetup;
+use connections::ConnectionsPlugin;
 use door::DoorPlugin;
 use map::{SpawnBuildingMap, TileLayoutPlugin};
 use panel::DoorPanelPlugin;
 use player::PlayerPlugin;
 use seed::SeedPlugin;
+use selection::SelectionPlugion;
 use sprite_animation::SpriteAnimationPlugin;
 use switch::SwitchPlugin;
 
 mod camera;
+mod connections;
+mod defs;
 mod door;
 mod map;
 mod panel;
 mod player;
 mod seed;
+mod selection;
 mod sprite_animation;
 mod switch;
 
@@ -51,7 +56,9 @@ fn main() {
             SeedPlugin,
             PlayerPlugin,
             TileLayoutPlugin,
+            ConnectionsPlugin,
             DoorPlugin,
+            SelectionPlugion,
             SwitchPlugin,
             DoorPanelPlugin,
         ))
