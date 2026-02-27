@@ -1,5 +1,11 @@
 # "Switches"
 
+A trial run at learning the Bevy game engine 
+
+- Demo: Procedurally generating rooms -- https://www.youtube.com/watch?v=kfHCCgHNAxU
+- Demo: Switch connection mechanism -- https://www.youtube.com/watch?v=HzoQYW3Mvx0
+
+### Credits
 - Tileset based on https://toosday.itch.io/sci-fi-rougelike
 - Drone character: https://papoycore.itch.io/free-drone
 - Collectable resources: https://free-game-assets.itch.io/free-cyberpunk-resource-pixel-art-3232-icons
